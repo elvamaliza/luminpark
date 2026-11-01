@@ -1,0 +1,506 @@
+import { call, results, BASE } from './api-test-harness.mjs';
+import { writeFileSync } from 'node:fs';
+
+let adminToken = '', salesToken = '', managerToken = '';
+
+const T = [];
+const add = (o) => T.push(o);
+
+// ---------------- AUTH ----------------
+add({ id: 'TC-001', nama: 'Login Success (Super Admin)', skenario: 'Autentikasi - Positif',
+  deskripsi: 'User dengan role superadmin memasukkan email & password yang benar.',
+  langkah: '1. Kirim POST /api/login 2. Sertakan email & password valid',
+  dataUji: '{"email":"admin@luminpark.com","password":"password123"}',
+  ekspektasi: 'HTTP 200, success=true, field access_token terisi, token_type=Bearer',
+  method: 'POST', path: '/login', body: { email: 'admin@luminpark.com', password: 'password123' }, expectStatus: 200 });
+
+add({ id: 'TC-002', nama: 'Login Wrong Password', skenario: 'Autentikasi - Negatif',
+  deskripsi: 'Email valid dengan password salah harus ditolak.',
+  langkah: '1. Kirim POST /api/login 2. Password sengaja salah',
+  dataUji: '{"email":"admin@luminpark.com","password":"salah123"}',
+  ekspektasi: 'HTTP 401, success=false, message "Email atau password salah"',
+  method: 'POST', path: '/login', body: { email: 'admin@luminpark.com', password: 'salah123' }, expectStatus: 401 });
+
+add({ id: 'TC-003', nama: 'Login Invalid Email Format', skenario: 'Validasi Input - Negatif',
+  deskripsi: 'Field email tidak mengikuti format email seharusnya divalidasi.',
+  langkah: '1. Kirim POST /api/login 2. Email = "bukan-email"',
+  dataUji: '{"email":"bukan-email","password":"password123"}',
+  ekspektasi: 'HTTP 422, message validasi "The email field must be a valid email."',
+  method: 'POST', path: '/login', body: { email: 'bukan-email', password: 'password123' }, expectStatus: 422 });
+
+add({ id: 'TC-004', nama: 'Login Missing Required Fields', skenario: 'Validasi Input - Negatif',
+  deskripsi: 'Request tanpa email dan password sama sekali.',
+  langkah: '1. Kirim POST /api/login 2. Body object kosong {}',
+  dataUji: '{}',
+  ekspektasi: 'HTTP 422, error validasi pada field email dan password',
+  method: 'POST', path: '/login', body: {}, expectStatus: 422 });
+
+add({ id: 'TC-006', nama: 'Get Profile Current User', skenario: 'Autentikasi - Positif',
+  deskripsi: 'Endpoint /api/me mengembalikan profil user pemilik token.',
+  langkah: '1. Login sebagai superadmin 2. GET /api/me dengan header Authorization Bearer',
+  dataUji: 'Header: Authorization: Bearer <token superadmin>',
+  ekspektasi: 'HTTP 200, success=true, data.id=1, data.role=superadmin',
+  method: 'GET', path: '/me', tokenRef: 'admin', expectStatus: 200 });
+
+add({ id: 'TC-007', nama: 'Access Protected Route Without Token', skenario: 'Autentikasi - Negatif',
+  deskripsi: 'Endpoint /api/me tanpa token akses harus ditolak.',
+  langkah: '1. GET /api/me tanpa header Authorization',
+  dataUji: 'Tanpa token',
+  ekspektasi: 'HTTP 401, success=false, message Unauthenticated',
+  method: 'GET', path: '/me', expectStatus: 401 });
+
+add({ id: 'TC-008', nama: 'Access Protected Route With Invalid Token', skenario: 'Autentikasi - Negatif',
+  deskripsi: 'Token acak/tidak valid tidak boleh diterima.',
+  langkah: '1. GET /api/me dengan Authorization Bearer token-palsu',
+  dataUji: 'Bearer 999|tokenpalsu',
+  ekspektasi: 'HTTP 401 Unauthenticated',
+  method: 'GET', path: '/me', badToken: '999|tokenpalsu', expectStatus: 401 });
+
+// ---------------- ROLE / AUTHZ ----------------
+add({ id: 'TC-010', nama: 'Manager Dashboard Akses Super Admin', skenario: 'Otorisasi Role - Positif',
+  deskripsi: 'Role superadmin diizinkan membuka dashboard manager (role:manager,superadmin).',
+  langkah: '1. Login superadmin 2. GET /api/dashboard/manager',
+  dataUji: 'Bearer <token superadmin>',
+  ekspektasi: 'HTTP 200, success=true, berisi total_revenue, total_bookings, occupancy_rate',
+  method: 'GET', path: '/dashboard/manager', tokenRef: 'admin', expectStatus: 200 });
+
+add({ id: 'TC-011', nama: 'Manager Dashboard Ditolak Untuk Sales', skenario: 'Otorisasi Role - Negatif',
+  deskripsi: 'Role sales tidak termasuk whitelist role:manager,superadmin sehingga harus 403.',
+  langkah: '1. Login sales 2. GET /api/dashboard/manager',
+  dataUji: 'Bearer <token sales@luminpark.com>',
+  ekspektasi: 'HTTP 403, message "Forbidden. Anda tidak memiliki akses ke resource ini."',
+  method: 'GET', path: '/dashboard/manager', tokenRef: 'sales', expectStatus: 403 });
+
+add({ id: 'TC-012', nama: 'Admin Sales Dashboard Superadmin', skenario: 'Otorisasi Role - Positif',
+  deskripsi: 'Hanya superadmin yang boleh membuka /api/dashboard/admin-sales.',
+  langkah: '1. Login superadmin 2. GET /api/dashboard/admin-sales',
+  dataUji: 'Bearer <token superadmin>',
+  ekspektasi: 'HTTP 200 berisi pending_payment_verifications, active_bookings',
+  method: 'GET', path: '/dashboard/admin-sales', tokenRef: 'admin', expectStatus: 200 });
+
+add({ id: 'TC-013', nama: 'Sales Dashboard Tanpa Query sales_id', skenario: 'Validasi Input - Negatif',
+  deskripsi: 'Parameter wajib sales_id tidak dikirim.',
+  langkah: '1. Login sales 2. GET /api/dashboard/sales tanpa query string',
+  dataUji: 'GET /api/dashboard/sales (tanpa sales_id)',
+  ekspektasi: 'HTTP 400, message "sales_id diperlukan"',
+  method: 'GET', path: '/dashboard/sales', tokenRef: 'sales', expectStatus: 400 });
+
+// ---------------- SALES ----------------
+add({ id: 'TC-020', nama: 'List Data Sales', skenario: 'CRUD Sales - Read',
+  deskripsi: 'Mengambil seluruh user ber-role sales beserta sales profile-nya.',
+  langkah: '1. GET /api/sales',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data = array daftar sales',
+  method: 'GET', path: '/sales', expectStatus: 200 });
+
+add({ id: 'TC-021', nama: 'Create Sales Baru', skenario: 'CRUD Sales - Create',
+  deskripsi: 'Menambahkan user role sales sekaligus sales_profile dalam satu transaksi DB.',
+  langkah: '1. POST /api/sales 2. Kirim name, email, password, phone, sales_code',
+  dataUji: '{"name":"Budi Salesman","email":"budi@luminpark.com","password":"rahasia123","phone":"081234567890","sales_code":"SLD-001","target_sales":10}',
+  ekspektasi: 'HTTP 201, success=true, data memuat user baru + salesProfile.sales_code=SLD-001',
+  method: 'POST', path: '/sales', body: { name: 'Budi Salesman', email: 'budi@luminpark.com', password: 'rahasia123', phone: '081234567890', sales_code: 'SLD-001', target_sales: 10 }, expectStatus: 201 });
+
+add({ id: 'TC-022', nama: 'Create Sales Email Duplikat', skenario: 'CRUD Sales - Negatif',
+  deskripsi: 'Email yang sudah dipakai harus ditolak aturan unique:users,email.',
+  langkah: '1. POST /api/sales 2. Email sudah terdaftar (admin@luminpark.com)',
+  dataUji: '{"name":"Dup","email":"admin@luminpark.com","password":"rahasia123","phone":"081234567890","sales_code":"SLD-002"}',
+  ekspektasi: 'HTTP 422, error validasi "email sudah diambil"',
+  method: 'POST', path: '/sales', body: { name: 'Dup', email: 'admin@luminpark.com', password: 'rahasia123', phone: '081234567890', sales_code: 'SLD-002' }, expectStatus: 422 });
+
+add({ id: 'TC-023', nama: 'Create Sales Tanpa Sales Code', skenario: 'CRUD Sales - Negatif',
+  deskripsi: 'Field wajib sales_code dikosongkan.',
+  langkah: '1. POST /api/sales 2. Tanpa sales_code',
+  dataUji: '{"name":"No Code","email":"nocode@luminpark.com","password":"rahasia123","phone":"0812"}',
+  ekspektasi: 'HTTP 422, error validasi field sales_code wajib diisi',
+  method: 'POST', path: '/sales', body: { name: 'No Code', email: 'nocode@luminpark.com', password: 'rahasia123', phone: '0812' }, expectStatus: 422 });
+
+add({ id: 'TC-024', nama: 'Detail Sales Tidak Ditemukan', skenario: 'CRUD Sales - Negatif',
+  deskripsi: 'ID sales yang tidak ada di database.',
+  langkah: '1. GET /api/sales/99999',
+  dataUji: 'id = 99999',
+  ekspektasi: 'HTTP 404, message "Sales tidak ditemukan"',
+  method: 'GET', path: '/sales/99999', expectStatus: 404 });
+
+add({ id: 'TC-025', nama: 'Update Data Sales', skenario: 'CRUD Sales - Update',
+  deskripsi: 'Memperbarui nama/phone/address sales yang tersedia.',
+  langkah: '1. Buat/ambil sales existing 2. PUT /api/sales/{id} 3. Kirim name & phone baru',
+  dataUji: '{"name":"Budi Updated","phone":"08999999999"}',
+  ekspektasi: 'HTTP 200, success=true, data.name = "Budi Updated"',
+  method: 'PUT', path: '/sales/3', body: { name: 'Budi Updated', phone: '08999999999' }, expectStatus: 200 });
+
+add({ id: 'TC-026', nama: 'Performance Sales', skenario: 'Laporan - Kinerja',
+  deskripsi: 'Mengambil metrik kinerja satu sales berdasarkan booking & lead.',
+  langkah: '1. GET /api/sales/3/performance',
+  dataUji: 'id = 3',
+  ekspektasi: 'HTTP 200 berisi data kinerja sales',
+  method: 'GET', path: '/sales/3/performance', expectStatus: 200 });
+
+// ---------------- UNIT ----------------
+add({ id: 'TC-030', nama: 'List Seluruh Unit', skenario: 'CRUD Unit - Read',
+  deskripsi: 'Mengambil seluruh data unit perumahan diurutkan terbaru.',
+  langkah: '1. GET /api/units',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, array unit dengan field block_number, unit_type, price, status',
+  method: 'GET', path: '/units', expectStatus: 200 });
+
+add({ id: 'TC-031', nama: 'Create Unit Baru', skenario: 'CRUD Unit - Create',
+  deskripsi: 'Menambahkan unit baru dengan status available.',
+  langkah: '1. POST /api/units 2. Kirim seluruh field wajib dengan status=available',
+  dataUji: '{"block_number":"A-01","unit_type":"Modern Tropical","land_size":120,"building_size":90,"price":1250000000,"status":"available","description":"Unit test"}',
+  ekspektasi: 'HTTP 201, message "Data unit berhasil disimpan.", data.id terisi',
+  method: 'POST', path: '/units', body: { block_number: 'A-01', unit_type: 'Modern Tropical', land_size: 120, building_size: 90, price: 1250000000, status: 'available', description: 'Unit test' }, expectStatus: 201 });
+
+add({ id: 'TC-032', nama: 'Create Unit Status Tidak Valid', skenario: 'CRUD Unit - Negatif',
+  deskripsi: 'Nilai status di luar enum available/booked/sold.',
+  langkah: '1. POST /api/units 2. status = "terjual"',
+  dataUji: '{"block_number":"A-02","unit_type":"Type 45","land_size":60,"building_size":45,"price":800000000","status":"terjual"}',
+  ekspektasi: 'HTTP 422, error validasi status harus available/booked/sold',
+  method: 'POST', path: '/units', body: { block_number: 'A-02', unit_type: 'Type 45', land_size: 60, building_size: 45, price: 800000000, status: 'terjual' }, expectStatus: 422 });
+
+add({ id: 'TC-033', nama: 'Create Unit Harga Negatif', skenario: 'CRUD Unit - Negatif',
+  deskripsi: 'Field price divalidasi min:0.',
+  langkah: '1. POST /api/units 2. price = -1000',
+  dataUji: '{"block_number":"A-03","unit_type":"Type 60","land_size":70,"building_size":60,"price":-1000,"status":"available"}',
+  ekspektasi: 'HTTP 422, error validasi "price harus lebih besar atau sama dengan 0"',
+  method: 'POST', path: '/units', body: { block_number: 'A-03', unit_type: 'Type 60', land_size: 70, building_size: 60, price: -1000, status: 'available' }, expectStatus: 422 });
+
+add({ id: 'TC-034', nama: 'Detail Unit', skenario: 'CRUD Unit - Read Single',
+  deskripsi: 'Mengambil satu unit berdasarkan id.',
+  langkah: '1. POST unit baru 2. GET /api/units/{id}',
+  dataUji: 'id = 1',
+  ekspektasi: 'HTTP 200, message "Detail unit berhasil ditemukan."',
+  method: 'GET', path: '/units/1', expectStatus: 200 });
+
+add({ id: 'TC-035', nama: 'Detail Unit Tidak Ditemukan', skenario: 'CRUD Unit - Negatif',
+  deskripsi: 'ID tidak dikenal memakai findOrFail.',
+  langkah: '1. GET /api/units/99999',
+  dataUji: 'id = 99999',
+  ekspektasi: 'HTTP 404 Not Found',
+  method: 'GET', path: '/units/99999', expectStatus: 404 });
+
+add({ id: 'TC-036', nama: 'Update Unit', skenario: 'CRUD Unit - Update',
+  deskripsi: 'Mengubah harga dan status unit existing.',
+  langkah: '1. PUT /api/units/1 2. Kirim payload lengkap dengan status=booked',
+  dataUji: '{"block_number":"A-01","unit_type":"Modern Tropical","land_size":120,"building_size":90,"price":1300000000,"status":"booked"}',
+  ekspektasi: 'HTTP 200, message "Data unit berhasil diperbarui."',
+  method: 'PUT', path: '/units/1', body: { block_number: 'A-01', unit_type: 'Modern Tropical', land_size: 120, building_size: 90, price: 1300000000, status: 'booked' }, expectStatus: 200 });
+
+add({ id: 'TC-037', nama: 'List Unit Tersedia', skenario: 'CRUD Unit - Filter',
+  deskripsi: 'Endpoint units-available hanya mengembalikan status available.',
+  langkah: '1. GET /api/units-available',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, seluruh elemen punya status = "available"',
+  method: 'GET', path: '/units-available', expectStatus: 200 });
+
+add({ id: 'TC-038', nama: 'Delete Unit', skenario: 'CRUD Unit - Delete',
+  deskripsi: 'Menghapus data unit berdasarkan id.',
+  langkah: '1. POST unit baru 2. DELETE /api/units/{id}',
+  dataUji: 'id = 1',
+  ekspektasi: 'HTTP 200, message "Data unit berhasil dihapus."',
+  method: 'DELETE', path: '/units/1', expectStatus: 200 });
+
+// ---------------- CUSTOMER LEAD ----------------
+add({ id: 'TC-040', nama: 'List Customer Leads', skenario: 'CRUD Lead - Read',
+  deskripsi: 'Mengambil seluruh lead beserta relasi salesProfile.',
+  langkah: '1. GET /api/customer-leads',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array lead',
+  method: 'GET', path: '/customer-leads', expectStatus: 200 });
+
+add({ id: 'TC-041', nama: 'Search Customer Leads', skenario: 'CRUD Lead - Filter',
+  deskripsi: 'Filter keyword pada nama/phone/email/interested_unit.',
+  langkah: '1. GET /api/customer-leads?search=Budi',
+  dataUji: 'search = Budi',
+  ekspektasi: 'HTTP 200, data hanya lead yang cocok dengan kata kunci',
+  method: 'GET', path: '/customer-leads?search=Budi', expectStatus: 200 });
+
+add({ id: 'TC-042', nama: 'Create Customer Lead', skenario: 'CRUD Lead - Create',
+  deskripsi: 'Menambahkan lead baru yang terikat pada sales profile.',
+  langkah: '1. POST /api/customer-leads 2. Kirim sales_id existing + data kontak + status=warm',
+  dataUji: '{"sales_id":1,"name":"Andi Calon","phone":"08111222333","email":"andi@mail.com","status":"warm","interested_unit":"A-01","budget":1200000000}',
+  ekspektasi: 'HTTP 201, message "Customer Lead berhasil ditambahkan"',
+  method: 'POST', path: '/customer-leads', body: { sales_id: 1, name: 'Andi Calon', phone: '08111222333', email: 'andi@mail.com', status: 'warm', interested_unit: 'A-01', budget: 1200000000 }, expectStatus: 201 });
+
+add({ id: 'TC-043', nama: 'Create Lead Sales ID Tidak Valid', skenario: 'CRUD Lead - Negatif',
+  deskripsi: 'sales_id merujuk data yang tidak ada (foreign key exists).',
+  langkah: '1. POST /api/customer-leads 2. sales_id = 9999',
+  dataUji: '{"sales_id":9999,"name":"X","phone":"0811","status":"cold"}',
+  ekspektasi: 'HTTP 422, error validasi "sales_id terpilih tidak valid"',
+  method: 'POST', path: '/customer-leads', body: { sales_id: 9999, name: 'X', phone: '0811', status: 'cold' }, expectStatus: 422 });
+
+add({ id: 'TC-044', nama: 'Create Lead Status Di Luar Enum', skenario: 'CRUD Lead - Negatif',
+  deskripsi: 'status harus cold/warm/hot/booking.',
+  langkah: '1. POST /api/customer-leads 2. status = "sangat-hot"',
+  dataUji: '{"sales_id":1,"name":"Y","phone":"0812","status":"sangat-hot"}',
+  ekspektasi: 'HTTP 422, error validasi nilai status',
+  method: 'POST', path: '/customer-leads', body: { sales_id: 1, name: 'Y', phone: '0812', status: 'sangat-hot' }, expectStatus: 422 });
+
+add({ id: 'TC-045', nama: 'Update Status Lead', skenario: 'CRUD Lead - Update',
+  deskripsi: 'Mengubah status lead menjadi hot.',
+  langkah: '1. PUT /api/customer-leads/{id} 2. Kirim status=hot',
+  dataUji: '{"status":"hot"}',
+  ekspektasi: 'HTTP 200, message "Data Customer Lead berhasil diperbarui"',
+  method: 'PUT', path: '/customer-leads/1', body: { status: 'hot' }, expectStatus: 200 });
+
+add({ id: 'TC-046', nama: 'Delete Lead Tidak Ditemukan', skenario: 'CRUD Lead - Negatif',
+  deskripsi: 'Menghapus lead dengan id tidak terdaftar.',
+  langkah: '1. DELETE /api/customer-leads/99999',
+  dataUji: 'id = 99999',
+  ekspektasi: 'HTTP 404, message "Data tidak ditemukan"',
+  method: 'DELETE', path: '/customer-leads/99999', expectStatus: 404 });
+
+// ---------------- FOLLOW UP ----------------
+add({ id: 'TC-050', nama: 'List Follow Up History', skenario: 'CRUD FollowUp - Read',
+  deskripsi: 'Mengambil riwayat follow-up beserta relasi lead & sales.',
+  langkah: '1. GET /api/follow-ups',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array riwayat',
+  method: 'GET', path: '/follow-ups', expectStatus: 200 });
+
+add({ id: 'TC-051', nama: 'Create Follow Up History', skenario: 'CRUD FollowUp - Create',
+  deskripsi: 'Mencatat follow-up; secara otomatis mengubah status & last_follow_up pada lead.',
+  langkah: '1. POST /api/follow-ups 2. Kirim lead_id, sales_id, tanggal, status before/after, method=whatsapp',
+  dataUji: '{"lead_id":1,"sales_id":1,"follow_up_date":"2026-10-20","status_before":"warm","status_after":"hot","method":"whatsapp","note":"Follow up test"}',
+  ekspektasi: 'HTTP 201, message "Riwayat follow-up berhasil dicatat", status lead ikut berubah jadi hot',
+  method: 'POST', path: '/follow-ups', body: { lead_id: 1, sales_id: 1, follow_up_date: '2026-10-20', status_before: 'warm', status_after: 'hot', method: 'whatsapp', note: 'Follow up test' }, expectStatus: 201 });
+
+add({ id: 'TC-052', nama: 'Create Follow Up Method Tidak Valid', skenario: 'CRUD FollowUp - Negatif',
+  deskripsi: 'method wajib salah satu whatsapp/phone/visit/email.',
+  langkah: '1. POST /api/follow-ups 2. method = "carrier-pigeon"',
+  dataUji: '{"lead_id":1,"sales_id":1,"follow_up_date":"2026-10-20","status_before":"warm","status_after":"hot","method":"carrier-pigeon"}',
+  ekspektasi: 'HTTP 422, error validasi field method',
+  method: 'POST', path: '/follow-ups', body: { lead_id: 1, sales_id: 1, follow_up_date: '2026-10-20', status_before: 'warm', status_after: 'hot', method: 'carrier-pigeon' }, expectStatus: 422 });
+
+// ---------------- PAYMENT SCHEME ----------------
+add({ id: 'TC-060', nama: 'List Skema Pembayaran', skenario: 'CRUD Skema - Read',
+  deskripsi: 'Mengambil seluruh skema pembayaran yang tersedia.',
+  langkah: '1. GET /api/payment-schemes',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array skema',
+  method: 'GET', path: '/payment-schemes', expectStatus: 200 });
+
+add({ id: 'TC-061', nama: 'Create Skema Pembayaran', skenario: 'CRUD Skema - Create',
+  deskripsi: 'Menambah skema pembayaran baru dengan DP persen & tenor.',
+  langkah: '1. POST /api/payment-schemes 2. Kirim scheme_name unik, dp persen, tenor, bunga',
+  dataUji: '{"scheme_name":"KPR 15 Tahun","down_payment_percent":10,"installment_months":180,"interest_rate":7.5,"is_active":true}',
+  ekspektasi: 'HTTP 201, success=true, data.scheme_name = "KPR 15 Tahun"',
+  method: 'POST', path: '/payment-schemes', body: { scheme_name: 'KPR 15 Tahun', down_payment_percent: 10, installment_months: 180, interest_rate: 7.5, is_active: true }, expectStatus: 201 });
+
+add({ id: 'TC-062', nama: 'Create Skema Nama Duplikat', skenario: 'CRUD Skema - Negatif',
+  deskripsi: 'scheme_name memakai aturan unique.',
+  langkah: '1. POST /api/payment-schemes dua kali dengan nama sama',
+  dataUji: '{"scheme_name":"KPR 15 Tahun","down_payment_percent":10,"installment_months":180,"interest_rate":7.5}',
+  ekspektasi: 'HTTP 422, error validasi scheme_name unik',
+  method: 'POST', path: '/payment-schemes', body: { scheme_name: 'KPR 15 Tahun', down_payment_percent: 10, installment_months: 180, interest_rate: 7.5 }, expectStatus: 422 });
+
+add({ id: 'TC-063', nama: 'Update Skema Pembayaran', skenario: 'CRUD Skema - Update',
+  deskripsi: 'Mengubah besaran bunga pada skema existing.',
+  langkah: '1. PUT /api/payment-schemes/{id} 2. Kirim interest_rate baru',
+  dataUji: '{"interest_rate":8.25}',
+  ekspektasi: 'HTTP 200, success=true, interest_rate = 8.25',
+  method: 'PUT', path: '/payment-schemes/1', body: { interest_rate: 8.25 }, expectStatus: 200 });
+
+// ---------------- BOOKING ----------------
+add({ id: 'TC-070', nama: 'List Booking', skenario: 'CRUD Booking - Read',
+  deskripsi: 'Mengambil daftar booking dengan relasi lead, sales, unit, skema pembayaran.',
+  langkah: '1. GET /api/bookings',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array booking',
+  method: 'GET', path: '/bookings', expectStatus: 200 });
+
+add({ id: 'TC-071', nama: 'Create Booking Baru', skenario: 'CRUD Booking - Create',
+  deskripsi: 'Membuat pemesanan unit; status unit otomatis berubah menjadi booking.',
+  langkah: '1. Siapkan unit, lead, sales, skema 2. POST /api/bookings dengan booking_code unik',
+  dataUji: '{"lead_id":1,"sales_id":1,"unit_id":1,"payment_scheme_id":1,"booking_date":"2026-10-21","booking_code":"BK-2026-001","total_price":1250000000,"down_payment_amount":125000000,"installment_amount":50000000,"remaining_amount":1125000000,"status":"menunggu dp"}',
+  ekspektasi: 'HTTP 201, message "Pemesanan (Booking) berhasil dibuat"',
+  method: 'POST', path: '/bookings', body: { lead_id: 1, sales_id: 1, unit_id: 1, payment_scheme_id: 1, booking_date: '2026-10-21', booking_code: 'BK-2026-001', total_price: 1250000000, down_payment_amount: 125000000, installment_amount: 50000000, remaining_amount: 1125000000, status: 'menunggu dp' }, expectStatus: 201 });
+
+add({ id: 'TC-072', nama: 'Create Booking Unit Tidak Valid', skenario: 'CRUD Booking - Negatif',
+  deskripsi: 'unit_id merujuk data tidak ada.',
+  langkah: '1. POST /api/bookings 2. unit_id = 99999',
+  dataUji: '{"lead_id":1,"sales_id":1,"unit_id":99999,"payment_scheme_id":1,"booking_date":"2026-10-21","booking_code":"BK-X","total_price":1,"down_payment_amount":1,"installment_amount":1,"remaining_amount":1,"status":"menunggu dp"}',
+  ekspektasi: 'HTTP 422, error validasi unit_id terpilih tidak valid',
+  method: 'POST', path: '/bookings', body: { lead_id: 1, sales_id: 1, unit_id: 99999, payment_scheme_id: 1, booking_date: '2026-10-21', booking_code: 'BK-X', total_price: 1, down_payment_amount: 1, installment_amount: 1, remaining_amount: 1, status: 'menunggu dp' }, expectStatus: 422 });
+
+add({ id: 'TC-073', nama: 'Create Booking Status Tidak Valid', skenario: 'CRUD Booking - Negatif',
+  deskripsi: 'status booking dibatasi menunggu dp/dp lunas/cicilan/lunas.',
+  langkah: '1. POST /api/bookings 2. status = "sold"',
+  dataUji: '{"status":"sold", ...field lain valid}',
+  ekspektasi: 'HTTP 422, error validasi status',
+  method: 'POST', path: '/bookings', body: { lead_id: 1, sales_id: 1, unit_id: 1, payment_scheme_id: 1, booking_date: '2026-10-21', booking_code: 'BK-2026-002', total_price: 1250000000, down_payment_amount: 125000000, installment_amount: 50000000, remaining_amount: 1125000000, status: 'sold' }, expectStatus: 422 });
+
+// ---------------- PAYMENT ----------------
+add({ id: 'TC-080', nama: 'List Pembayaran', skenario: 'CRUD Payment - Read',
+  deskripsi: 'Mengambil data pembayaran beserta booking dan verifikator.',
+  langkah: '1. GET /api/payments',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array pembayaran',
+  method: 'GET', path: '/payments', expectStatus: 200 });
+
+add({ id: 'TC-081', nama: 'Catat Pembayaran Baru', skenario: 'CRUD Payment - Create',
+  deskripsi: 'Pembayaran baru otomatis berstatus verifikasi pending.',
+  langkah: '1. POST /api/payments 2. Kirim booking_id, payment_type, amount, tanggal',
+  dataUji: '{"booking_id":1,"payment_type":"cash keras","amount":125000000,"payment_date":"2026-10-22","bank_name":"BCA","account_number":"123456","account_holder":"Andi"}',
+  ekspektasi: 'HTTP 201, message "Pembayaran berhasil dicatat, menunggu verifikasi", verification_status=pending',
+  method: 'POST', path: '/payments', body: { booking_id: 1, payment_type: 'cash keras', amount: 125000000, payment_date: '2026-10-22', bank_name: 'BCA', account_number: '123456', account_holder: 'Andi' }, expectStatus: 201 });
+
+add({ id: 'TC-082', nama: 'Verifikasi Pembayaran', skenario: 'CRUD Payment - Verifikasi',
+  deskripsi: 'Verifikator menyetujui pembayaran; sisa bayar booking berkurang.',
+  langkah: '1. PUT /api/payments/{id}/verify 2. Kirim verification_status=verified & verified_by id user',
+  dataUji: '{"verification_status":"verified","verified_by":1,"notes":"Bukti transfer valid"}',
+  ekspektasi: 'HTTP 200, message "Status verifikasi pembayaran berhasil diperbarui", remaining_amount booking berkurang',
+  method: 'PUT', path: '/payments/1/verify', body: { verification_status: 'verified', verified_by: 1, notes: 'Bukti transfer valid' }, expectStatus: 200 });
+
+add({ id: 'TC-083', nama: 'Verifikasi Pembayaran Status Tidak Valid', skenario: 'CRUD Payment - Negatif',
+  deskripsi: 'verification_status hanya menerima verified/rejected.',
+  langkah: '1. PUT /api/payments/1/verify 2. verification_status = "maybe"',
+  dataUji: '{"verification_status":"maybe","verified_by":1}',
+  ekspektasi: 'HTTP 422, error validasi verification_status',
+  method: 'PUT', path: '/payments/1/verify', body: { verification_status: 'maybe', verified_by: 1 }, expectStatus: 422 });
+
+add({ id: 'TC-084', nama: 'Verifikasi Pembayaran Tidak Ditemukan', skenario: 'CRUD Payment - Negatif',
+  deskripsi: 'Verifikasi pada id pembayaran yang tidak ada.',
+  langkah: '1. PUT /api/payments/99999/verify',
+  dataUji: 'id = 99999, body valid',
+  ekspektasi: 'HTTP 404, message "Data pembayaran tidak ditemukan"',
+  method: 'PUT', path: '/payments/99999/verify', body: { verification_status: 'verified', verified_by: 1 }, expectStatus: 404 });
+
+// ---------------- SYSTEM LOG ----------------
+add({ id: 'TC-090', nama: 'List System Logs', skenario: 'CRUD Log - Read',
+  deskripsi: 'Mengambil log aktivitas sistem beserta relasi user.',
+  langkah: '1. GET /api/system-logs',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, success=true, data array log',
+  method: 'GET', path: '/system-logs', expectStatus: 200 });
+
+add({ id: 'TC-091', nama: 'Create System Log', skenario: 'CRUD Log - Create',
+  deskripsi: 'Mencatat aktivitas; ip_address & user_agent diambil otomatis dari request.',
+  langkah: '1. POST /api/system-logs 2. Kirim user_id existing dan activity',
+  dataUji: '{"user_id":1,"activity":"manual_test","description":"Dijalankan saat pengujian API"}',
+  ekspektasi: 'HTTP 201, message "Log aktivitas berhasil dicatat"',
+  method: 'POST', path: '/system-logs', body: { user_id: 1, activity: 'manual_test', description: 'Dijalankan saat pengujian API' }, expectStatus: 201 });
+
+// ---------------- REPORT ----------------
+add({ id: 'TC-100', nama: 'Laporan Penjualan', skenario: 'Laporan - Read',
+  deskripsi: 'Rekap transaksi booking: jumlah transaksi & nilai penjualan.',
+  langkah: '1. GET /api/reports/sales',
+  dataUji: 'Tanpa filter tanggal',
+  ekspektasi: 'HTTP 200, memuat total_transactions dan total_sales_value',
+  method: 'GET', path: '/reports/sales', expectStatus: 200 });
+
+add({ id: 'TC-101', nama: 'Laporan Pelunasan', skenario: 'Laporan - Read',
+  deskripsi: 'Rekap pembayaran yang sudah diverifikasi.',
+  langkah: '1. GET /api/reports/settlement',
+  dataUji: 'Tanpa filter',
+  ekspektasi: 'HTTP 200, memuat total_settled_amount',
+  method: 'GET', path: '/reports/settlement', expectStatus: 200 });
+
+add({ id: 'TC-102', nama: 'Laporan Kinerja Sales', skenario: 'Laporan - Read',
+  deskripsi: 'Hitung jumlah lead & booking per sales profile beserta total nilai.',
+  langkah: '1. GET /api/reports/performance',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, data memuat customer_leads_count, bookings_count, bookings_sum_total_price',
+  method: 'GET', path: '/reports/performance', expectStatus: 200 });
+
+add({ id: 'TC-103', nama: 'Export Laporan', skenario: 'Laporan - Export',
+  deskripsi: 'Export data laporan berdasarkan parameter type.',
+  langkah: '1. GET /api/reports/export?type=sales',
+  dataUji: 'type = sales',
+  ekspektasi: 'HTTP 200, report_type=sales, exported_at terisi',
+  method: 'GET', path: '/reports/export?type=sales', expectStatus: 200 });
+
+// ---------------- PUBLIC ----------------
+add({ id: 'TC-110', nama: 'Publik: Daftar Unit', skenario: 'API Publik - Read',
+  deskripsi: 'Konsumen melihat unit berstatus tersedia tanpa perlu login.',
+  langkah: '1. GET /api/public/units',
+  dataUji: 'Tanpa token',
+  ekspektasi: 'HTTP 200, success=true, hanya unit status tersedia',
+  method: 'GET', path: '/public/units', expectStatus: 200 });
+
+add({ id: 'TC-111', nama: 'Publik: Detail Unit', skenario: 'API Publik - Read Single',
+  deskripsi: 'Detail satu unit untuk halaman publik.',
+  langkah: '1. GET /api/public/units/1',
+  dataUji: 'id = 1',
+  ekspektasi: 'HTTP 200 bila unit tersedia, 404 bila tidak',
+  method: 'GET', path: '/public/units/1', expectStatus: 200 });
+
+add({ id: 'TC-112', nama: 'Publik: Berita & Galeri', skenario: 'API Publik - Read',
+  deskripsi: 'Mengembalikan konten statis berita dan galeri.',
+  langkah: '1. GET /api/public/news-gallery',
+  dataUji: 'Tanpa body',
+  ekspektasi: 'HTTP 200, data.news dan data.gallery berisi 2 item',
+  method: 'GET', path: '/public/news-gallery', expectStatus: 200 });
+
+add({ id: 'TC-113', nama: 'Publik: Submit Form Kontak', skenario: 'API Publik - Create',
+  deskripsi: 'Form kontak landing page otomatis membuat Customer Lead baru source=website.',
+  langkah: '1. POST /api/public/contact 2. Kirim name, phone, email, notes',
+  dataUji: '{"name":"Calon Dari Web","phone":"081234000111","email":"web@mail.com","notes":"Tertarik unit A-01"}',
+  ekspektasi: 'HTTP 201, message "Pesan Anda berhasil dikirim!", data.status=cold, source=website',
+  method: 'POST', path: '/public/contact', body: { name: 'Calon Dari Web', phone: '081234000111', email: 'web@mail.com', notes: 'Tertarik unit A-01' }, expectStatus: 201 });
+
+add({ id: 'TC-114', nama: 'Publik: Form Kontak Tanpa Phone', skenario: 'API Publik - Negatif',
+  deskripsi: 'Field wajib phone dikosongkan.',
+  langkah: '1. POST /api/public/contact 2. Hanya kirim name',
+  dataUji: '{"name":"Tanpa Phone"}',
+  ekspektasi: 'HTTP 422, error validasi field phone wajib',
+  method: 'POST', path: '/public/contact', body: { name: 'Tanpa Phone' }, expectStatus: 422 });
+
+// ---------------- SECURITY ----------------
+add({ id: 'TC-120', nama: 'Akses CRUD Sales Tanpa Token', skenario: 'Keamanan - Autorisasi',
+  deskripsi: 'Endpoint /api/sales semestinya dilindungi auth:sanctum karena memuat data pribadi.',
+  langkah: '1. GET /api/sales tanpa header Authorization',
+  dataUji: 'Tanpa token',
+  ekspektasi: 'HTTP 401 (endpoint seharusnya dilindungi autentikasi)',
+  method: 'GET', path: '/sales', expectStatus: 401 });
+
+add({ id: 'TC-121', nama: 'Akses Laporan Tanpa Token', skenario: 'Keamanan - Autorisasi',
+  deskripsi: 'Endpoint /api/reports/sales mengembalikan data finansial sensitif.',
+  langkah: '1. GET /api/reports/sales tanpa token',
+  dataUji: 'Tanpa token',
+  ekspektasi: 'HTTP 401 (seharusnya butuh autentikasi)',
+  method: 'GET', path: '/reports/sales', expectStatus: 401 });
+
+add({ id: 'TC-122', nama: 'Akses Hapus Unit Tanpa Token', skenario: 'Keamanan - Autorisasi',
+  deskripsi: 'Operasi destruktif DELETE /api/units/{id} tanpa autentikasi.',
+  langkah: '1. DELETE /api/units/2 tanpa token',
+  dataUji: 'id = 2, tanpa token',
+  ekspektasi: 'HTTP 401 (operasi hapus harus dilindungi)',
+  method: 'DELETE', path: '/units/2', expectStatus: 401 });
+
+// ---------------- LOGOUT ----------------
+add({ id: 'TC-130', nama: 'Logout Menghapus Token', skenario: 'Autentikasi - Positif',
+  deskripsi: 'Setelah logout, token yang sama tidak boleh dipakai lagi.',
+  langkah: '1. Login 2. POST /api/logout dengan token 3. GET /api/me memakai token lama',
+  dataUji: 'Bearer <token superadmin>',
+  ekspektasi: 'HTTP 200 message "Logout berhasil"',
+  method: 'POST', path: '/logout', tokenRef: 'admin', body: {}, expectStatus: 200 });
+
+// ---------- RUN ----------
+const loginRes = await call(T[0]);
+adminToken = JSON.parse(loginRes.body).access_token;
+
+const salesLogin = await fetch(BASE + '/login', {
+  method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  body: JSON.stringify({ email: 'sales@luminpark.com', password: 'password123' })
+});
+const salesJson = await salesLogin.json().catch(() => ({}));
+salesToken = salesJson.access_token || '';
+
+const mgrLogin = await fetch(BASE + '/login', {
+  method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  body: JSON.stringify({ email: 'manager@luminpark.com', password: 'password123' })
+});
+managerToken = (await mgrLogin.json().catch(() => ({}))).access_token || '';
+
+console.log(`\nToken: admin=${adminToken ? 'OK' : 'NONE'} sales=${salesToken ? 'OK' : 'NONE'} manager=${managerToken ? 'OK' : 'NONE'}\n`);
+
+for (const tc of T.slice(1)) {
+  let token = null;
+  if (tc.tokenRef === 'admin') token = adminToken;
+  else if (tc.tokenRef === 'sales') token = salesToken;
+  else if (tc.badToken) token = tc.badToken;
+  await call(tc, token);
+}
+
+writeFileSync(new URL('./api-test-results.json', import.meta.url), JSON.stringify(results, null, 2));
+console.log(`\nTotal testcases dijalankan: ${results.length}`);

@@ -1,0 +1,2212 @@
+
+===== PAGE 1 =====
+LAPORAN TUGAS PROYEK  
+SISTEM INFORMASI MANAJEMEN PERUMAHAN LUMIN PARK 
+BERBASIS WEB 
+ 
+ 
+ 
+ 
+ 
+Oleh: 
+1. Aisyah Suryati 
+2. Elva Maliza 
+3. Akhva Hermanetta 
+4. Fatihatur Rahmah 
+5. Indira Larasati 
+2317020011 
+2317020047 
+2317020055 
+2317020063 
+2317020067 
+ 
+ 
+PROGRAM STUDI SISTEM INFORMASI 
+FAKULTAS SAINS DAN TEKNOLOGI 
+UNIVERSITAS ISLAM NEGERI IMAM BONJOL PADANG 
+2026
+===== PAGE 2 =====
+i 
+ 
+DAFTAR ISI 
+ 
+DAFTAR ISI ................................ ................................ ................................ ...................  i 
+DAFTAR GAMBAR ................................ ................................ ................................ ......  ii 
+DAFTAR TABEL ................................ ................................ ................................ ........... iii 
+DAFTAR LAMPIRAN................................ ................................ ................................ ...iv 
+PROJECT CHARTER................................ ................................ ................................ ... 1 
+BAB I ................................ ................................ ................................ ...........................  21 
+PENDAHULUAN ................................ ................................ ................................ ........  21 
+A. Latar Belakang ................................ ................................ ................................ . 21 
+B. Rumusan Masalah ................................ ................................ ............................  23 
+C. Tujuan Proyek ................................ ................................ ................................ .. 24 
+D. Manfaat Proyek ................................ ................................ ................................  24 
+BAB II ................................ ................................ ................................ .........................  27 
+ANALISIS KEBUTUHAN DAN PERANCANGAN SISTEM................................ ......  27 
+A. Latar belakang ................................ ................................ ................................ .. 27 
+B. Tujuan Sistem ................................ ................................ ................................ ... 27 
+C. Metode pengembangan sistem ................................ ................................ ..........  27 
+D. Analisis kebutuhan sistem ................................ ................................ .................  29 
+E. Analisis pengguna ................................ ................................ .............................  33 
+F. Proses Bisnis ................................ ................................ ................................ ..... 35 
+G. Perancangan sistem ................................ ................................ .......................  40 
+BAB III ................................ ................................ ................................ ....................... 103 
+IMPLEMENTASI DAN PENGUJIAN ................................ ................................ ........ 103 
+A. Tujuan Implementasi ................................ ................................ ....................... 103 
+B. Pengujian Sistem................................ ................................ .............................. 103 
+LAMPIRAN................................ ................................ ................................ ................ 107
+===== PAGE 3 =====
+ii 
+ 
+DAFTAR GAMBAR
+===== PAGE 4 =====
+iii 
+ 
+DAFTAR TABEL
+===== PAGE 5 =====
+iv 
+ 
+DAFTAR LAMPIRAN
+===== PAGE 6 =====
+1 
+ 
+PROJECT CHARTER 
+1. General Project Information 
+Project Title Sistem Informasi Manajemen 
+Perumahan Lumin Park Berbasis Web 
+Project Description Proyek ini bertujuan untuk 
+mengembangkan sebuah sistem 
+informasi berbasis web yang digunakan 
+untuk mengelola seluruh siklus 
+penjualan dan pelayanan Perumahan 
+Lumin Park. Sistem ini mencakup alur 
+mulai dari manajemen data unit rumah, 
+pengelolaan data konsumen dan calon 
+konsumen, proses follow up, pemesanan 
+(booking) unit, pencatatan pembayaran 
+dan pelunasan dengan tiga skema (KPR, 
+cash keras, dan cash bertahap), verifikasi 
+pembayaran oleh Manajer, hingga 
+penyajian dashboard dan laporan yang 
+informatif. Sistem dirancang untuk 
+menggantikan proses pencatatan manual 
+yang selama ini tersebar di buku, 
+spreadsheet, dan komunikasi informal, 
+menjadi satu platform terpusat dengan 
+hak akses berjenjang: Manajer/Super 
+Admin, Admin Sales, Sales, dan 
+Konsumen yang dapat menghubungi
+===== PAGE 7 =====
+2 
+ 
+salah satu dari tiga kontak WhatsApp 
+Sales yang tersedia pada website. 
+Fitur utama yang akan dikembangkan 
+meliputi: 
+1. Manajemen Autentikasi dan Hak 
+Akses 
+Login dengan username dan 
+password, role-based access control 
+(RBAC), reset password, dan logout 
+dengan batas waktu 
+2. Manajemen Data Unit 
+Pengelolaan data unit rumah beserta 
+statusnya (tersedia, booking, sold 
+out, proses delivery), termasuk 
+tambah, ubah, hapus, dan 
+pembaruan status oleh Manajer 
+3. Manajemen Pemesanan 
+Sales dapat membuat pemesanan 
+unit untuk konsumen dengan status 
+hot, memilih skema pelunasan, 
+sistem otomatis menghitung DP, 
+cicilan, dan sisa pembayaran, serta 
+mengubah status unit menjadi 
+"dipesan" 
+4. Manajemen Pembayaran dan 
+Pelunasan 
+pencatatan pembayaran (DP, 
+cicilan, pelunasan), unggah bukti
+===== PAGE 8 =====
+3 
+ 
+transfer, verifikasi oleh Manajer, 
+pembaruan status pelunasan dan 
+sisa pembayaran secara otomatis, 
+serta pemantauan status 
+pembayaran oleh Sales 
+5. Manajemen Calon Konsumen 
+Sales dapat menambah, mengubah, 
+menghapus data calon konsumen, 
+memperbarui status ( cold, warm, 
+hot, booking ), mencatat riwayat 
+follow up , sedangkan Admin Sales 
+dan Manajer dapat melihat seluruh 
+data calon konsumen dari semua 
+Sales dengan filter status 
+6. Dashboar dan Laporan 
+Manajer dapat melihat dashboard 
+rekapitulasi unit sold out dan belum 
+delivery, jumlah pendapatan, 
+jumlah sales, jumlah calon 
+konsumen dan konsumen . Admin 
+Sales dapat melihat dashboard 
+rekapitulasi penjualan seluruh sales. 
+Sales dapat melihat dashboard 
+jumlah calon konsumen yang 
+ditangani berdasarkan status . 
+Manajer dan Admin Sales dapat 
+melihat dan mencetak laporan
+===== PAGE 9 =====
+4 
+ 
+penjualan, pelunasan, kinerja sales, 
+dan laporan konsumen 
+7. Informasi untuk Konsumen 
+Konsumen dapat melihat daftar unit 
+rumah yang tersedia beserta tipe, 
+luas, dan harga, melihat detail unit 
+beserta spesifikasi lengkap, melihat 
+skema pembayaran yang tersedia, 
+dan diarahkan ke narahubung 
+(Sales) melalui tombol "Hubungi 
+Sales” 
+8. Manajemen Data Sales 
+Manajer dapat mengelola data sales 
+(tambah, ubah, hapus, reset 
+password), dan Admin Sales dapat 
+melihat daftar seluruh sales beserta 
+kinerjanya. Dengan adanya sistem 
+ini, proses pengelolaan perumahan 
+di Lumin Park akan menjadi lebih 
+efisien, transparan, ak urat, dan 
+terdokumentasi dengan baik, serta 
+mendukung pengambilan 
+keputusan strategis bagi Manajer 
+Client Name and Contact Manajer Lumin Park 
+Client Organization Lubuk Minturun Park 
+Does the organization have a previous 
+information system? Yes / No 
+No
+===== PAGE 10 =====
+5 
+ 
+Is the organization ready to provide a 
+PIC/Project Sponsor: Yes / No 
+Yes 
+Development Method Waterfall  
+2. General Project Information 
+Name Role responsibilities 
+Fatihatur Rahmah project Manager • Mengelola keseluruhan 
+proyek dan memastikan 
+tujuan tercapai sesuai 
+scope, waktu, dan biaya 
+yang telah ditetapkan. 
+• Mengoordinasikan 
+komunikasi dengan 
+seluruh stakeholder (klien, 
+tim sales, dan tim 
+pengembang) serta 
+menjadi penghubung 
+utama antara klien dan 
+tim. 
+• Menyusun jadwal proyek, 
+memantau kemajuan tim 
+melalui Trello pada setiap 
+milestone, serta mengelola 
+risiko, perubahan 
+kebutuhan, dan eskalasi 
+masalah. 
+• Memimpin rapat tim, 
+mendokumentasikan 
+keputusan penting, dan
+===== PAGE 11 =====
+6 
+ 
+melakukan review akhir 
+serta approval sebelum 
+serah terima sistem. 
+Elva Maliza Programer • Mengembangkan modul 
+backend dan frontend 
+sesuai dengan kebutuhan 
+fungsional yang telah 
+dianalisis dan disepakati. 
+• Merancang serta 
+mengimplementasikan 
+basis data, termasuk tabel, 
+relasi, dan query yang 
+efisien guna mendukung 
+kinerja sistem. 
+• Melakukan integrasi antar 
+modul sistem (autentikasi, 
+unit, booking, 
+pembayaran, calon 
+konsumen, dan laporan) 
+agar berjalan selaras. 
+• Memperbaiki bug yang 
+ditemukan oleh QA serta 
+melakukan optimasi 
+performa aplikasi dan 
+penulisan kode yang 
+bersih serta 
+terdokumentasi.
+===== PAGE 12 =====
+7 
+ 
+Aisyah Suryati Programer • Mengembangkan 
+antarmuka pengguna 
+(frontend) menggunakan 
+HTML, CSS, JavaScript, 
+dan framework CSS 
+sesuai desain UI/UX. 
+• Mengimplementasikan 
+fitur-fitur interaktif pada 
+sisi klien, seperti validasi 
+form, filter, pencarian, dan 
+tampilan responsif di 
+berbagai browser modern. 
+• Mengintegrasikan 
+frontend dengan API yang 
+disediakan backend serta 
+memastikan data yang 
+ditampilkan akurat dan 
+konsisten. 
+• Membantu pengujian 
+fungsional pada sisi 
+frontend, memperbaiki 
+bug tampilan, dan 
+mendokumentasikan 
+komponen antarmuka 
+yang dibuat. 
+Akhva Hermanetta Requirement Analyst • Menggali kebutuhan 
+bisnis dari stakeholder 
+(Manajer Lumin Park dan
+===== PAGE 13 =====
+8 
+ 
+tim sales) melalui 
+wawancara, observasi, dan 
+studi dokumen. 
+• Menganalisis proses bisnis 
+yang berjalan (As-Is) dan 
+merancang proses bisnis 
+yang diinginkan (To-Be) 
+sesuai kebutuhan sistem. 
+• Menyusun dokumen 
+spesifikasi kebutuhan 
+fungsional dan non-
+fungsional serta 
+menerjemahkannya 
+menjadi spesifikasi teknis 
+yang dapat dipahami 
+programmer. 
+• Memvalidasi kebutuhan 
+bersama klien, 
+memastikan tidak ada 
+kesalahpahaman, dan 
+menjadi penghubung 
+antara pengguna dengan 
+tim teknis. 
+Indira Larasati Requirement Analyst • Mengidentifikasi dan 
+menganalisis kebutuhan 
+pengguna sistem, 
+termasuk kebutuhan 
+Manajer, Admin Sales,
+===== PAGE 14 =====
+9 
+ 
+Sales, dan Konsumen 
+melalui elisitasi 
+kebutuhan. 
+• Menyusun dan 
+memelihara dokumen 
+kebutuhan (requirement 
+document) serta 
+memastikan seluruh 
+kebutuhan tercatat dengan 
+lengkap dan terstruktur. 
+• Memodelkan kebutuhan 
+ke dalam bentuk use case 
+diagram, activity diagram, 
+dan diagram pendukung 
+lainnya sebagai acuan 
+perancangan sistem. 
+• Berkoordinasi dengan 
+Project Manager dan 
+programmer untuk 
+memastikan kebutuhan 
+yang telah dianalisis dapat 
+diimplementasikan dengan 
+tepat sesuai harapan 
+pengguna. 
+3. Success Metrics 
+Goal How Will We Measure
+===== PAGE 15 =====
+10 
+ 
+Meningkatkan efisiensi dan akurasi 
+pengelolaan data unit, konsumen, dan 
+penjualan 
+• Waktu yang dibutuhkan untuk input 
+data unit baru atau pencarian data 
+konsumen berkurang minimal 50% 
+dibandingkan cara manual 
+• Tidak terjadi duplikasi data unit atau 
+konsumen karena sistem 
+menggunakan validasi dan primary 
+key yang unik. 
+• Seluruh data unit, konsumen, dan 
+penjualan terpusat dalam satu basis 
+data yang dapat diakses sesuai hak 
+akses. 
+Menyediakan pemantauan status unit 
+rumah secara real-time  
+• Status unit (tersedia, booking, sold 
+out, proses delivery) dapat dilihat 
+secara langsung dan selalu konsisten 
+di seluruh halaman sistem. 
+• Perubahan status unit oleh Manajer 
+atau Sales langsung tercermin pada 
+dashboard dan daftar unit tanpa perlu 
+refresh manual. 
+• Tidak ada perbedaan informasi status 
+unit antara yang dilihat oleh Manajer, 
+Sales, dan Konsumen. 
+Mencatat dan memantau pelunasan tiga 
+skema pembayaran (KPR, Cash Keras, 
+Cash Bertahap) 
+• Semua transaksi DP, cicilan, dan 
+pelunasan untuk ketiga skema tercatat 
+dalam sistem dengan bukti transfer 
+yang diunggah.
+===== PAGE 16 =====
+11 
+ 
+• Manajer dapat memverifikasi bukti 
+pembayaran dan sistem secara 
+otomatis memperbarui status 
+pelunasan serta sisa pembayaran. 
+• Laporan pelunasan dapat 
+menampilkan rekap pembayaran per 
+konsumen, per unit, dan per skema 
+pembayaran. 
+Mengelola follow up calon konsumen 
+dengan status yang jelas 
+• Status calon konsumen (cold, warm, 
+hot, booking) terdokumentasi dan 
+dapat diperbarui oleh Sales. 
+• Riwayat follow up setiap konsumen 
+tersimpan, mencakup tanggal, 
+keterangan kegiatan, dan status 
+terkini. 
+• Admin Sales dan Manajer dapat 
+melihat seluruh data calon konsumen 
+dari semua Sales dengan filter status. 
+Menyediakan dashboard dan laporan 
+yang informatif 
+• Dashboard Manajer menampilkan 
+rekapitulasi unit sold out dan belum 
+delivery, jumlah pendapatan, jumlah 
+sales, jumlah calon konsumen dan 
+konsumen. 
+• Dashboard Admin Sales menampilkan 
+rekapitulasi penjualan seluruh sales. 
+• Dashboard Sales menampilkan jumlah 
+calon konsumen yang ditangani 
+berdasarkan status.
+===== PAGE 17 =====
+12 
+ 
+• Laporan penjualan, pelunasan, kinerja 
+sales, dan laporan konsumen dapat 
+ditampilkan, dicetak, dan diekspor ke 
+PDF/Excel. 
+Kinerja sistem • Waktu respons maksimal 5 detik 
+untuk proses umum (login, pencarian, 
+penyimpanan data). 
+• Tingkat ketersediaan sistem minimal 
+80% (dapat diakses selama jam 
+operasional). 
+• Setiap kesalahan proses memberikan 
+pesan error yang jelas dan tidak 
+menyebabkan crash. 
+Penerimaan pengguna • UAT dilakukan oleh Manajer, Admin 
+Sales, dan Sales. 
+• Minimal 80% fitur utama diterima dan 
+dinyatakan sesuai dengan kebutuhan 
+operasional. 
+• Pengguna internal melaporkan 
+kemudahan penggunaan sistem dan 
+pengurangan waktu dalam 
+menyelesaikan tugas administrasi. 
+4. Initial Scope of the Project 
+In-Scope 
+Manajemen Autentikasi dan Hak Akses 
+• Login dengan username dan password untuk Manajer/Super Admin, 
+Admin Sales, dan Sales. 
+• Role-based access control (RBAC) untuk membedakan hak akses.
+===== PAGE 18 =====
+13 
+ 
+• Reset password dan logout dengan batas waktu tertentu. 
+Manajemen Data Unit 
+• Admin Sales dan Manajer dapat melihat seluruh data unit dan statusnya. 
+• Sales dapat melihat informasi unit yang tersedia. 
+• Konsumen dapat melihat informasi unit rumah yang tersedia. 
+• Manajer dapat menambah, mengubah, menghapus, dan memperbarui status 
+unit (tersedia, booking, sold out, proses delivery). 
+Manajemen Pemesanan 
+• Sales dapat membuat pemesanan unit untuk konsumen dengan status hot. 
+• Sales dapat memilih skema pelunasan (KPR, cash keras, cash bertahap). 
+• Sistem otomatis menghitung DP, cicilan, dan sisa pembayaran. 
+• Sistem mengubah status unit menjadi "dipesan" setelah booking berhasil. 
+Manajemen Pembayaran dan Pelunasan 
+• Sales dapat mencatat pembayaran (DP, cicilan, pelunasan) dan 
+mengunggah bukti transfer.  
+• Manajer dapat memverifikasi bukti pembayaran (terverifikasi/ditolak). 
+• Sistem memperbarui status pelunasan dan sisa pembayaran secara 
+otomatis. 
+• Sales dapat memantau status pembayaran konsumennya. 
+Manajemen Calon Konsumen 
+• Sales dapat menambah, mengubah, dan menghapus data calon konsumen. 
+• Sales dapat memperbarui status calon konsumen (cold, warm, hot, 
+booking). 
+• Sales dapat melihat daftar calon konsumen yang ditangani berdasarkan 
+status. 
+• Sales dapat mencatat riwayat follow up setiap kali berinteraksi.
+===== PAGE 19 =====
+14 
+ 
+• Admin Sales dan Manajer dapat melihat seluruh data calon konsumen dari 
+semua sales dengan filter status. 
+• Admin Sales dan Manajer dapat memantau perkembangan follow up setiap 
+sales. 
+Dashboard dan Laporan 
+• Manajer dapat melihat dashboard rekapitulasi unit sold out dan belum 
+delivery, jumlah pendapatan, jumlah sales, jumlah calon konsumen dan 
+konsumen. 
+• Admin Sales dapat melihat dashboard rekapitulasi penjualan seluruh sales. 
+• Sales dapat melihat dashboard jumlah calon konsumen yang ditangani 
+berdasarkan status. 
+• Manajer dan Admin Sales dapat melihat dan mencetak laporan penjualan, 
+laporan pelunasan, laporan kinerja sales, dan laporan konsumen beserta 
+calon konsumen. 
+Manajemen Data Sales 
+• Manajer dapat mengelola data sales (tambah, ubah, hapus, reset password). 
+• Manajer dan Admin Sales dapat melihat daftar seluruh sales beserta 
+kinerjanya. 
+• Admin Sales dapat mengelola data sales dengan hak yang sama. 
+Public Information  
+• Konsumen dapat melihat daftar unit rumah yang tersedia beserta tipe, luas, 
+dan harga. 
+• Konsumen dapat melihat detail unit rumah beserta spesifikasi lengkap. 
+• Konsumen dapat melihat skema pembayaran yang tersedia. 
+• Konsumen dapat diarahkan ke narahubung (Sales) melalui tombol 
+"Hubungi Sales". 
+Out of Scope
+===== PAGE 20 =====
+15 
+ 
+• Integrasi langsung ke bank/KPR. 
+• Registrasi dan login konsumen. 
+• Payment gateway. 
+• Aplikasi mobile. 
+• Modul akuntansi keuangan lengkap. 
+• Integrasi WhatsApp API/SMS gateway. 
+• Manajemen konstruksi/developer. 
+• E-signature. 
+• Fitur chat internal antar pengguna. 
+• Manajemen dokumen legal selain yang berkaitan dengan penjualan unit. 
+5. Technology Used 
+Frontend HTML, CSS, JavaScript, Tailwind CSS 
+Backend PHP, Laravel11 
+Database MySQL 
+Version Control Git, GitHub 
+Deployment Target  
+Design UI/UX Figma 
+API Testing Postman 
+Project Management Trello 
+6. Milestone Project 
+Step Dates Event 
+Rancangan  30 Agustus 2026 – 12 
+September 2026 
+Analisis Kebutuhan 
+Step 1 13 September 2026 – 
+26 September 2026 
+Desain Sistem 
+Step 2 27 September 2026 – 
+10 Oktober 2026 
+Implementasi Modul 
+Autentikasi & Data Sales
+===== PAGE 21 =====
+16 
+ 
+Step 3 11 Oktober 2026 – 24 
+Oktober 2026 
+Pengembangan Modul Data 
+Unit & Calon Konsumen 
+(Leads) 
+Step 4 
+25 Oktober 2026 – 7 
+November 2026 
+Pengembangan Modul 
+Booking & Pembayaran 
+Step 5 8 November 2026 – 21 
+November 2026 
+Pengembangan Modul 
+Dashboard, Laporan & 
+Halaman Publik 
+Step 6 22 November 2026 – 
+28 November 2026 
+Integrasi Sistem & Testing 
+Awal 
+Step 7 29 November 2026 – 5 
+Desember 2026 
+Final Testing & Bug Fixing 
+Step 8 6 Desember 2026 – 12 
+Desember 2026 
+Demo Sistem ke Client 
+Step 9 13 Desember 2026 – 
+20 Desember 2026 
+Laporan dan Finalisasi 
+Sistem  
+7. Anggaran Proyek  
+Kategori Rincian Volume Perkiraan Biaya 
+Infrastruktur TI  Domain .id 1 tahun Rp800.000 
+VPS Indonesia 
+2GB 
+1 tahun Rp200.000 
+Operasional  transportasi 5 orang x 8 Rp480.000 
+Pulsa, kuota tim 16 x 5 orang Rp500.000 
+Pelatihan 
+Pengguna 
+Training Pengguna  1x sesi Rp500.000 
+Dokumentasi & 
+Laporan 
+Cetak dan jilid 
+laporan 
+3 laporan Rp100.000
+===== PAGE 22 =====
+17 
+ 
+Biaya tambahan Biaya tidak 
+terduga 
+5% dari total 
+anggaran 
+Rp129.000 
+ 
+Total Rp2.979.000 
+8. Risks & issues 
+Potential Risk Perceived Impact Mitigation Strategy 
+Mitra (Lumin Park) tidak 
+responsif dalam 
+memberikan data & 
+feedback 
+Keterlambatan analisis 
+kebutuhan, desain, dan 
+validasi sistem 
+• Menjadwalkan 
+komunikasi rutin 
+(mingguan) 
+• Menyiapkan 
+narahubung Cadangan 
+• Membuat daftar data 
+yang dibutuhkan secara 
+detail 
+• Menetapkan deadline 
+pengumpulan data 
+Perubahan kebutuhan di 
+tengah proyek oleh mitra 
+(misalnya penambahan 
+fitur atau perubahan alur 
+bisnis) 
+Keterlambatan 
+pengembangan, 
+penyesuaian desain dan 
+kode, serta potensi 
+melebihi anggaran 
+• Melakukan analisis 
+kebutuhan yang matang 
+di awal proyek 
+• Menetapkan scope 
+yang jelas dan disetujui 
+bersama 
+• Menjalin komunikasi 
+rutin dengan mitra 
+• Mendokumentasikan 
+setiap perubahan 
+kebutuhan dan 
+dampaknya
+===== PAGE 23 =====
+18 
+ 
+Keterbatasan waktu 
+pengembangan (16 
+minggu) dengan cakupan 
+modul yang banyak 
+Fitur tidak selesai tepat 
+waktu, kualitas sistem 
+menurun, dan testing 
+tidak maksimal 
+• Memprioritaskan fitur 
+inti terlebih dahulu 
+• Menerapkan metode 
+Waterfall dengan 
+milestone ketat 
+• Menambah jam kerja 
+(lembur) jika 
+diperlukan 
+• Menggunakan template 
+dan library yang sudah 
+ada 
+Kesulitan teknis dalam 
+integrasi sistem 
+(konfigurasi server, 
+database, API, atau 
+deployment) 
+Sistem tidak berjalan 
+dengan baik, bug 
+meningkat, dan waktu 
+testing bertambah 
+• Menggunakan 
+teknologi yang sudah 
+dikuasai tim (Laravel, 
+MySQL) 
+•  Melakukan testing 
+berkala (unit & 
+integration) 
+• Menyiapkan 
+dokumentasi teknis dan 
+panduan deployment 
+• Konsultasi dengan 
+dosen atau mentor 
+teknis 
+Kehilangan data atau 
+kebocoran data pengguna 
+(data unit, konsumen, 
+pembayaran) 
+Kehilangan kepercayaan 
+mitra, masalah hukum, 
+dan sistem tidak aman 
+•  Menerapkan Role-
+Based Access Control 
+(RBAC)
+===== PAGE 24 =====
+19 
+ 
+• Menyimpan password 
+dalam bentuk hash 
+(bcrypt) 
+• Melakukan backup 
+database secara rutin 
+• Menggunakan protokol 
+HTTPS dan SSL 
+certificate 
+9. Approval  
+Kami menyatakan bahwa informasi diatas benar dan siap melaksanakan 
+proyek ini sesuai dengan rencana. 
+Padang, 06 ktober 2026 
+ Client 
+ Lumin Park 
+ 
+  
+ 
+Manajer Lumin Park 
+Project Manager 
+ 
+ 
+ 
+Fatihatur Rahmah 
+NIM.2317020063
+===== PAGE 25 =====
+20
+===== PAGE 26 =====
+21 
+ 
+BAB I 
+PENDAHULUAN 
+A. Latar Belakang 
+Perkembangan teknologi informasi dan komunikasi (TIK) pada era digital saat 
+ini berlangsung sangat pesat dan telah menjadi pendorong utama transformasi di 
+hampir seluruh sektor kehidupan, termasuk dunia usaha dan bisnis. Tingkat 
+penggunaan internet masyarakat Indonesia yang terus meningkat membuat 
+masyarakat semakin terhubung dengan ekosistem digital melalui berbagai 
+perangkat, sehingga transformasi dari sistem pengelolaan yang bersifat tradisional 
+menuju platform berbasis web menjadi kebut uhan yang sulit d ihindari (Vicky & 
+Christianto, 2026). Pemanfaatan teknologi informasi kini menjadi hal yang lazim 
+dalam proses pengolahan, manajemen, dan analisis data guna menghasilkan 
+informasi yang relevan, akurat, cepat, dan transparan, baik bagi pelaku usaha 
+maupun masyarakat sebagai konsumen. 
+Salah satu sektor yang turut merasakan dampak signifikan dari perkembangan 
+teknologi informasi tersebut adalah sektor properti dan perumahan. Sektor 
+perumahan merupakan sektor yang terus mengalami pertumbuhan yang stabil 
+seiring dengan meningkatnya permintaan masyarakat terkait hunian yang terjangkau 
+dan nyaman (Fernando et al., 2025). Persaingan pada bisnis properti yang semakin 
+meningkat menuntut setiap pengembang perumahan untuk mampu memanfaatkan 
+teknologi informasi guna memperluas jangkauan promosi, me mpercepat prosedur 
+administrasi, serta meningkatkan efisiensi pengelolaan data penjualan dan layanan 
+bagi penghuni (Alghifari et al., 2025). Keberhasilan penjualan sebuah perumahan 
+sangat dipengaruhi oleh sejauh mana pengembang mampu menyediakan sistem 
+informasi yang terintegrasi, baik untuk membantu calon pembeli memperoleh 
+informasi rumah maupun untuk membantu pihak pengelola dalam mengatur data 
+transaksi dan layanan penghuni secara lebih efisien.
+===== PAGE 27 =====
+22 
+ 
+Meskipun demikian, tingkat adopsi sistem digital dalam pengelolaan 
+perumahan di Indonesia pada praktiknya masih tergolong rendah. Sebagian besar 
+pengembang dan pengelola perumahan masih mengandalkan metode konvensional, 
+seperti pencatatan manual menggunakan kertas maupun spreadsheet, serta promosi 
+melalui social media, pamflet, brosur, dan spanduk (Alghifari et al., 2025). Metode 
+tersebut seringkali menimbulkan berbagai kendala, di antaranya keterlambatan 
+verifikasi pembayaran, risiko duplikasi maupun kehilangan data, sulitnya memantau 
+status unit rumah yang telah terjual maupun yang masih dalam proses serah terima, 
+hingga penanganan keluhan penghuni  yang tidak terdokumentasi dengan baik 
+karena hanya mengandalkan komunikasi informal melalui aplikasi pesan instan 
+(Vicky & Christianto, 2026). Kondisi ini pada akhirnya berdampak pada rendahnya 
+efisiensi operasional serta berpotensi menghambat daya saing pengembang 
+perumahan di pasar properti yang semakin kompetitif dan digital. 
+Kondisi serupa juga ditemukan pada Perumahan Lumin Park (Lubuk Minturun 
+Park), salah satu pendiri dan pengembang perumahan yang berlokasi di Jalan Lubuk 
+Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota 
+Padang, Sumatera Barat. Lumin Park mengusung konsep hunian minimalis, asri, 
+dan islami dengan target pasar mulai dari kalangan menengah ke bawa h hingga 
+menengah ke atas, serta menawarkan beberapa tipe rumah dan cluster dengan skema 
+pembayaran yang beragam, yaitu Kredit Pemilikan Rumah ( KPR), cash keras, dan 
+cash bertahap. Beragamnya tipe unit, skema pelunasan, serta tahapan proses mulai 
+dari pemesanan hingga serah terima unit menuntut pengelolaan data yang cermat 
+dan terintegrasi antara pihak manajer, tim sales, dan konsumen. 
+Namun, berdasarkan observasi awal yang dilakukan, proses pengelolaan pada 
+Lumin Park saat ini masih dilakukan secara manual dan belum terpusat dalam satu 
+sistem. Pencatatan status unit rumah yang sudah sold out dan yang masih dalam 
+proses delivery (serah terima) belum terdokumentasi secara rapi, pencatatan 
+pelunasan pada masing-masing skema pembayaran (KPR, cash keras, maupun cash 
+bertahap) masih tersebar dan sulit dipantau, serta proses follow up dari calon
+===== PAGE 28 =====
+23 
+ 
+konsumen belum memiliki mekanisme pelacakan status yang jelas, apakah calon 
+konsumen tersebut telah melakukan follow up lebih lanjut terhadap hunian yang 
+ingin di booking. Kondisi ini menyulitkan manajer dalam memantau perkembangan 
+penjualan secara menyeluruh, menyulitkan tim sales dalam mengelola data unit dan 
+konsumen, serta menyulitkan konsumen dalam memperoleh informasi yang jelas 
+mengenai status pembelian yang telah diajukan. 
+Berdasarkan permasalahan tersebut, dibutuhkan sebuah sistem informasi 
+manajemen perumahan berbasis website yang mampu mengintegrasikan data unit 
+rumah hingga proses pelunasan dari berbagai skema pembayaran dalam satu 
+platform yang dapat diakses oleh manajer, sales, dan Admin Sales sesuai dengan hak 
+akses masing-masing. Sistem ini diharapkan dapat menggantikan proses pencatatan 
+manual yang selama ini digunakan, sehingga pemantauan status unit  hingga 
+verifikasi pelunasan dapat dilakukan secara lebih cepat, akurat, dan transparan. 
+Berdasarkan penjelasan tersebut,  maka dilakukanlah  penelitian dengan judul 
+"Sistem Informasi Manajemen Perumahan Lumin Park Padang Berbasis Website". 
+B. Rumusan Masalah 
+Berdasarkan uraian latar belakang diatas, maka dirumuskan beberapa 
+permasalahan utama sebagai berikut:  
+1. Bagaimana cara meningkatkan efisiensi dan akurasi dalam pengelolaan data unit 
+rumah, konsumen, dan penjualan di lingkungan Perumahan Lumin Park melaui 
+penerapan sistem informasi? 
+2. Bagaimana sistem dapat memberikan pemantauan status unit rumah secara real -
+time sehingga mengurangi risiko kesalahan informasi? 
+3. Bagaimana merancang sistem yang dapat mengelola proses follow up calon 
+konsumen dengan status yang jelas untuk mendukung kinerja tim sales? 
+4. Bagaimana membangun sistem pencatatan pelunasan yang terintegrasi untuk tiga 
+skema pembayaran sehingga mudah dipantau oleh manajer?
+===== PAGE 29 =====
+24 
+ 
+5. Bagaimana merancang dashboard pelaporan yang informatif dan mudah 
+dipahami untuk mendukung kebutuhan manajer dalam pengambilan Keputusan?   
+C. Tujuan Proyek 
+Berdasarkan latar belakang yang telah diuraikan, tujuan dari pengembangan 
+sistem ini adalah sebagai berikut: 
+1. Merancang dan membangun sistem informasi manajemen perumahan berbasis 
+website untuk Perumahan Lumin Park Padang untuk meningkatkan efisiensi dan 
+akurasi dalam pengelolaan data unit rumah, konsumen, dan penjualan. 
+2. Menyediakan fitur pemantauan status unit rumah, baik unit yang sudah sold out 
+maupun unit yang masih dalam proses delivery (serah terima), sehingga dapat 
+dipantau secara real-time oleh manajer. 
+3. Memfasilitasi pencatatan dan pemantauan proses pelunasan pembelian rumah 
+melalui tiga skema pembayaran, yaitu KPR, cash keras, dan cash bertahap, agar 
+lebih terstruktur dan terdokumentasi dengan baik. 
+4. Menyediakan fitur pemantauan status calon konsumen, sehingga dapatdipantau 
+calon oknsumen yang sudah melakukan follow up beserta statusnya (cold, warm, 
+dan hot) transparan. 
+5. Mengembangkan dashboard pelaporan yang informatif dan mudah dipahami 
+untuk mendukung kebutuhan manajer dalam pengambilan keputusan. 
+D. Manfaat Proyek 
+Pelaksanaan proyek Sistem Informasi Manajemen Perumahan Lumin Park ini 
+diharapkan dapat memberikan berbagai manfaat bagi mitra maupun tim 
+pengembang, antara lain sebagai berikut: 
+1. Bagi Pengelola Perumahan Lumin Park 
+a. Mempermudah proses administrasi dan pemantauan penjualan melalui sistem 
+yang terintegrasi dan mudah digunakan. 
+b. Mengurangi ketergantungan terhadap dokumen fisik dan pencatatan manual, 
+sehingga proses menjadi lebih cepat, efisien, dan akurat.
+===== PAGE 30 =====
+25 
+ 
+c. Memastikan data unit rumah, konsumen, dan pelunasan tersimpan dengan 
+aman dan dapat diakses kapan saja sesuai kebutuhan. 
+d. Memudahkan pemantauan kinerja tim sales melalui dashboard dan laporan 
+yang tersedia secara real-time. 
+2. Bagi Tim Sales 
+a. Memudahkan pengelolaan data calon konsumen yang ditangani, termasuk 
+pembaruan status follow up (cold, warm, hot, booking). 
+b. Menyediakan informasi unit rumah yang tersedia secara real -time, sehingga 
+dapat langsung ditawarkan kepada calon konsumen. 
+c. Mempermudah pencatatan pembayaran dan pengunggahan bukti transfer ke 
+dalam sistem. 
+d. Memudahkan koordinasi dengan manajer dan admin sales terkait status 
+pemesanan dan pelunasan. 
+3. Bagi Konsumen 
+a. Mendapatkan kemudahan akses informasi unit rumah yang tersedia secara 
+online melalui website. 
+b. Memperoleh transparansi status pembelian dan pelunasan yang telah 
+dilakukan. 
+c. Mempercepat proses koordinasi dan komunikasi dengan tim sales melalui 
+narahubung yang tersedia. 
+4. Bagi Tim Pengembang 
+a. Memberikan pengalaman langsung dalam proses analisis kebutuhan, 
+perancangan, pengembangan, dan implementasi sistem informasi berbasis 
+web. 
+b. Meningkatkan kemampuan teknis dalam bidang pemrograman, manajemen 
+basis data, dan desain antarmuka pengguna (UI/UX). 
+c. Mengasah kemampuan bekerja secara kolaboratif dan profesional dalam 
+menyelesaikan proyek berbasis kebutuhan institusional nyata.
+===== PAGE 31 =====
+26 
+ 
+d. Menambah portofolio dan wawasan praktis tentang penerapan teknologi 
+informasi dalam mendukung tata kelola bisnis properti.
+===== PAGE 32 =====
+27 
+ 
+BAB II 
+ANALISIS KEBUTUHAN DAN PERANCANGAN SISTEM 
+A. Latar belakang 
+Proses pengelolaan penjualan dan pelayanan perumahan di Lumin Park saat ini 
+masih dilakukan secara manual melalui pencatatan di buku, spreadsheet, dan 
+komunikasi yang belum terpusat. Hal ini menyebabkan kesulitan dalam pelacakan 
+status unit, pencatatan pelunasan, serta pemantauan follow up calon konsumen. 
+Untuk itu, dibutuhkan Sistem Informasi Manajemen Perumahan yang mampu: 
+1. Mengelola seluruh siklus penjualan (pengelolaan unit, pemesanan, pelunasan, 
+dan pengelolaan calon konsumen). 
+2. Memberikan transparansi dan efisiensi pengelolaan data unit dan konsumen. 
+3. Mendukung pengambilan keputusan strategis manajer dengan data real-time. 
+B. Tujuan Sistem 
+1. Meningkatkan efisiensi dan akurasi pengelolaan data unit, konsumen, dan 
+penjualan. 
+2. Menyediakan pemantauan status unit rumah secara real-time. 
+3. Menyediakan fitur pengelolaan calon konsumen dengan status follow up yang 
+jelas. 
+4. Menyediakan dashboard pelaporan yang informatif bagi manajer . 
+C. Metode pengembangan sistem 
+1. Pengertian Waterfall 
+Metode Waterfall merupakan pendekatan pengembangan perangkat lunak 
+yang sistematis dan berurutan, di mana setiap tahapan harus diselesaikan sebelum 
+melanjutkan ke tahap berikutnya (Pressman & Maxim, 2020). Dalam 
+pengembangan Sistem Informasi Manajemen Perumahan Lumin Park, metode 
+ini dipilih karena kemampuannya dalam menyediakan struktur pen gembangan 
+yang jelas dan teratur, sehingga sesuai untuk proyek dengan kebutuhan yang 
+relatif stabil dan telah terdefinisi dengan baik sejak awal.
+===== PAGE 33 =====
+28 
+ 
+2. Tahapan Pengembangan Waterfall 
+Berdasarkan model Waterfall, tahapan yang akan diterapkan dalam proyek 
+ini adalah: 
+a. Analisis Kebutuhan (Requirement Analysis) 
+• Pengumpulan kebutuhan melalui wawancara dan observasi langsung di 
+Perumahan Lumin Park 
+• Identifikasi masalah (pencatatan manual, pelacakan status unit dan 
+pelunasan yang sulit) 
+• Penyusunan spesifikasi kebutuhan fungsional dan non-fungsional 
+b. Desain Sistem (System Design) 
+• Perancangan arsitektur sistem dan basis data 
+• Visualisasi kebutuhan ke dalam model UML (Use Case Diagram, Activity 
+Diagram, ERD) 
+• Perancangan antarmuka pengguna yang mencakup fitur-fitur utama seperti 
+halaman login, dashboard, pengelolaan data unit, dan pengelolaan calon 
+konsumen. 
+c. Implementasi (Implementation) 
+• Pengkodean sistem berdasarkan desain yang telah dibuat 
+• Pengembangan fitur -fitur sesuai dengan peran (Manajer, Admin Sales, 
+Sales, Konsumen) 
+• Integrasi antar modul system 
+d. Pengujian (Testing) 
+• Pengujian fungsional menggunakan metode Black Box Testing 
+• Pengujian integrasi antar modul 
+• Pencatatan dan perbaikan bug 
+e. Pemeliharaan (Maintenance) 
+• Perbaikan bug yang ditemukan setelah implementasi 
+• Pengembangan fitur tambahan jika diperlukan
+===== PAGE 34 =====
+29 
+ 
+D. Analisis kebutuhan sistem 
+1. Kebutuhan Fungsional 
+Berdasarkan hasil elisitasi yang dilakukan kepada manajer dan tim sales 
+pada tanggal 1 September 2026, kebutuhan fungsional sistem dikelompokkan ke 
+dalam beberapa modul utama. 
+a. Manajemen Autentikasi 
+• Sistem menyediakan fitur login dengan username dan password untuk 
+Manajer sebagai Super Admin, Admin Sales, Sales 
+• Sistem menerapkan role-based acces control untuk membedakan hak akses 
+• Sistem menyediakan fitur resset password untuk setiap pengguna 
+• Sistem menyediakan fitur logout dengan batas waktu tertentu untuk setiap 
+aktor 
+b. Manajemen Data Unit 
+• Admin Sales dan manajer dapat melihat seluruh data unit dan statusnya 
+• Sales dapat melihat informasi unit yang tersedia 
+• Konsumen dapat melihat informasi unit rumah yang tersedia 
+• Manajer dapat melihat , menambah, mengubah, dan menghapus  seluruh 
+data unit dan statusnya (tersedia, booking, sold out, proses delivery) 
+• Manajer dapat memperbarui status unit 
+c. Manajemen Pemesanan  
+• Sales dapat membuat  pemesanan (booking) unit rumah  untuk konsumen 
+dengan status hot  
+• Sales dapat memilih skema pelunasan (KPR, cash keras, cash bertahap) 
+• Sistem otomatis menghitung DP, cicilan, dan sisa pembayaran. 
+• Sistem mengubah status unit menjadi "dipesan" setelah booking berhasil. 
+d. Manajemen Pembayaran dan Pelunasan (Payment Management) 
+• Sales dapat mencatat pembayaran (DP, cicilan, pelunasan) dan 
+mengunggah bukti transfer.
+===== PAGE 35 =====
+30 
+ 
+• Manajer dapat memverifikasi bukti pembayaran (terverifikasi/ditolak). 
+• Sistem memperbarui status pelunasan dan sisa pembayaran secara 
+otomatis. 
+• Sales dapat memantau status pembayaran konsumennya. 
+e. Manajemen Calon Konsumen 
+• Sales dapat menambah , mengubah, dan menghapus  data calon konsumen 
+baru 
+• Sales dapat memperbarui status calon konsumen (cold, warm, hot, 
+booking) 
+• Sales dapat melihat daftar calon konsumen yang ditangani berdasarkan 
+status 
+• Sales dapat mencatat riwayat follow up setiap kali berinteraksi dengan 
+calon konsumen. 
+• Admin Sales dan Manajer dapat melihat seluruh data calon konsumen dari 
+semua sales dengan filter status 
+• Admin Sales dan Manajer dapat memantau perkembangan follow up setiap 
+sales 
+f. Dashboard dan Laporan 
+• Manajer dapat melihat dashboard rekapitulasi unit sold out dan belum 
+delivery, jumlah pendapatan, jumlah sales, jumlah calon konsumen dan 
+konsumen 
+• Admin Sales dapat melihat dashboard rekapitulasi penjualan seluruh sales 
+• Sales dapat melihat dashboard jumlah calon konsumen yang ditangani 
+berdasarkan status 
+• Manajer dan admin sales dapat melihat dan mencetak laporan penjualan 
+unit, laporan pelunasan, dan laporan kinerja sales, dan laporan konsumen 
+beserta calon konsumen. 
+g. Informasi untuk Konsumen (Public Information)
+===== PAGE 36 =====
+31 
+ 
+• Konsumen dapat melihat daftar unit rumah yang tersedia beserta tipe, luas, 
+dan harga. 
+• Konsumen dapat melihat detail unit rumah beserta spesifikasi lengkap. 
+• Konsumen dapat melihat skema pembayaran yang tersedia. 
+• Konsumen dapat diarahkan ke narahubung (Sales) melalui tombol 
+"Hubungi Sales" untuk proses selanjutnya. 
+h. Manajemen Data Sales 
+• Manajer dapat mengelola data sales (tambah, ubah, hapus, resset password) 
+• Manajer dan Admin Sales dapat melihat daftar seluruh sales beserta 
+kinerjanya 
+• Admin sales dapat mengelola data sales dengan hak yang sama 
+2. Kebutuhan Non-Fungsional 
+Kebutuhan non-fungsional sistem mencakup beberapa aspek penting yang 
+harus dipenuhi agar sistem dapat berjalan dengan baik dan memenuhi harapan 
+pengguna: 
+a. Kinerja Sistem 
+• Sistem memberikan waktu respons maksimal 5 detik untuk proses umum 
+b. Keamanan Sistem 
+• Setiap pengguna harus login menggunakan akun yang terverifikasi 
+• Sistem menerapkan role-based access control (RBAC) 
+• Password pengguna disimpan dalam bentuk hash 
+c. Kemudahan Pengguna 
+• Antarmuka sistem harus sederhana, konsisten, dan mudah dipahami 
+• Sistem harus responsif dan dapat diakses melalui berbagai perangkat 
+• Navigasi menu harus jelas dengan penggunaan ikon dan label yang mudah 
+dipahami 
+d. Ketersediaan dan Keandalan 
+• Sistem memiliki tingkat ketersediaan minimal 80%
+===== PAGE 37 =====
+32 
+ 
+• Setiap kesalahan proses memberikan pesan error yang jelas tanpa 
+menyebabkan crash 
+e. Integritas Data 
+• Setiap data yang masuk divalidasi sebelum disimpan 
+• Sistem mencegah duplikasi data 
+f. Portabilitas 
+• Sistem dapat diakses melalui browser modern seperti Chrome, Firefox, dan 
+Edge 
+3. Kebutuhan Teknologi 
+Berdasarkan kebutuhan fungsional dan non -fungsional yang telah 
+diidentifikasi, serta mempertimbangkan kemampuan tim dan ketersediaan 
+sumber daya, maka kebutuhan teknologi untuk pengembangan sistem ini adalah 
+sebagai berikut: 
+a. Frontend 
+• HTML, CSS, dan JavaScript sebagai bahasa dasar pemrograman web 
+• Framework Tailwind CSS untuk tampilan responsive 
+• Figma sebagai tools perancangan antarmuka 
+b. Backend 
+• PHP sebagai bahasa pemrograman backend 
+• Framework Laravel yang mendukung arsitektur MVC 
+c. Database 
+• MySQL sebagai sistem manajemen basis data (DBMS) 
+d. Version Control dan Deployment 
+• Git sebagai sistem kontrol versi 
+• GitHub sebagai repository pusat 
+• Vercel atau Netlify untuk deployment frontend 
+• Supabase atau MySQL untuk database 
+e. Tools Pendukung
+===== PAGE 38 =====
+33 
+ 
+• Visual Studio Code sebagai code editor 
+• Laragon sebagai server local 
+• Postman untuk pengujian API 
+• DBDiagram untuk desain database (ERD) 
+E. Analisis pengguna  
+1. Analisis Pengguna 
+Tabel 2. 1 Analisis Pengguna 
+Jenis Pengguna  Peran  
+Manajer (Super 
+Admin) 
+Sebagai pengguna utama yang bertanggung jawab 
+memantau keseluruhan proses penjualan. mengelola 
+data sales dan unit, memverifikasi pelunasan, serta 
+melihat seluruh laporan. 
+Admin Sales Sebagai pengguna yang bertugas mengelola 
+mengelola data sales dan memantau kinerja penjualan 
+seluruh sales. 
+Sales   Sebagai pengguna yang bertugas berinteraksi 
+langsung dengan calon konsumen yang ditangani, 
+menelola follow up, melakukan booking pada calon 
+konsumen dan memantau status pemesanan serta 
+pelunasan konsumen. 
+Konsumen  Pengguna yang hanya dapat melihat informasi 
+perumahan (daftar unit, detail unit, skema 
+pembayaran) dan diarahkan ke narahubung untuk 
+proses selanjutnya. 
+ 
+2. Fitur Utama Pengguna
+===== PAGE 39 =====
+34 
+ 
+Tabel 2. 2 Fitur Pengguna 
+Jenis Pengguna  Fitur Utama  
+Manajer (Super 
+Admin) 
+• Memantau dashboard rekapitulasi penjualan 
+• Mengelola data sales (tambah, ubah, hapus, reset 
+password) 
+• Mengelola data unit rumah (CRUD, update status) 
+• Memverifikasi pelunasan konsumen 
+• Melihat seluruh data calon konsumen dari semua 
+sales 
+• Melihat dan mencetak laporan penjualan, 
+pelunasan, dan kinerja sales 
+Admin Sales • Mengelola data sales (tambah, ubah, hapus, reset 
+password)  
+• Melihat dashboard rekapitulasi penjualan seluruh 
+sales 
+• Melihat seluruh data calon konsumen dari semua 
+sales 
+• Memantau status pelunasan konsumen dari semua 
+sales 
+• Melihat dan mencetak laporan penjualan dan 
+kinerja sales 
+Sales   • Mengelola data calon konsumen yang ditangani 
+(tambah, ubah, hapus, update statuss 
+• Melakukan pemesanan (booking) unit rumah 
+• Memilih skema pelunasan dan mencatat pelunasan 
+• Mengunggah bukti pembayaran 
+• Memantau status unit yang dipesan dan status 
+pelunasan
+===== PAGE 40 =====
+35 
+ 
+Jenis Pengguna  Fitur Utama  
+Konsumen  • Melihat daftar unit rumah yang tersedia 
+• Melihat detail unit rumah 
+• Melihat skema pembayaran 
+• Menghubungi Sales melalui tombol "Hubungi 
+Sales" 
+ 
+F. Proses Bisnis  
+1. As – Is Diagram (Proses Bisnis Sebelum Sistem)
+===== PAGE 41 =====
+36 
+ 
+Diagram tersebut menggambarkan proses bisnis penjualan unit yang 
+sedang berjalan (AS-IS) dengan melibatkan empat pihak, yaitu konsumen, sales, 
+admin sales, dan pemilik. Proses dimulai ketika konsumen datang dan 
+menanyakan informasi mengenai unit yang terse dia. Sales kemudian mencatat 
+data konsumen secara manual menggunakan buku atau Excel, setelah itu 
+memberikan informasi mengenai unit melalui presentasi atau brosur. Apabila 
+Gambar 2. 1 As Is Diagram
+===== PAGE 42 =====
+37 
+ 
+konsumen tertarik dengan unit tertentu, sales meminta admin sales untuk 
+melakukan pengecekan ketersediaan stok unit melalui Excel atau papan stok. 
+Hasil pengecekan stok kemudian menentukan proses selanjutnya. Jika unit 
+yang diinginkan tidak tersedia, sales akan menawarkan unit lain atau unit 
+alternatif kepada konsumen dan kembali memberikan informasi mengenai unit 
+tersebut. Namun, apabila unit tersed ia, proses dilanjutkan dengan pengisian 
+formulir booking menggunakan formulir kertas. Setelah melakukan booking, 
+konsumen melakukan pembayaran uang muka (DP) secara tunai atau transfer. 
+Sales kemudian menerima dan mengonfirmasi pembayaran DP tersebut, 
+sedangkan admin sales melakukan pencatatan pembayaran secara manual 
+menggunakan buku kas atau Excel. 
+Selanjutnya, data pembayaran yang telah dicatat oleh admin sales 
+direkapitulasi ke dalam laporan Excel bulanan. Laporan tersebut kemudian 
+diberikan kepada pemilik untuk dilihat dan digunakan sebagai bahan evaluasi 
+terhadap kegiatan penjualan. Dari diagram tersebut dapat dilihat bahwa sebagian 
+besar proses masih dilakukan secara manual dan meng gunakan media yang 
+berbeda, seperti buku, Excel, papan stok, dan formulir kertas. Kondisi tersebut 
+berpotensi menyebabkan terjadinya kesalahan pencatatan, data yang tidak 
+terintegrasi, keterlambatan dalam memperoleh informasi stok maupun transaksi, 
+serta m embutuhkan waktu lebih lama dalam proses pembuatan laporan dan 
+evaluasi oleh pemilik.
+===== PAGE 43 =====
+38 
+ 
+2. To Be Diagram (Proses Bisnis Setelah Sistem) 
+ 
+Gambar 2. 2 To Be Diagram
+===== PAGE 44 =====
+39 
+ 
+Diagram To-Be menunjukkan proses bisnis penjualan rumah di Perumahan 
+Lumin Park setelah penerapan sistem informasi manajemen yang berbasis web. 
+Proses dimulai saat konsumen mengakses situs Lumin Park untuk melihat daftar 
+unit rumah, rincian informasi perumahan, serta pilihan skema pembayaran yang 
+ada. Sistem lalu menunjukkan informasi perumahan disertai tiga kontak 
+WhatsApp Sales yang bisa dipilih oleh konsumen. Jika pelanggan berminat 
+dengan unit yang tersedia, mereka dapat menghubungi salah satu Sales lewat 
+WhatsApp. Sebaliknya, apabila konsumen tidak berminat, p roses dapat 
+dihentikan tanpa melanjutkan ke fase penjualan. 
+Setelah konsumen mengontak Sales, Sales mendapatkan pesan dan 
+melakukan tindak lanjut terhadap kebutuhan konsumen. Sales lalu memasukkan 
+data calon konsumen ke dalam sistem, sehingga informasi tersebut bisa disimpan 
+dan dikelola dengan teratur. Selanjutnya , Tim Sales mengikuti perkembangan 
+dan memperbaharui status calon konsumen berdasarkan hasil komunikasi. 
+Sistem ini mendukung tampilan informasi ketersediaan unit sehingga Sales dapat 
+memberikan informasi yang tepat kepada calon konsumen. 
+Jika calon pembeli menunjukkan ketertarikan untuk membeli, Sales 
+melanjutkan proses ke fase booking unit. Data pemesanan dan status calon 
+pelanggan selanjutnya dicatat atau diperbaharui melalui sistem. Setelah 
+melakukan pemesanan, konsumen melaksanakan pem bayaran sesuai dengan 
+perjanjian. Tim penjualan mencatat pembayaran dan mengupload bukti 
+pembayaran ke dalam sistem untuk dianalisis oleh Manajer. Manager melakukan 
+pengecekan dengan menelaah bukti pembayaran itu. Apabila bukti pembayaran 
+tidak valid, pros es harus dilanjutkan untuk memperbaiki atau mengirim ulang 
+bukti pembayaran. Apabila bukti pembayaran dianggap sah, sistem akan 
+menyimpan dan memperbarui status dari pembayaran. 
+Di tahap akhir, konsumen mendapatkan informasi tentang hasil verifikasi 
+pembayaran, sementara Manajer dapat mengakses laporan untuk mengawasi 
+aktivitas penjualan dan pembayaran. Melalui sistem ini, diharapkan proses
+===== PAGE 45 =====
+40 
+ 
+manajemen calon pelanggan, ketersediaan unit, pemesanan, dan pembayaran 
+dapat menjadi lebih teratur. Informasi yang tersimpan di dalam sistem juga 
+mendukung pihak pengelola untuk melakukan pengawasan serta mendapatkan 
+data yang diperlukan untuk penilaian penjualan. 
+G. Perancangan sistem 
+1. Use case  
+Manajer/Super Admin adalah pelaku yang memiliki hak akses terluas dalam 
+sistem. Manajer dapat melakukan identifikasi, memantau dashboard, mengelola 
+informasi penjualan dan unit, memperbarui status unit, melihat data calon 
+pembeli, memantau penanganan penjualan, memverifikasi pembaya ran, 
+memantau status pelunasan, serta melihat dan mencetak berbagai laporan. Hak 
+akses tersebut disesuaikan dengan kebutuhan fungsional sistem yang 
+menjadikan manajer sebagai pihak yang bertanggung jawab untuk mengawasi 
+keseluruhan proses penjualan. 
+Admin Sales berwenang untuk membantu dalam pengelolaan dan 
+pengawasan kegiatan penjualan. Admin Sales dapat masuk, mengelola 
+informasi sales, melihat dasbor penjualan, melihat data unit, mengakses semua 
+data calon konsumen, memonitor perkembangan follow up  sales, memantau 
+status pembayaran, serta melihat dan mencetak laporan penjualan, pelunasan, 
+kinerja sales, dan konsumen.Sales adalah pihak yang berinteraksi langsung 
+dengan calon pelanggan. Sales dapat mengatur data calon pembeli, 
+memperbarui status calon  pembeli, mencatat riwayat tindak lanjut, melihat 
+ketersediaan unit, melakukan pemesanan unit, memilih metode pembayaran, 
+mencatat transaksi, mengunggah bukti transaksi, serta memantau status 
+pemesanan dan pelunasan pembeli.Konsumen adalah pengguna yang ti dak 
+diharuskan mendaftar atau masuk.
+===== PAGE 46 =====
+41 
+ 
+ 
+Gambar 2. 3 Use Case Lumin Park 
+Konsumen hanya bisa mengakses informasi publik berupa daftar unit yang 
+ada, rincian unit, skema pembayaran, dan menghubungi Sales melalui kontak 
+yang disediakan. Dengan cara ini, Konsumen tidak memiliki akses pada fitur 
+pengelolaan data internal sistem. 
+Pada Diagram Use Case terdapat hubungan include dan extend. Relasi 
+include diterapkan ketika satu fungsi selalu memerlukan fungsi lain, sedangkan 
+extend digunakan untuk fungsi tambahan yang bersifat pilihan. Pada sistem ini, 
+proses Login memiliki hubungan include dengan Verifikasi Akun dan Hak 
+Akses. Proses Booking Unit memiliki hubungan extend dengan Memilih Skema 
+Pembayaran dan Menghitung DP, Cicilan, se rta Sisa Pembayaran. Prosedur 
+Mencatat Pembayaran berkaitan dengan pengunggahan bukti pembayaran, 
+sedangkan prosedur Memverifikasi Pembayaran meliputi aktivitas memeriksa 
+bukti pembayaran. Reset Password dan Cetak/Ekspor Laporan berfungsi 
+sebagai tambahan untuk proses yang berkaitan. 
+2. Activity Diagram
+===== PAGE 47 =====
+42 
+ 
+Activity Diagram menggambarkan alur kerja ( workflow) dari setiap proses 
+bisnis utama dalam sistem, mulai dari titik awal ( start) hingga titik akhir ( end). 
+Diagram ini menggunakan swimlane untuk memisahkan tanggung jawab antar 
+aktor dan sistem, sehingga memudahkan pembaca memahami siapa yang 
+melakukan apa dalam setiap tahapan proses. 
+a. Activity Diagram Autentikasi 
+Diagram Aktivitas Autentikasi mencerminkan langkah -langkah yang 
+diambil oleh pengguna internal saat mengakses sistem. Proses dimulai saat 
+pengguna menginput username dan password, lalu sistem memeriksa data 
+akun serta hak akses pengguna. Jika data yang dimasukkan tidak cocok, sistem 
+akan menunjukkan notifikasi kesalahan dan pengguna dapat mencoba login 
+lagi. Jika data valid, sistem memberikan akses kepada pengguna sesuai 
+perannya, yaitu Manajer/Super Admin, Admin Penjualan, atau Sales. 
+Kebutuhan autentikasi ini berfungsi untuk membedakan tingkat akses setiap 
+pengguna dalam sistem.
+===== PAGE 48 =====
+43 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Gambar 2. 4 Activity Diagram Autentikasi 
+b. Activity Diagram Manajer/Super Admin 
+Activity Diagram Manajer/Super Admin terdiri dari pengelolaan data unit, 
+data sales, pembayaran, konsumen, booking, dan penjualan. 
+• Activity Diagram Manajer Kelola Data Unit 
+Diagram Aktivitas Pengelolaan Data Unit menunjukkan langkah -
+langkah yang diambil oleh Manajer untuk mengatur data unit rumah dalam 
+sistem. Manajer dapat mengakses data unit yang ada, lalu mengelola data 
+tersebut sesuai kebutuhan, seperti menambah, mengubah, dan menghapus 
+data unit serta memperbarui statusnya. Unit status yang diterapkan dalam 
+sistem mencakup tersedia, booking, terjual habis, dan proses pengiriman. 
+Setelah modifikasi dilakukan, sistem menyimpan ser ta memperbarui 
+informasi unit.
+===== PAGE 49 =====
+44 
+ 
+ 
+Gambar 2. 5 Activity Diagram Manajer Kelola Data Unit 
+• Activity Diagram Manajer Kelola Data Sales 
+Activity Diagram Kelola Data Sales menggambarkan proses Manajer 
+dalam mengelola data sales. Manajer memilih menu data sales, kemudian
+===== PAGE 50 =====
+45 
+ 
+sistem menampilkan daftar sales yang tersimpan. Selanjutnya Manajer 
+dapat menambah data sales, mengubah data, menghapus data, maupun 
+melakukan reset password. Setelah tindakan dilakukan, sistem menyimpan 
+perubahan sehingga data sales selalu diperbarui.
+===== PAGE 51 =====
+46 
+ 
+ 
+Gambar 2. 6 Activity Diagram Manajer Kelola Data Sales 
+• Activity Diagram Manajer Kelola Pembayaran 
+Diagram Aktivitas Pengelolaan Pembayaran menggambarkan proses 
+Pengelola dalam mengawasi dan mengevaluasi pembayaran yang
+===== PAGE 52 =====
+47 
+ 
+dilakukan oleh pelanggan. Manajer mengakses data pembayaran, lalu 
+sistem menunjukkan rincian transaksi serta bukti pembayaran yang telah 
+diupload. Manajer melakukan evaluasi terhadap bukti pembayaran dan 
+menetapkan hasil verifikasi. Hasil verifikasi bisa berupa pembayaran yang 
+terverifikasi atau ditolak, lalu sistem memperbarui status pembayaran, 
+status pelunasan, dan sisa pembayaran berdasarkan hasil proses verifikasi.
+===== PAGE 53 =====
+48
+===== PAGE 54 =====
+49 
+ 
+Gambar 2. 7 Activity Diagram Manajer Kelola Pembayaran 
+• Activity Diagram Manajer Kelola Konsumen 
+Diagram Aktivitas Pengelolaan Konsumen memperlihatkan proses 
+Manajer dalam mengakses dan memantau informasi konsumen yang ada 
+dalam sistem. Manajer mengakses menu data pelanggan, lalu sistem 
+menunjukkan data yang ada. Manajer bisa mencari atau memilih data 
+konsumen tertentu untuk mengakses informasi yang relevan dengan proses 
+pembelian. Kegiatan ini mendukung Manajer dalam mendapatkan 
+informasi konsumen terkait dengan aktivitas penjualan dan transaksi 
+properti.
+===== PAGE 55 =====
+50 
+ 
+ 
+Gambar 2. 8 Activity Diagram Manajer Kelola Konsumen 
+• Activity Diagram Manajer Kelola Booking 
+Diagram Aktivitas Kelola Booking menggambarkan langkah -langkah 
+yang diambil Manajer untuk mengakses dan memonitor data pemesanan
+===== PAGE 56 =====
+51 
+ 
+unit rumah. Manajer mengakses menu pemesanan, lalu sistem 
+menunjukkan daftar reservasi yang telah dibuat oleh Sales. Manajer bisa 
+memilih data pemesanan untuk melihat rincian booking dan informasi yang 
+terkait dengan konsumen serta unit yang dipesan. Aktivitas ini mendukung 
+Manajer dalam mengawasi proses pemesanan unit rumah.
+===== PAGE 57 =====
+52 
+ 
+ 
+Gambar 2. 9 Activity Diagram Manajer Kelola Booking
+===== PAGE 58 =====
+53 
+ 
+• Activity Diagram Manajer Kelola Penjualan 
+Activity Diagram Kelola Penjualan menggambarkan proses Manajer 
+dalam melihat dan memantau data penjualan yang tersimpan pada sistem. 
+Manajer membuka menu penjualan, kemudian sistem menampilkan daftar 
+penjualan yang telah dilakukan. Manajer dapat melakukan pencarian atau 
+penyaringan data untuk memperoleh informasi penjualan tertentu dan 
+melihat rekapitulasi penjualan. Informasi tersebut dapat digunakan untuk
+===== PAGE 59 =====
+54 
+ 
+memantau perkembangan penjualan perumahan secara keseluruhan.
+ 
+ Gambar 2. 10 Activity Diagram Manajer Kelola Penjualan
+===== PAGE 60 =====
+55 
+ 
+c. Activity Diagram Admin Sales 
+Activity Diagram Admin Sales terdiri dari monitoring 
+pembayaran/pelunasan, laporan kinerja sales, laporan penjualan dan 
+pelunasan, kelola data konsumen, dan monitoring booking. 
+• Monitoring Pembayaran/Pelunasan 
+Diagram Aktivitas Pemantauan Pembayaran/Pelunasan menunjukkan 
+proses Admin Sales dalam mengawasi status pembayaran konsumen dari 
+semua Sales. Admin Sales mengakses menu pemantauan pembayaran, lalu 
+sistem menunjukkan daftar transaksi pembayaran. Admin Sales  dapat 
+memilih informasi tertentu untuk melihat rincian pembayaran dan keadaan 
+pelunasan. Dalam kegiatan ini, Admin Sales berperan sebagai pihak yang 
+memantau, sementara proses verifikasi pembayaran dilaksanakan oleh 
+Manajer.
+===== PAGE 61 =====
+56 
+ 
+ 
+Gambar 2. 11 Monitoring Pembayaran/Pelunasan 
+• Laporan Kinerja Sales 
+Diagram Aktivitas Laporan Kinerja Sales memperlihatkan prosedur 
+Admin Sales dalam meninjau data kinerja penjualan. Admin Sales memilih 
+opsi laporan kinerja penjualan, lalu menetapkan periode laporan yang 
+diperlukan. Sistem berikutnya menunjukkan laporan ya ng berdasarkan 
+pada data penjualan dan kegiatan sales selama periode itu. Laporan dapat 
+dimanfaatkan untuk mengawasi perkembangan kinerja setiap salesperson
+===== PAGE 62 =====
+57 
+ 
+dan dapat dicetak sesuai kebutuhan. Kebutuhan untuk memantau kinerja 
+penjualan tercatat pada hak akses Admin Sales. 
+ 
+ 
+Gambar 2. 12 Laporan Kinerja Sales 
+• Laporan Penjualan Dan Pelunasan 
+Diagram Aktivitas Laporan Penjualan dan Pelunasan menggambarkan 
+langkah-langkah yang diambil oleh Admin Sales untuk mendapatkan 
+laporan penjualan dan pembayaran dari konsumen. Admin Sales
+===== PAGE 63 =====
+58 
+ 
+mengakses menu laporan, memilih periode yang diinginkan, lalu sistem 
+memperlihatkan informasi tentang penjualan dan pelunasan berdasarkan 
+data yang ada. Setelah laporan ditampilkan, Admin Penjualan dapat 
+mengamati hasil laporan dan mencetaknya sebagai doku men. Kebutuhan 
+laporan penjualan dan pembayaran termasuk dalam fitur laporan sistem. 
+ 
+ 
+Gambar 2. 13 Laporan Penjualan Dan Pelunasan 
+• Kelola Data Konsumen
+===== PAGE 64 =====
+59 
+ 
+Diagram Aktivitas Pengelolaan Data Konsumen menunjukkan prosedur 
+Admin Sales dalam mengakses data konsumen dan prospek yang berasal 
+dari seluruh Sales. Admin Sales memilih opsi data konsumen, lalu sistem 
+menampilkan daftar data yang ada. Admin Sales bisa melakukan pencarian 
+atau penyaringan untuk menemukan data spesifik dan melihat informasi 
+konsumen yang diperlukan. Kegiatan ini membantu Admin Sales dalam 
+mengawasi data konsumen dari semua Sales. 
+ 
+Gambar 2. 14 Kelola Data Konsumen
+===== PAGE 65 =====
+60 
+ 
+• Monitoring Booking 
+Diagram Aktivitas Pemantauan Booking menggambarkan prosedur 
+Admin Sales dalam mengawasi data pemesanan yang dilakukan oleh Sales. 
+Admin Sales mengakses menu pemantauan pemesanan, lalu sistem 
+menampilkan daftar reservasi unit. Admin Sales bisa mencari atau 
+menyaring data pemesanan dan melihat rincian dari pemesanan yang 
+dipilih. Aktivitas ini digunakan untuk membantu Admin Penjualan 
+memahami pergerakan pemesanan unit yang dilakukan oleh Sales.
+===== PAGE 66 =====
+61 
+ 
+ 
+Gambar 2. 15 Monitoring Booking 
+d. Activity Diagram Sales 
+Activity Diagram Sales terdiri dari kelola calon konsumen, edit status calon 
+konsumen, follow up calon konsumen, melihat status unit tersedia, kelola 
+booking unit, dan melihat status pembayaran. 
+• Kelola Calon Konsumen 
+Diagram Aktivitas Pengelolaan Calon Konsumen memvisualisasikan 
+proses Penjualan dalam mengatur informasi calon konsumen yang menjadi
+===== PAGE 67 =====
+62 
+ 
+tanggung jawabnya. Penjualan dapat menambah informasi calon pelanggan 
+baru, mengedit informasi yang telah disimpan, atau menghilangkan data 
+yang tidak dibutuhkan. Sistem lalu menyimpan modifikasi tersebut dan 
+memperbarui daftar prospek konsumen. Kegiatan i ni mendukung 
+pengelolaan data calon pelanggan dengan cara yang lebih terorganisir. 
+ 
+Gambar 2. 16 Kelola Calon Konsumen 
+• Edit Status Calon Konsumen 
+Diagram Aktivitas Mengubah Status Calon Konsumen menunjukkan 
+proses Penjualan dalam memperbarui status kemajuan calon konsumen. 
+Sales memilih calon pelanggan yang akan diperbaharui, lalu menetapkan
+===== PAGE 68 =====
+63 
+ 
+status berdasarkan kemajuan proses penjualan. Status calon konsumen 
+yang diterapkan mencakup cold, warm, hot, dan booking. Setelah 
+pemilihan status, sistem mencatat perubahan dan memperbarui informasi 
+calon konsumen. 
+ 
+Gambar 2. 17 Edit Status Calon Konsumen 
+• Follow Up Calon Konsumen 
+Diagram Aktivitas Follow Up Calon Konsumen menggambarkan 
+proses Penjualan dalam mencatat kegiatan komunikasi dengan calon 
+konsumen. Sales menentukan calon konsumen yang akan dihubungi lebih 
+lanjut, lalu melakukan tindak lanjut sesuai kebutuhan. Setelah int eraksi 
+selesai, Sales mencatat hasil tindak lanjut ke dalam sistem agar riwayat
+===== PAGE 69 =====
+64 
+ 
+komunikasi tersimpan. Pencatatan sejarah ini dimanfaatkan untuk 
+memahami kemajuan hubungan antara Sales dan prospek konsumen. 
+ 
+Gambar 2. 18 Follow Up Calon Konsumen 
+• Melihat Status Unit Tersedia 
+Diagram Aktivitas Melihat Status Unit Tersedia menunjukkan langkah-
+langkah Sales dalam memeriksa data terkait unit rumah yang dapat 
+disediakan untuk calon pelanggan. Sales mengakses menu unit, lalu sistem 
+menunjukkan informasi unit serta statusnya. Sales d apat mengakses unit
+===== PAGE 70 =====
+65 
+ 
+yang tersedia dan memilih unit tertentu untuk mendapatkan informasi lebih 
+lanjut. Fitur ini memudahkan Sales untuk mendapatkan informasi unit 
+secara terkini sebelum mengajukan penawaran kepada calon konsumen. 
+ 
+Gambar 2. 19 Melihat Status Unit Tersedia 
+• Kelola Booking Unit 
+Diagram Aktivitas Pengelolaan Pemesanan Unit menggambarkan 
+proses Penjualan dalam melaksanakan pemesanan unit rumah bagi calon 
+konsumen. Sales memilih informasi calon konsumen dan unit yang akan 
+dipesan, lalu sistem memverifikasi status calon konsumen sert a
+===== PAGE 71 =====
+66 
+ 
+ketersediaan unit. Reservasi dilakukan untuk calon pelanggan dengan 
+status hot. Penjualan selanjutnya menentukan metode pembayaran yang 
+ada, yaitu KPR, tunai langsung, atau pembayaran bertahap. Sistem 
+menghitung DP, angsuran, dan sisa pembayaran, lalu meny impan data 
+pemesanan dan memperbarui status unit menjadi dipesan.
+===== PAGE 72 =====
+67 
+ 
+ 
+Gambar 2. 20 Kelola Booking Unit
+===== PAGE 73 =====
+68 
+ 
+• Melihat Status Pembayaran 
+Diagram Aktivitas Melihat Status Pembayaran menggambarkan proses 
+Penjualan dalam mengawasi perkembangan pembayaran dari konsumen 
+yang dikelola. Sales mengakses menu pembayaran, lalu sistem 
+menunjukkan informasi pembayaran yang sudah terdaftar. Sales dapat 
+melihat total pembayaran, sisa yang harus dibayar, serta status pembayaran 
+pelanggan. Kegiatan ini hanya digunakan untuk mengawasi kemajuan 
+pembayaran, sedangkan proses verifikasi bukti pembayaran dilakukan oleh 
+Manajer. 
+ 
+Gambar 2. 21 Melihat Status Pembayaran 
+e. Activity Diagram Konsumen 
+Activity Diagram Konsumen yang tercantum adalah Melihat Daftar Unit 
+dan Melihat Skema Pembayaran. 
+• Melihat Daftar Unit
+===== PAGE 74 =====
+69 
+ 
+Diagram Aktivitas Melihat Daftar Unit mencerminkan langkah-langkah 
+Konsumen dalam mendapatkan informasi tentang unit rumah yang 
+ditawarkan melalui situs web. Konsumen mengakses halaman informasi 
+hunian, lalu sistem menampilkan daftar unit yang ada. Data yang dapat 
+diakses oleh Konsumen mencakup jenis unit, ukuran, dan tarif. Pengguna 
+tidak diwajibkan untuk mendaftar atau masuk guna mendapatkan informasi 
+tersebut. 
+ 
+Gambar 2. 22 Melihat Daftar Unit 
+• Melihat Skema Pembayaran 
+Diagram Aktivitas Melihat Skema Pembayaran menggambarkan 
+langkah-langkah Konsumen saat meninjau opsi skema pembayaran yang
+===== PAGE 75 =====
+70 
+ 
+ada untuk pembelian unit rumah. Konsumen memilih informasi 
+pembayaran di situs web, lalu sistem memperlihatkan opsi skema yang 
+tersedia, yaitu KPR, tunai penuh, dan tunai bertahap. Data tersebut 
+digunakan sebagai acuan bagi Konsumen sebelum melanjutkan int eraksi 
+dengan Sales. 
+ 
+Gambar 2. 23 Melihat Skema Pembayaran
+===== PAGE 76 =====
+71 
+ 
+3. Entity Relationship Diagram Lumin Park (ERD) 
+ 
+Entity Relationship Diagram (ERD) merupakan diagram yang digunakan 
+untuk menggambarkan struktur basis data serta hubungan antarentitas dalam 
+Gambar 2. 24 ERD
+===== PAGE 77 =====
+72 
+ 
+Sistem Informasi Manajemen Perumahan Lumin Park Berbasis Web. ERD ini 
+terdiri dari 14 tabel yang saling berhubungan untuk mendukung proses 
+pengelolaan data pengguna, unit rumah, calon konsumen, aktivitas follow -up, 
+pemesanan, pembayaran, dan pelaporan penjualan. 
+Tabel pengguna berfungsi untuk menyimpan informasi akun pengguna 
+internal, seperti nama, email, kata sandi, peran, nomor telepon, alamat, dan status 
+akun. Tabel ini mendukung pengaturan hak akses bagi Manajer, Admin Sales, 
+dan Sales. Tabel profil_sales men yimpan informasi tambahan mengenai Sales, 
+seperti kode Sales, tanggal bergabung, dan status Sales, yang terhubung dengan 
+data pengguna. 
+Pada bagian pengelolaan unit perumahan, terdapat tabel proyek, cluster, dan 
+unit_rumah. Tabel proyek menyimpan informasi proyek perumahan, sedangkan 
+tabel cluster digunakan untuk menyimpan informasi kelompok unit dalam suatu 
+proyek. Tabel unit_rumah menyim pan informasi setiap unit, seperti kode unit, 
+cluster, tipe rumah, luas tanah, luas bangunan, harga, status, deskripsi, dan 
+gambar. Hubungan antartabel tersebut membantu sistem mengelola informasi 
+unit berdasarkan proyek dan cluster perumahan. 
+Tabel calon_konsumen digunakan untuk menyimpan data calon konsumen, 
+meliputi nama, nomor telepon, email, alamat, status calon konsumen, unit yang 
+diminati, anggaran, catatan, serta informasi follow-up terakhir. Data ini dikaitkan 
+dengan Sales yang bertangg ung jawab menangani calon konsumen tersebut. 
+Selanjutnya, tabel riwayat_follow_up digunakan untuk mencatat aktivitas tindak 
+lanjut yang dilakukan Sales, termasuk tanggal follow -up, metode komunikasi, 
+status sebelum dan sesudah follow -up, serta catatan hasi l komunikasi. Dengan 
+adanya kedua tabel tersebut, proses pengelolaan calon konsumen dan riwayat 
+komunikasinya dapat dilakukan secara terstruktur. 
+Proses pemesanan unit dikelola melalui tabel pemesanan. Tabel ini 
+menyimpan informasi kode pemesanan, calon konsumen yang melakukan 
+pemesanan, Sales yang menangani, unit yang dipilih, skema pembayaran, tanggal
+===== PAGE 78 =====
+73 
+ 
+pemesanan, harga total, jumlah uang muka, nominal angsuran, sisa pembayaran, 
+status serah terima, dan catatan. Tabel skema_pembayaran menyimpan pilihan 
+skema pembayaran beserta informasi pendukungnya, seperti nama skema, 
+deskripsi, persentase uang muka, te nor, suku bunga, dan status aktif. Hubungan 
+kedua tabel tersebut memungkinkan sistem mencatat skema pembayaran yang 
+dipilih untuk setiap pemesanan. 
+Tabel pembayaran digunakan untuk mencatat transaksi pembayaran yang 
+berkaitan dengan pemesanan. Informasi yang disimpan meliputi jenis 
+pembayaran, jumlah pembayaran, tanggal bayar, nama bank, nomor rekening, 
+pemilik rekening, bukti transfer, status verifik asi, pihak yang melakukan 
+verifikasi, waktu verifikasi, dan catatan. Tabel ini mendukung pencatatan 
+pembayaran uang muka, cicilan, maupun pelunasan serta proses pemeriksaan 
+bukti pembayaran oleh Manajer. 
+Untuk mendukung pemantauan kinerja penjualan, terdapat tabel target_sales 
+dan laporan_penjualan. Tabel target_sales digunakan untuk menyimpan target 
+unit dan target nominal penjualan Sales pada periode tertentu beserta 
+pencapaiannya. Sementara itu, tabel l aporan_penjualan menyimpan ringkasan 
+penjualan berdasarkan periode, termasuk jumlah unit terjual, total pendapatan, 
+jumlah calon konsumen, dan total closing. Kedua tabel tersebut mendukung 
+proses evaluasi kinerja Sales dan pemantauan perkembangan penjualan. 
+Selain tabel utama tersebut, terdapat tabel notifikasi, log_sistem, dan 
+sesi_login. Tabel notifikasi digunakan untuk menyimpan pemberitahuan bagi 
+pengguna, sedangkan log_sistem mencatat aktivitas pengguna dalam sistem. 
+Tabel sesi_login menyimpan informasi sesi pengguna, seperti token sesi, alamat 
+IP, user agent, waktu login, waktu logout, dan status sesi. Ketiga tabel ini 
+mendukung pengelolaan aktivitas dan penggunaan sistem.
+===== PAGE 79 =====
+74 
+ 
+5. Perancangan Antarmuka (Wireframe) 
+1. Perancangan Antarmuka Autentikasi 
+Halaman autentikasi merupakan gerbang utama yang harus dilalui oleh 
+pengguna internal (Manajer, Admin Sales, dan Sales) untuk dapat mengakses 
+sistem. Antarmuka ini dirancang dengan mengedepankan aspek keamanan, 
+kemudahan penggunaan, dan konsistensi identit as visual Perumahan Lumin 
+Park. 
+a. Halaman Login 
+Wireframe Halaman Login dibuat dengan menggunakan tata letak 
+dua kolom (split -screen) untuk menciptakan nuansa yang profesional dan 
+modern. Bagian sisi kiri tampilan difokuskan untuk menunjukkan identitas 
+visual perumahan, meliputi logo Lumin Park, tulisan penyambutan 
+"Selamat Datang", dan keterangan "Sistem Manajemen Perumahan Lubuk 
+Minturun Park". Sementara itu, sisi kanan tampilan berfungsi sebagai zona 
+interaksi pengguna yang berisi formulir login. 
+ 
+Gambar 2. 25 Wireframe Login 
+Formulir masuk memiliki dua kolom input utama, yaitu Nama 
+Pengguna dan Kata Sandi. Di kolom kata sandi, terdapat ikon "mata" yang
+===== PAGE 80 =====
+75 
+ 
+berfungsi untuk memperlihatkan atau menyembunyikan karakter rahasia 
+demi kenyamanan pengguna . Di bawah kolom input, terdapat tombol 
+utama LOG IN berwarna hitam yang berguna untuk memproses otentikasi 
+data ke backend . Sebagai pilihan lain, tersedia tombol Masuk 
+menggunakan Google untuk memudahkan proses masuk. Selain itu, ada 
+pula link Lupa Password? yang bisa ditekan oleh pengguna jika mengalami 
+kesulitan mengingat kata sandi mereka . Di bagian paling bawah, terdapat 
+tulisan hak cipta (copyright) yang menandakan kepemilikan sistem. 
+b. Halaman Lupa Password 
+Wireframe Halaman Lupa Kata Sandi dibuat dengan desain yang 
+mirip dengan halaman masuk agar antarmuka tetap konsisten. Di sisi kiri 
+layar, logo dan identitas instansi tetap ditampilkan, namun disertai dengan 
+tautan navigasi "< Kembali ke Halaman Masuk" yang memberi 
+kesempatan kepada pengguna untuk membatalkan proses dan kembali ke 
+halaman utama. 
+ 
+Gambar 2. 26 Lupa Password 
+Di sisi kanan layar, ada formulir Atur Ulang Password yang berfungsi 
+sebagai alat pemulihan akun. Formulir ini disertai dengan petunjuk ringkas
+===== PAGE 81 =====
+76 
+ 
+yang menguraikan maksud dari halaman itu. Pengguna harus mengisi tiga 
+kolom yang diperlukan, yaitu Password Saat Ini (dengan ikon verifikasi), 
+Password Baru, dan Konfirmasi Password Baru . Di bawah kolom input, 
+terdapat tombol utama berwarna hitam bernama UPDATE PASSWORD 
+untuk menyimpan perubahan kata sandi yang baru . Sebagai pilihan lain, 
+tersedia tautan "Batal dan Kembali ke Halaman Login" sehingga pengguna 
+bisa membatalkan proses penggantian kata sandi jika diperlukan. 
+2. Perancangan Antarmuka Super Admin 
+a. Dashboard Super Admin 
+Wireframe Dashboard Super Admin merupakan halaman utama yang 
+digunakan oleh Manajer/Super Admin untuk memantau kondisi umum 
+pengelolaan perumahan. Dashboard menampilkan informasi ringkas 
+berupa total unit, unit yang tersedia, jumlah sales, jumlah konsumen, 
+booking aktif, dan pembayaran yang masih pending. Selain itu, dashboard 
+menyediakan grafik penjualan per bulan serta daftar booking terbaru
+===== PAGE 82 =====
+77 
+ 
+sehingga Super Admin dapat memperoleh gambaran mengenai 
+perkembangan penjualan dan aktivitas transaksi secara ringkas 
+ 
+Gambar 2. 27 Wireframe Dashboard Super Admin 
+b. Wireframe Data Unit Perumahan 
+Wireframe Data Unit Perumahan digunakan oleh Super Admin untuk 
+melihat dan mengelola informasi unit rumah yang tersedia dalam sistem. 
+Antarmuka menyediakan fitur pencarian dan filter berdasarkan status unit 
+serta tombol untuk menambahkan unit baru. Informa si unit ditampilkan 
+dalam bentuk tabel yang mencakup nomor, blok, tipe unit, luas tanah, luas
+===== PAGE 83 =====
+78 
+ 
+bangunan, harga, dan status unit. Pada bagian aksi tersedia fasilitas untuk 
+melakukan pengelolaan terhadap data unit. 
+ 
+Gambar 2. 28 Wireframe Data Unit Perumahan Super Admin 
+c. Wireframe Data Sales 
+Wireframe Data Sales digunakan oleh Super Admin untuk mengelola 
+informasi sales yang terdaftar dalam sistem. Halaman ini menyediakan 
+fasilitas pencarian berdasarkan nama sales, filter status, serta tombol 
+untuk menambahkan data sales. Data yang ditampilkan  meliputi kode 
+sales, nama sales, nomor telepon, email, jumlah booking, dan status sales.
+===== PAGE 84 =====
+79 
+ 
+Tersedia pula bagian aksi untuk melakukan pengelolaan terhadap data 
+sales. 
+ 
+Gambar 2. 29 Wireframe Data Sales Super Admin 
+d. Wireframe Data Konsumen 
+Wireframe Data Konsumen digunakan oleh Super Admin untuk melihat 
+dan memantau data konsumen yang tersimpan dalam sistem. Halaman ini 
+menyediakan fasilitas pencarian berdasarkan nama, nomor telepon, atau 
+email serta filter berdasarkan status konsumen. Infor masi yang
+===== PAGE 85 =====
+80 
+ 
+ditampilkan meliputi nama konsumen, nomor telepon, sales yang 
+menangani, dan status konsumen. 
+ 
+Gambar 2. 30 Wireframe Data Konsumen Super Admin 
+e. Wireframe Data Booking 
+Wireframe Data Booking digunakan oleh Super Admin untuk memantau 
+data pemesanan unit rumah yang dilakukan oleh sales. Halaman ini 
+menyediakan fitur pencarian berdasarkan konsumen atau unit serta filter 
+status booking. Informasi yang ditampilkan meliputi nomor booking, 
+nama konsumen, unit yang dipesan, tanggal booking, uang muka, kode 
+sales, dan status booking. Dengan tampilan tersebut, Super Admin dapat 
+memantau perkembangan pemesanan unit secara terstruktur.
+===== PAGE 86 =====
+81 
+ 
+ 
+ 
+Gambar 2. 31 Wireframe Data Booking Super Admin 
+f. Wireframe Data Penjualan 
+Wireframe Data Penjualan digunakan oleh Super Admin untuk melihat 
+dan memantau data penjualan unit rumah. Halaman ini menyediakan 
+fasilitas pencarian dan filter berdasarkan skema pembayaran. Data 
+penjualan yang ditampilkan meliputi nomor penjualan, konsume n, unit, 
+sales, skema pembayaran, dan total harga. Selain itu, tersedia fitur ekspor 
+data ke dalam format PDF dan Excel untuk mendukung kebutuhan 
+pelaporan.
+===== PAGE 87 =====
+82 
+ 
+ 
+ 
+Gambar 2. 32 Wireframe Data Penjualan Super Admin 
+g. Wireframe Data Pembayaran 
+Wireframe Data Pembayaran digunakan oleh Super Admin untuk 
+memantau dan mengelola informasi pembayaran konsumen. Halaman ini 
+menyediakan fitur pencarian berdasarkan nama konsumen atau nomor 
+booking serta filter berdasarkan status pembayaran. Informasi 
+pembayaran ditampilkan dalam bentuk tabel yang terdiri dari nama 
+konsumen, nomor booking, jumlah pembayaran, tanggal pembayaran, 
+dan status pembayaran. Pada kebutuhan sistem, Manajer juga memiliki 
+kewenangan untuk melakukan verifikasi terhadap bukti pembayaran dan 
+memperbarui status pembayaran serta pelunasan.
+===== PAGE 88 =====
+83 
+ 
+ 
+Gambar 2. 33 Wireframe Data Pembayaran Super Admin 
+h. Wireframe Pengaturan 
+Wireframe Pengaturan digunakan oleh Super Admin untuk mengatur 
+informasi dasar yang berkaitan dengan sistem pengelolaan Perumahan 
+Lumin Park. Informasi yang dapat diatur meliputi nama perumahan, 
+alamat, nomor telepon, email, minimal uang muka, dan batas wa ktu 
+booking. Setelah melakukan perubahan, Super Admin dapat
+===== PAGE 89 =====
+84 
+ 
+membatalkan perubahan atau menyimpan perubahan melalui tombol 
+yang tersedia. 
+ 
+Gambar 2. 34 Wireframe Pengaturan Super Admin 
+2.  Perancangan Antarmuka Admin Sales 
+a. Wireframe Dashboard Admin Sales 
+Wireframe Dashboard Admin Sales merupakan halaman utama yang 
+digunakan oleh Admin Sales untuk memantau informasi penjualan secara 
+keseluruhan. Dashboard menampilkan ringkasan berupa total unit, unit 
+tersedia, total sales, total konsumen, booking aktif, dan  pembayaran 
+pending. Selain itu, dashboard menampilkan daftar booking terbaru
+===== PAGE 90 =====
+85 
+ 
+sehingga Admin Sales dapat memantau aktivitas pemesanan yang sedang 
+berlangsung. 
+ 
+Gambar 2. 35 Wireframe Dashboard Admin Sales 
+b. Wireframe Data Unit Perumahan 
+Wireframe Data Unit Perumahan digunakan oleh Admin Sales untuk 
+melihat informasi unit rumah yang tersedia dalam sistem. Halaman ini 
+menyediakan fitur pencarian berdasarkan tipe atau blok serta filter 
+berdasarkan status unit. Informasi unit ditampilkan dala m bentuk tabel
+===== PAGE 91 =====
+86 
+ 
+yang meliputi blok, tipe unit, luas tanah, luas bangunan, harga, dan status 
+unit. 
+ 
+Gambar 2. 36 Wireframe Data Unit Perumahan Admin Sales 
+c. Wireframe Data Sales 
+Wireframe Data Sales digunakan oleh Admin Sales untuk mengelola dan 
+memantau informasi sales yang terdaftar dalam sistem. Halaman ini 
+menyediakan fitur pencarian nama sales dan filter berdasarkan status. 
+Informasi yang ditampilkan meliputi kode sales, nama  sales, nomor 
+telepon, email, jumlah booking, dan status sales. Admin Sales dapat
+===== PAGE 92 =====
+87 
+ 
+menggunakan halaman ini untuk melihat data sales dan memantau 
+informasi yang berkaitan dengan aktivitas penjualan. 
+ 
+Gambar 2. 37 Wireframe Data Sales Admin Sales 
+d. Wireframe Data Konsumen 
+Wireframe Data Konsumen digunakan oleh Admin Sales untuk melihat 
+dan memantau data konsumen serta calon konsumen yang ditangani oleh 
+seluruh sales. Halaman ini menyediakan fitur pencarian berdasarkan 
+nama, nomor telepon, atau email serta filter berdasarkan status. Informasi
+===== PAGE 93 =====
+88 
+ 
+yang ditampilkan meliputi nama konsumen, nomor telepon, sales yang 
+menangani, dan status konsumen. 
+ 
+Gambar 2. 38 Wireframe Data Konsumen Admin Sales 
+e. Wireframe Data Booking 
+Wireframe Data Booking digunakan oleh Admin Sales untuk memantau 
+data pemesanan unit rumah yang dilakukan oleh sales. Halaman ini 
+menyediakan fitur pencarian berdasarkan konsumen atau unit dan filter 
+berdasarkan status booking. Data yang ditampilkan meliputi nomor 
+booking, nama konsumen, unit, tanggal booking, uang muka, kode
+===== PAGE 94 =====
+89 
+ 
+sales, dan status booking. Tampilan ini membantu Admin Sales dalam 
+memantau perkembangan pemesanan unit yang dilakukan oleh sales. 
+ 
+Gambar 2. 39 Wireframe Data Booking Admin Sales 
+f. Wireframe Data Penjualan 
+Wireframe Data Penjualan digunakan oleh Admin Sales untuk melihat 
+dan memantau data penjualan unit rumah dari seluruh sales. Halaman ini 
+menyediakan fasilitas pencarian dan filter berdasarkan skema 
+pembayaran. Informasi yang ditampilkan meliputi nomor penj ualan, 
+konsumen, unit, sales, skema pembayaran, dan total harga. Selain itu, 
+tersedia fasilitas ekspor data ke dalam format PDF dan Excel untuk 
+mendukung kebutuhan laporan penjualan. Fitur tersebut mendukung
+===== PAGE 95 =====
+90 
+ 
+kebutuhan Admin Sales untuk melihat dan mencetak laporan penjualan 
+serta memantau kinerja penjualan seluruh sales. 
+ 
+Gambar 2. 40 Wireframe Data Penjualan Admin Sales 
+g. Wireframe Data Pembayaran 
+Wireframe Data Pembayaran digunakan oleh Admin Sales untuk 
+memantau status pembayaran dan pelunasan konsumen dari seluruh sales. 
+Halaman ini menyediakan fitur pencarian berdasarkan nama konsumen 
+atau nomor booking serta filter berdasarkan status pembayaran. Informasi 
+yang ditampilkan meliputi nama konsumen, nomor booking, jumlah 
+pembayaran, tanggal pembayaran, dan status pembayaran.  Pada sistem, 
+Admin Sales berperan sebagai pihak yang melakukan pemantauan 
+terhadap pembayaran, sedangkan proses verifikasi buk ti pembayaran
+===== PAGE 96 =====
+91 
+ 
+dilakukan oleh Manajer. Hal tersebut juga telah dijelaskan pada Activity 
+Diagram Monitoring Pembayaran/Pelunasan.  
+ 
+Gambar 2. 41 Wireframe Data Pembayaran Admin Sales 
+3.  Perancangan Antarmuka Sales 
+a. Wireframe Dashboard Sales 
+Wireframe Dashboard Sales merupakan halaman utama yang digunakan 
+oleh Sales untuk memantau aktivitas penjualan dan konsumen yang 
+ditangani. Dashboard menampilkan ringkasan jumlah konsumen, 
+booking unit, pembayaran, dan unit yang tersedia. Selain itu, terda pat 
+daftar booking terbaru yang menampilkan nama konsumen, unit, tanggal
+===== PAGE 97 =====
+92 
+ 
+booking, dan status booking sehingga Sales dapat memantau 
+perkembangan pemesanan yang sedang ditangani. 
+ 
+Gambar 2. 42 Wireframe Dashboard Sales 
+b. Wireframe Data Konsumen 
+Wireframe Data Konsumen digunakan oleh Sales untuk mengelola data 
+calon konsumen yang menjadi tanggung jawabnya. Halaman ini 
+menyediakan fitur pencarian berdasarkan nama, nomor telepon, atau 
+email serta tombol untuk menambahkan konsumen baru. Data konsumen 
+ditampilkan dalam bentuk tabel yang memuat nama konsumen, nomor
+===== PAGE 98 =====
+93 
+ 
+HP, status, dan aksi untuk mengelola data. Status konsumen yang 
+ditampilkan antara lain Cold, Warm, dan Booking. 
+ 
+Gambar 2. 43 Wireframe Data Konsumen Sales 
+Detail Konsumen juga digunakan oleh Sales untuk melihat informasi 
+secara lebih lengkap mengenai konsumen yang ditangani. Halaman ini 
+menampilkan identitas konsumen, nomor telepon, email, status, 
+informasi pribadi, serta riwayat interaksi dengan konsumen. Riwayat 
+interaksi mencatat tanggal, keterangan kegiatan, dan status konsumen. 
+Tersedia pula tombol untuk mengubah status konsumen. 
+c. Wireframe Booking Unit 
+Wireframe Booking Unit digunakan oleh Sales untuk melihat informasi 
+unit rumah yang dapat digunakan dalam proses pemesanan. Halaman ini 
+menyediakan fitur pencarian unit dan filter berdasarkan status. Informasi 
+yang ditampilkan meliputi blok, tipe unit, lua s tanah, luas bangunan, 
+harga, status, dan aksi untuk melihat informasi unit. Dengan tampilan ini,
+===== PAGE 99 =====
+94 
+ 
+Sales dapat memeriksa ketersediaan unit sebelum melakukan proses 
+booking. 
+ 
+Gambar 2. 44 Wireframe Booking Unit Sales 
+Wireframe ini juga dilengkapi form booking unit yang digunakan oleh 
+Sales untuk melakukan pemesanan unit rumah bagi konsumen. Pada 
+halaman ini Sales memilih tipe unit dan unit yang akan dipesan, kemudian 
+menentukan skema pembayaran yang digunakan. Skema pembayaran 
+yang tersedia dalam wireframe adalah tunai, KPR, dan cicilan bertahap. 
+Selanjutnya Sales mengisi data booking berupa tanggal booking, uang 
+muka, dan jangka waktu pembayaran sebelum menyimpan data 
+pemesanan. 
+d. Wireframe Data Pembayaran Sales 
+Wireframe Data Pembayaran digunakan oleh Sales untuk memantau 
+pembayaran konsumen yang ditangani. Halaman ini menyediakan
+===== PAGE 100 =====
+95 
+ 
+pencarian berdasarkan nama konsumen atau nomor booking serta filter 
+berdasarkan status pembayaran. Data yang ditampilkan meliputi nama 
+konsumen, nomor booking, jumlah pembayaran, tanggal pembayaran, 
+status, dan aksi. Status pembayaran yang ditampilkan dala m wireframe 
+meliputi pending, lunas, dan verifikasi. 
+ 
+Gambar 2. 45 Wireframe Data Pembayaran Sales 
+e. Wireframe Laporan Sales 
+Wireframe Laporan Sales  sebagai media untuk Sales dalam melihat, 
+memantau, dan mengunduh laporan kegiatan penjualan yang berkaitan 
+dengan konsumen yang dikelola. Halaman ini menawarkan filter untuk 
+Periode dan Jenis Laporan, sehingga Sales dapat menampilkan informasi 
+sesuai dengan rentang tanggal yang ditentukan. Bagian atas menunjukkan 
+ringkasan dalam bentuk kartu informasi, seperti jumlah pelanggan, 
+pemesanan, dan penjualan unit. Di bawahnya terdapat tabel Rincian 
+Laporan yang memuat kolom nomor, tanggal, pelanggan, unit, 
+pembayaran, dan status. Status yang muncu l bisa berupa Pemesanan,
+===== PAGE 101 =====
+96 
+ 
+Terjual, atau Calon Pembeli. Ada juga tombol untuk Cetak PDF dan 
+Ekspor Excel yang tersedia untuk kebutuhan pelaporan.  
+Melalui halaman ini, Sales dapat menilai kinerja penjualan individu, 
+mengawasi status pembayaran pelanggan, serta menyusun laporan 
+berkala dengan lebih cepat dan teratur. 
+ 
+Gambar 2. 46 Wireframe Laporan Sales 
+f. Wireframe Profile Sales 
+Halaman Profil Sales adalah halaman yang digunakan oleh sales untuk 
+mengatur informasi akunnya. Halaman ini menunjukkan informasi 
+identitas Sales, termasuk foto profil, nama sales, kode sales, nomor HP, 
+dan alamat email. Di samping itu, ada bagian Informasi Akun yang 
+menunjukkan username serta status akun, contohnya  Aktif. 
+Di halaman ini terdapat tombol Ganti Foto, Edit Profil, dan Ganti Kata 
+Sandi. Fitur-fitur ini memungkinkan Sales untuk memperbarui informasi 
+pribadi, mengubah kata sandi, dan memastikan akun tetap aman serta
+===== PAGE 102 =====
+97 
+ 
+valid. Halaman ini krusial untuk memelihara ketepatan informasi 
+pengguna dan mendukung perlindungan akses sistem. 
+ 
+Gambar 2. 47 Wireframe Profile Sales 
+4.   Perancangan Antarmuka Konsumen 
+a. Wireframe Beranda 
+Wireframe Beranda adalah desain antarmuka untuk halaman utama 
+website Perumahan Lumin Park yang menjadi tampilan pertama bagi 
+konsumen saat mengunjungi website. Halaman ini dibuat untuk memberi 
+informasi dasar tentang perumahan dan membantu konsumen mencari 
+informasi yang diperlukan sebelum mengontak pi hak Sales. Di halaman 
+utama, konsumen dapat menemukan informasi mengenai Perumahan 
+Lumin Park, termasuk ringkasan perumahan serta informasi tambahan 
+yang disajikan di situs web. Penyajian informasi tersebut bertujuan agar 
+konsumen mendapatkan gambaran awal tentang hunian yang ditawarkan. 
+Beranda juga berperan sebagai titik awal untuk menavigasi ke halaman 
+lain, seperti halaman daftar unit, rincian unit rumah, dan informasi 
+mengenai skema pembayaran.
+===== PAGE 103 =====
+98 
+ 
+ 
+Gambar 2. 48 Wireframe Beranda 
+Dengan navigasi yang ada, konsumen bisa melanjutkan pencarian 
+informasi tentang unit rumah yang ditawarkan, termasuk ketersediaan 
+unit, harga, serta opsi pembayaran berdasarkan informasi yang disediakan 
+oleh sistem. Jika konsumen memerlukan penjelasan lebih, situs web 
+menyediakan tiga kontak WhatsApp Sales yang bisa dipilih sesuai 
+keperluan. Saat satu kontak dipilih, pelanggan akan diarahkan untuk 
+menghubungi Sales tersebut melalui WhatsApp. We bsite ini tidak 
+mengharuskan konsumen untuk mendaftar atau masuk hanya untuk 
+mengakses informasi perumahan. Dengan cara itu, konsumen dapat 
+secara langsung mendapatkan informasi yang ada dan menghubungi 
+Sales jika berminat untuk mengetahui lebih lanjut ten tang unit rumah 
+yang ditawarkan.  Dengan Wireframe Beranda, tampilan awal situs 
+diharapkan memudahkan konsumen mengakses informasi perumahan, 
+memahami pilihan unit yang ada, dan menemukan jalur komunikasi 
+dengan Sales tanpa harus membuat akun sebelumnya.
+===== PAGE 104 =====
+99 
+ 
+b. Wireframe Daftar Unit 
+Wireframe Daftar Unit digunakan untuk menampilkan unit -unit 
+perumahan yang tersedia pada Lumin Park. Halaman ini menyediakan 
+fitur penyaringan berdasarkan beberapa kriteria unit sehingga konsumen 
+dapat menemukan unit yang sesuai dengan kebutuhan. Setiap unit 
+ditampilkan dalam b entuk kartu yang memuat informasi utama seperti 
+tipe unit, harga, dan informasi terkait unit. Konsumen dapat memilih unit 
+tertentu untuk melihat informasi yang lebih lengkap melalui halaman 
+detail unit. 
+ 
+Gambar 2. 49 Wireframe Daftar Unit Konsumen 
+c. Wireframe Detail Unit 
+Wireframe Detail Unit dari daftar unit yang tersedia yang digunakan oleh 
+konsumen. Halaman tersebut memuat tipe, ukuran, harga, dan Lokasi
+===== PAGE 105 =====
+100 
+ 
+unit. Dengan tampilan tersebut, konsumen dapat mengetahui 
+perkembangan pemesanan unit yang dilakukan melalui sistem.  
+ 
+Gambar 2. 50 Wireframe Detail Unit 
+d.   Wiraframe Kontak 
+ Wiraframe kontak digunakan sebagai media bagi konsumen untuk 
+memperoleh informasi mengenai kontak Lumin Park. Halaman ini
+===== PAGE 106 =====
+101 
+ 
+menampilkan informasi seperti alamat, nomor telepon, email, dan jam 
+operasional.  
+ 
+Gambar 2. 51 Wiraframe Kontak 
+e. Wiraframe Tentang Kami 
+ Wiraframe tentang kami digunakan untuk memberikan informasi 
+mengenai Lumin Park kepada konsumen. Halaman ini menampilkan 
+gambaran umum mengenai perumahan Lumin Park beserta informasi 
+pendukung mengenai perumahan. Dengan adanya halaman ini, konsumen
+===== PAGE 107 =====
+102 
+ 
+dapat memperoleh informasi mengenai Lumin Park sebelum melihat unit 
+yang tersedia atau menghubungi pihak pengelola. 
+ 
+Gambar 2. 52 Halaman Tentang Kami
+===== PAGE 108 =====
+103 
+ 
+BAB III 
+IMPLEMENTASI DAN PENGUJIAN 
+A. Tujuan Implementasi 
+Tahap implementasi adalah proses merealisasikan seluruh rancangan sistem, 
+termasuk arsitektur basis data, alur proses bisnis, dan desain antarmuka, menjadi 
+perangkat lunak yang dapat berfungsi secara nyata. Dalam proyek Sistem Informasi 
+Manajemen Perumahan Lumin Park, tahap ini bertujuan untuk mengubah kebutuhan 
+fungsional yang sudah dianalisis menjadi kode program menggunakan framework 
+Laravel dan database MySQL. 
+Secara khusus, tujuan dari pelaksanaan pada tahap ini adalah untuk 
+membangun dasar logika bisnis (backend) secara komprehensif, mencakup modul 
+autentikasi, manajemen unit, pemesanan, hingga pencatatan pembayaran. Selain itu, 
+penerapan bertujuan untuk menghadirkan layanan Application Programming 
+Interface (API) yang terjamin dan terorganisir. API ini nantinya bakal dihubungkan 
+dengan antarmuka pengguna (frontend) yang sedang dikembangkan, agar data dapat 
+ditampilkan dan diproses secara real-time sesuai dengan hak akses setiap pengguna 
+(Manajer, Admin Sales, Sales, dan Konsumen) . Oleh karena itu, hasil akhir dari 
+tahap ini adalah terciptanya sistem yang siap untuk diuji dan digunakan dalam 
+mendukung operasional Perumahan Lumin Park. 
+B. Pengujian Sistem 
+Pengujian sistem merupakan tahap penting untuk memastikan bahwa 
+perangkat lunak yang dibangun telah berjalan sesuai dengan kebutuhan operasional 
+dan bebas dari kesalahan ( bug). Pada proyek Sistem Informasi Manajemen 
+Perumahan Lumin Park, pengujian dilakukan secara bertahap menyesuaikan 
+progres pengerjaan, di mana saat ini fokus utama pengujian diarahkan pada stabilitas 
+modul backend sebelum diintegrasikan secara penuh ke antarmuka frontend. 
+1. Tujuan Pengujian
+===== PAGE 109 =====
+104 
+ 
+Secara khusus, fase pengujian dalam sistem ini memiliki beberapa tujuan 
+utama, yaitu:   
+• Memverifikasi Kesesuaian Fungsi 
+Menjamin bahwa semua fitur yang telah dikembangkan (autentikasi, 
+manajemen unit, pemesanan, pembayaran, dan pelaporan) berfungsi sesuai 
+dengan spesifikasi kebutuhan yang telah disepakati dengan klien. 
+• Mengamankan Hak Akses 
+Menjamin bahwa sistem Role-Based Access Control (RBAC) berjalan dengan 
+efektif, sehingga setiap pengguna (Manajer, Admin Sales, Sales, dan 
+Konsumen) hanya dapat melihat data dan fitur sesuai dengan perannya 
+masing-masing.  
+• Menguji Ketepatan Logika Bisnis 
+Menjamin bahwa perhitungan otomatis dalam sistem, seperti kalkulasi DP, 
+sisa bayar, dan perubahan status unit (dari 'Tersedia' ke 'Booking'), dilakukan 
+dengan tepat tanpa adanya kesalahan.  
+• Menemukan dan Mengurangi Bug 
+Mendeteksi kesalahan atau error dalam sistem sejak awal, agar bisa segera 
+diperbaiki sebelum sistem diserahkan dan digunakan secara nyata oleh pihak 
+Perumahan Lumin Park. 
+• Menjamin Kesiapan Integrasi 
+Memastikan bahwa API yang disediakan oleh backend mampu merespons 
+permintaan data secara akurat, sehingga dapat terhubung dengan antarmuka 
+frontend tanpa masalah teknis. 
+2. Metode Pengujian 
+Untuk mencapai tujuan tersebut, sistem ini diuji menggunakan beberapa metode 
+yang disesuaikan dengan tahapan pengembangan saat ini: 
+• API Testing Dengan Postman
+===== PAGE 110 =====
+105 
+ 
+Cara ini dilakukan untuk menguji endpoint API di backend secara langsung. 
+Pengujian terfokus pada pengiriman permintaan (seperti data unit, pemesanan, 
+atau pembayaran) dan memeriksa respons yang diterima, memastikan proses 
+validasi data berjalan, serta memastikan status kesalahan (seperti 401 
+Unauthorized atau 422 Unprocessable Entity) muncul dengan benar jika 
+terjadi kesalahan input. 
+• Black-Box Testing 
+Metode ini diterapkan untuk menguji fungsi antarmuka dan jalur sistem secara 
+keseluruhan dari perspektif pengguna akhir. Uji coba dilakukan dengan 
+memberikan masukan pada formulir aplikasi dan mengecek apakah hasil atau 
+keluaran yang ditampilkan sesuai dengan yang diharapkan, tanpa perlu 
+memeriksa struktur kode program di dalamnya. Metode ini akan diperkuat 
+setelah tahap pengembangan frontend selesai. 
+• User Acceptance Test (UAT) 
+Proses pengujian terakhir yang akan melibatkan Manager dan tim Penjualan 
+Perumahan Lumin Park. Uji coba ini bertujuan untuk menjamin bahwa sistem 
+yang telah dikembangkan benar-benar dapat diterima, mudah digunakan 
+(ramah pengguna), dan sesuai dengan proses kerja nyata di lapangan. 
+Pemilihan metode pengujian tersebut ditentukan oleh efisiensi proses 
+pengembangan dan kebutuhan untuk memvalidasi sistem. Metode pengujian API 
+dengan Postman dipilih karena semua modul backend telah rampung, sehingga 
+pengujian logika bisnis, respons data, dan keamanan akses otorisasi (RBAC) dapat 
+dipastikan tepat sebelum diintegrasikan.  
+Selanjutnya, Black Box Testing dipilih karena kemampuannya untuk menguji 
+fungsionalitas antarmuka (input -output) secara langsung dari perspektif pengguna 
+tanpa harus memeriksa struktur kode, sehingga sangat efisien dan sesuai untuk 
+menguji tahap pengerjaan frontend yang sedang berlangsung. Terakhir, User 
+Acceptance Test (UAT) dipilih sebagai validasi terakhir untuk memastikan sistem
+===== PAGE 111 =====
+106 
+ 
+yang dibangun sesuai dengan alur kerja yang sebenarnya, mudah dimengerti, dan 
+diterima dengan baik oleh pengguna akhir (Manajer dan tim Sales Lumin Park).
+===== PAGE 112 =====
+107 
+ 
+LAMPIRAN 
+Lampiran 1 Dokumentasi Wawancara  
+ 
+ 
+ 
+Link Trello: 
+https://trello.com/invite/b/lSD4ufgw/ATTIa0693f2f7ca455f1224dfb686c1f08565B73
+C950/manajemen-lumin-park
