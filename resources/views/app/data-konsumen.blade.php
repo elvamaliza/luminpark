@@ -13,7 +13,8 @@
 @endsection
 
 @section('content')
-    <div id="lead-stats" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <div id="lead-stats" class="mb-4"></div>
 
     <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -107,20 +108,31 @@
     });
   }
 
+  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
   function leadRenderStats() {
+    const host = document.getElementById('lead-stats');
     const jumlah = (status) => leadAll.filter((row) => row.status === status).length;
 
-    document.getElementById('lead-stats').innerHTML = [
-      LP.statCard({ label: 'Total Konsumen', value: LP.number(leadAll.length), tone: 'zinc' }),
-      LP.statCard({ label: 'Hot', value: LP.number(jumlah('hot')), hint: 'Siap dibuat booking', tone: 'rose' }),
-      LP.statCard({ label: 'Sudah Booking', value: LP.number(jumlah('booking')), tone: 'amber' }),
-      LP.statCard({
-        label: 'Perlu Follow Up',
-        value: LP.number(leadAll.filter(leadStale).length),
-        hint: 'Belum ada kontak 7 hari terakhir',
-        tone: 'sky',
-      }),
-    ].join('');
+    const items = [
+      { label: 'Total Konsumen', value: LP.number(leadAll.length), tone: 'zinc' },
+      { label: 'Hot', value: LP.number(jumlah('hot')), hint: 'Siap dibuat booking', tone: 'rose' },
+      { label: 'Sudah Booking', value: LP.number(jumlah('booking')), tone: 'amber' },
+      { label: 'Perlu Follow Up', value: LP.number(leadAll.filter(leadStale).length), hint: 'Belum ada kontak 7 hari terakhir', tone: 'sky' },
+    ];
+
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+      + items.map((item) => {
+          let toneClass = 'border-slate-200 bg-white';
+          if (item.tone === 'rose') toneClass = 'border-rose-200 bg-rose-50/30';
+          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
+          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
+
+          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+          </div>`;
+      }).join('') + '</div>';
   }
 
   function leadRender() {

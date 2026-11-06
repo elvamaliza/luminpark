@@ -13,7 +13,8 @@
 @endsection
 
 @section('content')
-    <div id="payment-stats" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <div id="payment-stats" class="mb-4"></div>
 
     <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -109,18 +110,34 @@
     });
   }
 
+  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
   function paymentRenderStats() {
+    const host = document.getElementById('payment-stats');
     const menunggu = paymentAll.filter((row) => row.verification_status === 'pending');
     const terverifikasi = paymentAll.filter((row) => row.verification_status === 'verified');
     const ditolak = paymentAll.filter((row) => row.verification_status === 'rejected').length;
     const totalTerverifikasi = terverifikasi.reduce((akumulasi, row) => akumulasi + Number(row.amount || 0), 0);
 
-    document.getElementById('payment-stats').innerHTML = [
-      LP.statCard({ label: 'Total Pembayaran', value: LP.number(paymentAll.length), tone: 'zinc' }),
-      LP.statCard({ label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan manajer', tone: 'amber' }),
-      LP.statCard({ label: 'Dana Terverifikasi', value: LP.shortMoney(totalTerverifikasi), hint: terverifikasi.length + ' pembayaran', tone: 'emerald' }),
-      LP.statCard({ label: 'Ditolak', value: LP.number(ditolak), hint: 'Bukti transfer perlu diunggah ulang', tone: 'rose' }),
-    ].join('');
+    const items = [
+      { label: 'Total Pembayaran', value: LP.number(paymentAll.length), tone: 'zinc' },
+      { label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan manajer', tone: 'amber' },
+      { label: 'Dana Terverifikasi', value: LP.shortMoney(totalTerverifikasi), hint: terverifikasi.length + ' pembayaran', tone: 'emerald' },
+      { label: 'Ditolak', value: LP.number(ditolak), hint: 'Bukti transfer perlu diunggah ulang', tone: 'rose' },
+    ];
+
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+      + items.map((item) => {
+          let toneClass = 'border-slate-200 bg-white';
+          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
+          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
+          if (item.tone === 'rose') toneClass = 'border-rose-200 bg-rose-50/30';
+
+          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+          </div>`;
+      }).join('') + '</div>';
   }
 
   function paymentRender() {

@@ -12,7 +12,8 @@
 @endsection
 
 @section('content')
-    <div id="unit-stats" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+    <!-- Kotak Statistik diperbarui agar persis seperti gambar referensi -->
+    <div id="unit-stats" class="mb-4"></div>
 
     <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -85,21 +86,31 @@
     });
   }
 
+  // FUNGSI INI YANG MENGATUR KOTAK STATISTIK AGAR PERSIS SEPERTI GAMBAR REFERENSI ANDA
   function unitStats() {
     const host = document.getElementById('unit-stats');
     const hitung = (status) => unitAll.filter((row) => row.status === status).length;
 
-    host.innerHTML = [
-      LP.statCard({ label: 'Total Unit', value: LP.number(unitAll.length), hint: 'Seluruh unit terdaftar', tone: 'zinc' }),
-      LP.statCard({ label: 'Tersedia', value: LP.number(hitung('available')), hint: 'Siap dibooking', tone: 'emerald' }),
-      LP.statCard({ label: 'Sedang Booking', value: LP.number(hitung('booking')), hint: 'Menunggu pembayaran', tone: 'amber' }),
-      LP.statCard({
-        label: 'Terjual',
-        value: LP.number(hitung('sold_out') + hitung('delivery_process')),
-        hint: 'Termasuk proses serah terima',
-        tone: 'sky',
-      }),
-    ].join('');
+    const items = [
+      { label: 'Total Unit', value: LP.number(unitAll.length), hint: 'Seluruh unit terdaftar', tone: 'zinc' },
+      { label: 'Tersedia', value: LP.number(hitung('available')), hint: 'Siap dibooking', tone: 'emerald' },
+      { label: 'Sedang Booking', value: LP.number(hitung('booking')), hint: 'Menunggu pembayaran', tone: 'amber' },
+      { label: 'Terjual', value: LP.number(hitung('sold_out') + hitung('delivery_process')), hint: 'Termasuk proses serah terima', tone: 'sky' },
+    ];
+
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;">'
+      + items.map((item) => {
+          let toneClass = 'border-slate-200 bg-white';
+          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
+          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
+          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
+
+          return `<div style="padding: 14px 18px; border-radius: 12px; min-height: 85px; display: flex; flex-direction: column; justify-content: space-between;" class="border ${toneClass} shadow-sm">
+            <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 2px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 22px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 2px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 11px; color: #64748b; margin-top: 4px;">${LP.esc(item.hint)}</p>` : ''}
+          </div>`;
+      }).join('') + '</div>';
   }
 
   function unitRender() {

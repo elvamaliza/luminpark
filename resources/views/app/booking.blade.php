@@ -13,7 +13,8 @@
 @endsection
 
 @section('content')
-    <div id="booking-stats" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <div id="booking-stats" class="mb-4"></div>
 
     <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -112,16 +113,32 @@
     });
   }
 
+  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
   function bookingRenderStats() {
+    const host = document.getElementById('booking-stats');
     const jumlah = (status) => bookingAll.filter((row) => row.status === status).length;
     const nilai = (key) => bookingAll.reduce((akumulasi, row) => akumulasi + Number(row[key] || 0), 0);
 
-    document.getElementById('booking-stats').innerHTML = [
-      LP.statCard({ label: 'Total Booking', value: LP.number(bookingAll.length), tone: 'zinc' }),
-      LP.statCard({ label: 'Menunggu DP', value: LP.number(jumlah('menunggu dp')), hint: 'Perlu pembayaran awal', tone: 'amber' }),
-      LP.statCard({ label: 'Nilai Booking', value: LP.shortMoney(nilai('total_price')), hint: 'Akumulasi harga unit dipesan', tone: 'violet' }),
-      LP.statCard({ label: 'Sisa Pembayaran', value: LP.shortMoney(nilai('remaining_amount')), hint: 'Belum terverifikasi', tone: 'sky' }),
-    ].join('');
+    const items = [
+      { label: 'Total Booking', value: LP.number(bookingAll.length), tone: 'zinc' },
+      { label: 'Menunggu DP', value: LP.number(jumlah('menunggu dp')), hint: 'Perlu pembayaran awal', tone: 'amber' },
+      { label: 'Nilai Booking', value: LP.shortMoney(nilai('total_price')), hint: 'Akumulasi harga unit dipesan', tone: 'violet' },
+      { label: 'Sisa Pembayaran', value: LP.shortMoney(nilai('remaining_amount')), hint: 'Belum terverifikasi', tone: 'sky' },
+    ];
+
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+      + items.map((item) => {
+          let toneClass = 'border-slate-200 bg-white';
+          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
+          if (item.tone === 'violet') toneClass = 'border-violet-200 bg-violet-50/30';
+          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
+
+          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+          </div>`;
+      }).join('') + '</div>';
   }
 
   function bookingRender() {

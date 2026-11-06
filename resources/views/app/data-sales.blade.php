@@ -12,7 +12,8 @@
 @endsection
 
 @section('content')
-    <div id="sales-stats" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+    <!-- Kotak statistik disesuaikan agar ukurannya kecil, padat, dan 4 kolom persegi -->
+    <div id="sales-stats" class="mb-4"></div>
 
     <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -89,21 +90,32 @@
     });
   }
 
+  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
   function salesRenderStats() {
+    const host = document.getElementById('sales-stats');
     const aktif = salesAll.filter((row) => salesProfileStatus(row) === 'aktif').length;
     const totalBooking = Object.keys(salesBookingCount).reduce((akumulasi, key) => akumulasi + salesBookingCount[key], 0);
 
-    document.getElementById('sales-stats').innerHTML = [
-      LP.statCard({ label: 'Total Sales', value: LP.number(salesAll.length), tone: 'zinc' }),
-      LP.statCard({ label: 'Sales Aktif', value: LP.number(aktif), hint: (salesAll.length - aktif) + ' nonaktif atau resign', tone: 'emerald' }),
-      LP.statCard({ label: 'Total Booking', value: LP.number(totalBooking), hint: 'Tercatat pada modul booking', tone: 'amber' }),
-      LP.statCard({
-        label: 'Tanpa Profil',
-        value: LP.number(salesAll.filter((row) => !salesProfile(row)).length),
-        hint: 'Perlu dilengkapi kode sales',
-        tone: 'sky',
-      }),
-    ].join('');
+    const items = [
+      { label: 'Total Sales', value: LP.number(salesAll.length), tone: 'zinc' },
+      { label: 'Sales Aktif', value: LP.number(aktif), hint: (salesAll.length - aktif) + ' nonaktif atau resign', tone: 'emerald' },
+      { label: 'Total Booking', value: LP.number(totalBooking), hint: 'Tercatat pada modul booking', tone: 'amber' },
+      { label: 'Tanpa Profil', value: LP.number(salesAll.filter((row) => !salesProfile(row)).length), hint: 'Perlu dilengkapi kode sales', tone: 'sky' },
+    ];
+
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+      + items.map((item) => {
+          let toneClass = 'border-slate-200 bg-white';
+          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
+          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
+          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
+
+          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+          </div>`;
+      }).join('') + '</div>';
   }
 
   function salesRender() {
