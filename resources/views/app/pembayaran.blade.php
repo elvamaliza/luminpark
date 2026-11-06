@@ -5,26 +5,26 @@
 @section('page_desc', 'Catat pembayaran konsumen, pantau bukti transfer, dan verifikasi pembayaran untuk mengubah status pelunasan booking.')
 
 @section('page_actions')
-    <a href="/booking" class="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Data Booking</a>
-    <button id="btn-bayar" type="button" class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800">
+    <a href="/booking" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Data Booking</a>
+    <button id="btn-bayar" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Catat Pembayaran
     </button>
 @endsection
 
 @section('content')
-    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <!-- Kotak statistik dengan variasi warna lembut -->
     <div id="payment-stats" class="mb-4"></div>
 
-    <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari Pembayaran</span>
-                <input id="payment-search" type="search" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10" placeholder="kode booking atau nama konsumen">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Pembayaran</span>
+                <input id="payment-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="kode booking atau nama konsumen">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Verifikasi</span>
-                <select id="payment-verification" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Verifikasi</span>
+                <select id="payment-verification" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="pending">Menunggu Verifikasi</option>
                     <option value="verified">Terverifikasi</option>
@@ -32,21 +32,21 @@
                 </select>
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Jenis Pembayaran</span>
-                <select id="payment-type" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Jenis Pembayaran</span>
+                <select id="payment-type" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Jenis</option>
                     <option value="KPR">KPR</option>
                     <option value="cash keras">Cash Keras</option>
                     <option value="cash bertahap">Cash Bertahap</option>
                 </select>
             </label>
-            <p id="payment-count" class="self-end text-sm text-zinc-500">Memuat data pembayaran...</p>
+            <p id="payment-count" class="self-end text-sm text-slate-500">Memuat data pembayaran...</p>
         </div>
     </section>
 
     <div id="payment-table"></div>
 
-    <p id="payment-note" class="mt-4 text-xs text-zinc-500">
+    <p id="payment-note" class="mt-4 text-xs text-slate-500">
         Verifikasi dan penolakan bukti transfer hanya dapat dilakukan Manajer atau Super Admin.
         Setiap pembayaran yang belum terverifikasi tidak mengubah sisa pembayaran booking.
     </p>
@@ -110,7 +110,7 @@
     });
   }
 
-  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
+  // KOTAK STATISTIK DENGAN WARNA LEMBUT (KARTU DITOLAK MENGGUNAKAN WARNA ROSE/MERAH MUDA)
   function paymentRenderStats() {
     const host = document.getElementById('payment-stats');
     const menunggu = paymentAll.filter((row) => row.verification_status === 'pending');
@@ -119,23 +119,18 @@
     const totalTerverifikasi = terverifikasi.reduce((akumulasi, row) => akumulasi + Number(row.amount || 0), 0);
 
     const items = [
-      { label: 'Total Pembayaran', value: LP.number(paymentAll.length), tone: 'zinc' },
-      { label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan manajer', tone: 'amber' },
-      { label: 'Dana Terverifikasi', value: LP.shortMoney(totalTerverifikasi), hint: terverifikasi.length + ' pembayaran', tone: 'emerald' },
-      { label: 'Ditolak', value: LP.number(ditolak), hint: 'Bukti transfer perlu diunggah ulang', tone: 'rose' },
+      { label: 'Total Pembayaran', value: LP.number(paymentAll.length), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+      { label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan manajer', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Dana Terverifikasi', value: LP.shortMoney(totalTerverifikasi), hint: terverifikasi.length + ' pembayaran', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      { label: 'Ditolak', value: LP.number(ditolak), hint: 'Bukti transfer perlu diunggah ulang', bg: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', border: '#fecaca' },
     ];
 
-    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;" class="max-xl:grid-cols-2">'
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
-          if (item.tone === 'rose') toneClass = 'border-rose-200 bg-rose-50/30';
-
-          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
             <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -154,7 +149,7 @@
       empty: 'Belum ada pembayaran yang cocok dengan kata kunci atau filter.',
       columns: [
         { label: 'Tanggal', render: (row) => LP.date(row.payment_date) },
-        { label: 'Kode Booking', render: (row) => '<span class="font-semibold text-zinc-900">' + LP.esc(paymentBookingCode(row)) + '</span>' },
+        { label: 'Kode Booking', render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(paymentBookingCode(row)) + '</span>' },
         { label: 'Konsumen', render: (row) => LP.esc(paymentCustomer(row)) },
         { label: 'Jenis', render: (row) => LP.esc(paymentTypeLabel(row.payment_type)) },
         { label: 'Nominal', align: 'right', render: (row) => LP.money(row.amount) },
@@ -166,11 +161,11 @@
           render: (row, index) => {
             let tombol = '<div class="flex flex-wrap gap-1.5">'
               + '<button type="button" data-payment-action="detail" data-index="' + index + '"'
-              + ' class="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50">Detail</button>';
+              + ' class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</button>';
 
             if (row.transfer_receipt) {
               tombol += '<a href="/storage/' + LP.esc(row.transfer_receipt) + '" target="_blank" rel="noopener noreferrer"'
-                + ' class="rounded-lg border border-sky-200 bg-white px-2.5 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-50">Bukti</a>';
+                + ' class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Bukti</a>';
             }
 
             if (paymentCanVerify()) {
@@ -222,7 +217,7 @@
     let box = form.querySelector('[data-payment-guidance]');
     if (box) return box;
     box = document.createElement('div');
-    box.className = 'sm:col-span-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600';
+    box.className = 'sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600';
     box.setAttribute('data-payment-guidance', 'ya');
     box.innerHTML = 'Pilih booking untuk melihat panduan nominal uang muka, angsuran, dan sisa pembayaran.';
     form.querySelector('.grid').appendChild(box);
@@ -243,15 +238,15 @@
     const jenis = booking.payment_scheme ? booking.payment_scheme.scheme_type : '';
     if (jenis && PAYMENT_TYPES.some((item) => item.value === jenis)) selectType.value = jenis;
 
-    box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Panduan Nominal Booking '
+    box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Panduan Nominal Booking '
       + LP.esc(booking.booking_code) + '</p>'
       + '<div class="mt-3 grid gap-3 sm:grid-cols-4">'
-      + '<div><p class="text-xs text-zinc-500">Total Harga</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(booking.total_price)) + '</p></div>'
-      + '<div><p class="text-xs text-zinc-500">Uang Muka</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(booking.down_payment_amount)) + '</p></div>'
-      + '<div><p class="text-xs text-zinc-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(booking.installment_amount)) + '</p></div>'
-      + '<div><p class="text-xs text-zinc-500">Sisa Pembayaran</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(booking.remaining_amount)) + '</p></div>'
+      + '<div><p class="text-xs text-slate-500">Total Harga</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.total_price)) + '</p></div>'
+      + '<div><p class="text-xs text-slate-500">Uang Muka</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.down_payment_amount)) + '</p></div>'
+      + '<div><p class="text-xs text-slate-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.installment_amount)) + '</p></div>'
+      + '<div><p class="text-xs text-slate-500">Sisa Pembayaran</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.remaining_amount)) + '</p></div>'
       + '</div>'
-      + '<p class="mt-3 text-xs text-zinc-500">Status booking: ' + LP.esc(booking.status) + '. Nominal akan tercatat menunggu verifikasi manajer.</p>';
+      + '<p class="mt-3 text-xs text-slate-500">Status booking: ' + LP.esc(booking.status) + '. Nominal akan tercatat menunggu verifikasi manajer.</p>';
   }
 
   async function paymentCreate(values, context) {
@@ -298,14 +293,14 @@
 
   function paymentDialog(options) {
     const wrap = document.createElement('div');
-    wrap.className = 'fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-zinc-900/40 p-4 pt-16';
+    wrap.className = 'fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 pt-16';
     wrap.innerHTML = '<div role="dialog" aria-modal="true" aria-label="' + LP.esc(options.title) + '" class="w-full '
       + (options.width || 'max-w-3xl') + ' rounded-2xl bg-white shadow-xl">'
-      + '<div class="flex items-start justify-between gap-4 border-b border-zinc-100 p-5">'
-      + '<div><h3 class="text-lg font-semibold text-zinc-900">' + LP.esc(options.title) + '</h3>'
-      + (options.description ? '<p class="mt-1 text-sm text-zinc-500">' + LP.esc(options.description) + '</p>' : '')
+      + '<div class="flex items-start justify-between gap-4 border-b border-slate-100 p-5">'
+      + '<div><h3 class="text-lg font-semibold text-slate-900">' + LP.esc(options.title) + '</h3>'
+      + (options.description ? '<p class="mt-1 text-sm text-slate-500">' + LP.esc(options.description) + '</p>' : '')
       + '</div>'
-      + '<button type="button" data-close class="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50">Tutup</button>'
+      + '<button type="button" data-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">Tutup</button>'
       + '</div><div data-body class="p-5"></div></div>';
     document.body.appendChild(wrap);
 
@@ -324,9 +319,9 @@
   }
 
   function paymentDetailRow(label, value) {
-    return '<div class="flex items-start justify-between gap-4 border-b border-zinc-100 py-2 last:border-b-0">'
-      + '<span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">' + LP.esc(label) + '</span>'
-      + '<span class="text-right text-sm text-zinc-800">' + value + '</span></div>';
+    return '<div class="flex items-start justify-between gap-4 border-b border-slate-100 py-2 last:border-b-0">'
+      + '<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">' + LP.esc(label) + '</span>'
+      + '<span class="text-right text-sm text-slate-800">' + value + '</span></div>';
   }
 
   function paymentOpenDetail(row) {
@@ -339,11 +334,11 @@
     });
 
     const bukti = row.transfer_receipt
-      ? '<a class="mt-4 inline-flex rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white" target="_blank" rel="noopener noreferrer"'
+      ? '<a class="mt-4 inline-flex rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all" target="_blank" rel="noopener noreferrer"'
         + ' href="/storage/' + LP.esc(row.transfer_receipt) + '">Buka Bukti Transfer</a>'
-      : '<p class="mt-4 text-sm text-zinc-500">Tidak ada berkas bukti transfer terlampir.</p>';
+      : '<p class="mt-4 text-sm text-slate-500">Tidak ada berkas bukti transfer terlampir.</p>';
 
-    dialog.body.innerHTML = '<div class="rounded-xl border border-zinc-200 p-4">'
+    dialog.body.innerHTML = '<div class="rounded-xl border border-slate-200 p-4">'
       + paymentDetailRow('Tanggal Pembayaran', LP.esc(LP.date(row.payment_date)))
       + paymentDetailRow('Jenis Pembayaran', LP.esc(paymentTypeLabel(row.payment_type)))
       + paymentDetailRow('Nominal', '<span class="font-semibold">' + LP.esc(LP.money(row.amount)) + '</span>')

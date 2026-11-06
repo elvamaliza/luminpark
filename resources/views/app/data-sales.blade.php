@@ -5,38 +5,38 @@
 @section('page_desc', 'Daftar akun sales. Buka tombol Detail untuk mengubah data, melihat kinerja, menonaktifkan akun, atau mereset kata sandi.')
 
 @section('page_actions')
-    <button id="btn-add-sales" type="button" class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800">
+    <button id="btn-add-sales" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Tambah Sales
     </button>
 @endsection
 
 @section('content')
-    <!-- Kotak statistik disesuaikan agar ukurannya kecil, padat, dan 4 kolom persegi -->
+    <!-- Kotak statistik dengan variasi warna lembut -->
     <div id="sales-stats" class="mb-4"></div>
 
-    <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari Sales</span>
-                <input id="sales-search" type="search" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10" placeholder="nama, kode sales, atau email">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Sales</span>
+                <input id="sales-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="nama, kode sales, atau email">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Sales</span>
-                <select id="sales-status" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Sales</span>
+                <select id="sales-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="aktif">Aktif</option>
                     <option value="nonaktif">Nonaktif</option>
                     <option value="resign">Resign</option>
                 </select>
             </label>
-            <p id="sales-count" class="self-end text-sm text-zinc-500">Memuat data sales...</p>
+            <p id="sales-count" class="self-end text-sm text-slate-500">Memuat data sales...</p>
         </div>
     </section>
 
     <div id="sales-table"></div>
 
-    <p class="mt-4 text-xs text-zinc-500">
+    <p class="mt-4 text-xs text-slate-500">
         Reset kata sandi akan menghapus seluruh sesi login sales tersebut sehingga yang bersangkutan harus masuk ulang.
         Sales yang masih memiliki riwayat booking tidak dapat dihapus, cukup dinonaktifkan.
     </p>
@@ -90,30 +90,25 @@
     });
   }
 
-  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
+  // KOTAK STATISTIK DENGAN VARIASI WARNA LEMBUT
   function salesRenderStats() {
     const host = document.getElementById('sales-stats');
     const aktif = salesAll.filter((row) => salesProfileStatus(row) === 'aktif').length;
     const totalBooking = Object.keys(salesBookingCount).reduce((akumulasi, key) => akumulasi + salesBookingCount[key], 0);
 
     const items = [
-      { label: 'Total Sales', value: LP.number(salesAll.length), tone: 'zinc' },
-      { label: 'Sales Aktif', value: LP.number(aktif), hint: (salesAll.length - aktif) + ' nonaktif atau resign', tone: 'emerald' },
-      { label: 'Total Booking', value: LP.number(totalBooking), hint: 'Tercatat pada modul booking', tone: 'amber' },
-      { label: 'Tanpa Profil', value: LP.number(salesAll.filter((row) => !salesProfile(row)).length), hint: 'Perlu dilengkapi kode sales', tone: 'sky' },
+      { label: 'Total Sales', value: LP.number(salesAll.length), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+      { label: 'Sales Aktif', value: LP.number(aktif), hint: (salesAll.length - aktif) + ' nonaktif atau resign', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      { label: 'Total Booking', value: LP.number(totalBooking), hint: 'Tercatat pada modul booking', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Tanpa Profil', value: LP.number(salesAll.filter((row) => !salesProfile(row)).length), hint: 'Perlu dilengkapi kode sales', bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
     ];
 
-    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;" class="max-xl:grid-cols-2">'
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
-          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-
-          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
             <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -129,11 +124,11 @@
       rows: salesView,
       empty: 'Belum ada data sales yang cocok dengan pencarian atau filter status.',
       columns: [
-        { label: 'Kode Sales', render: (row) => '<span class="font-semibold text-zinc-900">' + LP.esc(salesCode(row)) + '</span>' },
+        { label: 'Kode Sales', render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(salesCode(row)) + '</span>' },
         {
           label: 'Nama Sales',
-          render: (row) => '<span class="font-medium text-zinc-900">' + LP.esc(row.name) + '</span>'
-            + '<span class="block text-xs text-zinc-500">' + LP.esc(row.email) + '</span>',
+          render: (row) => '<span class="font-medium text-slate-900">' + LP.esc(row.name) + '</span>'
+            + '<span class="block text-xs text-slate-500">' + LP.esc(row.email) + '</span>',
         },
         { label: 'Telepon', render: (row) => LP.esc(row.phone || '-') },
         { label: 'WhatsApp', render: (row) => { const p = salesProfile(row); return LP.esc(p && p.whatsapp_number ? p.whatsapp_number : '-'); } },
@@ -142,12 +137,12 @@
         {
           label: 'Status',
           render: (row) => LP.badge(salesProfileStatus(row))
-            + (row.status === 'aktif' ? '' : '<span class="ml-1 block text-xs text-zinc-500">Akun ' + LP.esc(row.status) + '</span>'),
+            + (row.status === 'aktif' ? '' : '<span class="ml-1 block text-xs text-slate-500">Akun ' + LP.esc(row.status) + '</span>'),
         },
         {
           label: 'Aksi',
           render: (row, index) => '<div class="flex flex-wrap gap-1.5">'
-            + '<a href="/data-sales/' + LP.esc(row.id) + '" class="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50">Detail</a>'
+            + '<a href="/data-sales/' + LP.esc(row.id) + '" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</a>'
             + '<button type="button" data-sales-action="delete" data-index="' + index + '" class="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50">Hapus</button>'
             + '</div>',
         },

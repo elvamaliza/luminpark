@@ -5,26 +5,26 @@
 @section('page_desc', 'Pantau pemesanan unit rumah dan buat booking baru lengkap dengan simulasi uang muka serta angsuran.')
 
 @section('page_actions')
-    <a href="/pembayaran" class="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Data Pembayaran</a>
-    <button id="btn-buat-booking" type="button" class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800">
+    <a href="/pembayaran" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Data Pembayaran</a>
+    <button id="btn-buat-booking" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Buat Booking
     </button>
 @endsection
 
 @section('content')
-    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <!-- Kotak statistik dengan variasi warna lembut -->
     <div id="booking-stats" class="mb-4"></div>
 
-    <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari Booking</span>
-                <input id="booking-search" type="search" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10" placeholder="kode booking, nama konsumen, atau unit">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Booking</span>
+                <input id="booking-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="kode booking, nama konsumen, atau unit">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Booking</span>
-                <select id="booking-status" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Booking</span>
+                <select id="booking-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="menunggu dp">Menunggu DP</option>
                     <option value="dp lunas">DP Lunas</option>
@@ -33,21 +33,21 @@
                 </select>
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Serah Terima</span>
-                <select id="booking-delivery" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Serah Terima</span>
+                <select id="booking-delivery" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua</option>
                     <option value="belum proses">Belum Proses</option>
                     <option value="sedang proses">Sedang Proses</option>
                     <option value="selesai">Selesai</option>
                 </select>
             </label>
-            <p id="booking-count" class="self-end text-sm text-zinc-500">Memuat data booking...</p>
+            <p id="booking-count" class="self-end text-sm text-slate-500">Memuat data booking...</p>
         </div>
     </section>
 
     <div id="booking-table"></div>
 
-    <p class="mt-4 text-xs text-zinc-500">
+    <p class="mt-4 text-xs text-slate-500">
         Uang muka, angsuran, dan sisa pembayaran dihitung oleh sistem dari harga unit dan skema pembayaran terpilih,
         kemudian diperbarui otomatis setiap pembayaran diverifikasi manajer.
     </p>
@@ -113,30 +113,25 @@
     });
   }
 
-  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
+  // KOTAK STATISTIK DENGAN VARIASI WARNA LEMBUT (PUTIH, HIJAU, KUNING, BIRU)
   function bookingRenderStats() {
     const host = document.getElementById('booking-stats');
     const jumlah = (status) => bookingAll.filter((row) => row.status === status).length;
     const nilai = (key) => bookingAll.reduce((akumulasi, row) => akumulasi + Number(row[key] || 0), 0);
 
     const items = [
-      { label: 'Total Booking', value: LP.number(bookingAll.length), tone: 'zinc' },
-      { label: 'Menunggu DP', value: LP.number(jumlah('menunggu dp')), hint: 'Perlu pembayaran awal', tone: 'amber' },
-      { label: 'Nilai Booking', value: LP.shortMoney(nilai('total_price')), hint: 'Akumulasi harga unit dipesan', tone: 'violet' },
-      { label: 'Sisa Pembayaran', value: LP.shortMoney(nilai('remaining_amount')), hint: 'Belum terverifikasi', tone: 'sky' },
+      { label: 'Total Booking', value: LP.number(bookingAll.length), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+      { label: 'Menunggu DP', value: LP.number(jumlah('menunggu dp')), hint: 'Perlu pembayaran awal', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Nilai Booking', value: LP.shortMoney(nilai('total_price')), hint: 'Akumulasi harga unit dipesan', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      { label: 'Sisa Pembayaran', value: LP.shortMoney(nilai('remaining_amount')), hint: 'Belum terverifikasi', bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
     ];
 
-    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;" class="max-xl:grid-cols-2">'
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-          if (item.tone === 'violet') toneClass = 'border-violet-200 bg-violet-50/30';
-          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
-
-          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
             <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -155,12 +150,12 @@
       empty: 'Belum ada booking yang cocok dengan kata kunci atau filter status.',
       onRow: (row) => bookingOpenDetail(row.id),
       columns: [
-        { label: 'Kode Booking', render: (row) => '<span class="font-semibold text-zinc-900">' + LP.esc(row.booking_code) + '</span>' },
+        { label: 'Kode Booking', render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(row.booking_code) + '</span>' },
         { label: 'Tanggal Booking', render: (row) => LP.date(row.booking_date) },
         {
           label: 'Konsumen',
-          render: (row) => '<span class="font-medium text-zinc-900">' + LP.esc(bookingCustomerName(row)) + '</span>'
-            + '<span class="block text-xs text-zinc-500">' + LP.esc(row.sales_profile ? row.sales_profile.sales_code : '-') + '</span>',
+          render: (row) => '<span class="font-medium text-slate-900">' + LP.esc(bookingCustomerName(row)) + '</span>'
+            + '<span class="block text-xs text-slate-500">' + LP.esc(row.sales_profile ? row.sales_profile.sales_code : '-') + '</span>',
         },
         { label: 'Unit', render: (row) => LP.esc(bookingUnitLabel(row)) },
         { label: 'Skema', render: (row) => LP.esc(bookingSchemeName(row)) },
@@ -172,7 +167,7 @@
         {
           label: 'Aksi',
           render: (row, index) => '<div class="flex flex-wrap gap-1.5" data-stop>'
-            + '<button type="button" data-booking-action="detail" data-index="' + index + '" class="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50">Detail</button>'
+            + '<button type="button" data-booking-action="detail" data-index="' + index + '" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</button>'
             + (bolehKelola
               ? '<button type="button" data-booking-action="delivery" data-index="' + index + '" class="rounded-lg border border-sky-200 bg-white px-2.5 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-50">Serah Terima</button>'
               : '')
@@ -242,7 +237,7 @@
     let box = form.querySelector('[data-booking-simulasi]');
     if (box) return box;
     box = document.createElement('div');
-    box.className = 'sm:col-span-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600';
+    box.className = 'sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600';
     box.setAttribute('data-booking-simulasi', 'ya');
     box.innerHTML = 'Pilih unit dan skema pembayaran untuk melihat simulasi uang muka, angsuran, serta tenor.';
     form.querySelector('.grid').appendChild(box);
@@ -259,23 +254,23 @@
       return;
     }
 
-    box.innerHTML = '<span class="inline-flex items-center gap-2 text-zinc-500">'
-      + '<span class="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-800"></span> Menghitung simulasi pembayaran...</span>';
+    box.innerHTML = '<span class="inline-flex items-center gap-2 text-slate-500">'
+      + '<span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-800"></span> Menghitung simulasi pembayaran...</span>';
 
     try {
       const hasil = await LP.http.post('/payment-schemes/' + schemeId + '/simulate', { unit_id: Number(unitId) });
       const data = (hasil.json && hasil.json.data) || {};
       const unit = bookingUnits.find((item) => String(item.id) === String(unitId));
 
-      box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Simulasi '
+      box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Simulasi '
         + LP.esc(data.scheme_name || 'skema pembayaran') + (unit ? ' — unit ' + LP.esc(unit.unit_code) : '') + '</p>'
         + '<div class="mt-3 grid gap-3 sm:grid-cols-4">'
-        + '<div><p class="text-xs text-zinc-500">Uang Muka</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(data.down_payment_amount)) + '</p></div>'
-        + '<div><p class="text-xs text-zinc-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(data.installment_amount)) + '</p></div>'
-        + '<div><p class="text-xs text-zinc-500">Tenor</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.number(data.installment_months)) + ' bulan</p></div>'
-        + '<div><p class="text-xs text-zinc-500">Total Bunga</p><p class="mt-1 font-semibold text-zinc-900">' + LP.esc(LP.money(data.interest_total)) + '</p></div>'
+        + '<div><p class="text-xs text-slate-500">Uang Muka</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(data.down_payment_amount)) + '</p></div>'
+        + '<div><p class="text-xs text-slate-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(data.installment_amount)) + '</p></div>'
+        + '<div><p class="text-xs text-slate-500">Tenor</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.number(data.installment_months)) + ' bulan</p></div>'
+        + '<div><p class="text-xs text-slate-500">Total Bunga</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(data.interest_total)) + '</p></div>'
         + '</div>'
-        + '<p class="mt-3 text-xs text-zinc-500">Nilai di atas dihitung sistem dari harga unit dan akan menjadi dasar uang muka serta angsuran booking.</p>';
+        + '<p class="mt-3 text-xs text-slate-500">Nilai di atas dihitung sistem dari harga unit dan akan menjadi dasar uang muka serta angsuran booking.</p>';
     } catch (error) {
       box.innerHTML = '<p class="text-rose-700">Simulasi gagal dihitung: ' + LP.esc(error.message || 'terjadi kesalahan.') + '</p>';
     }
@@ -337,14 +332,14 @@
 
   function bookingDialog(options) {
     const wrap = document.createElement('div');
-    wrap.className = 'fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-zinc-900/40 p-4 pt-16';
+    wrap.className = 'fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 pt-16';
     wrap.innerHTML = '<div role="dialog" aria-modal="true" aria-label="' + LP.esc(options.title) + '" class="w-full '
       + (options.width || 'max-w-3xl') + ' rounded-2xl bg-white shadow-xl">'
-      + '<div class="flex items-start justify-between gap-4 border-b border-zinc-100 p-5">'
-      + '<div><h3 class="text-lg font-semibold text-zinc-900">' + LP.esc(options.title) + '</h3>'
-      + (options.description ? '<p class="mt-1 text-sm text-zinc-500">' + LP.esc(options.description) + '</p>' : '')
+      + '<div class="flex items-start justify-between gap-4 border-b border-slate-100 p-5">'
+      + '<div><h3 class="text-lg font-semibold text-slate-900">' + LP.esc(options.title) + '</h3>'
+      + (options.description ? '<p class="mt-1 text-sm text-slate-500">' + LP.esc(options.description) + '</p>' : '')
       + '</div>'
-      + '<button type="button" data-close class="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50">Tutup</button>'
+      + '<button type="button" data-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">Tutup</button>'
       + '</div><div data-body class="p-5"></div></div>';
     document.body.appendChild(wrap);
 
@@ -363,9 +358,9 @@
   }
 
   function bookingDetailRow(label, value) {
-    return '<div class="flex items-start justify-between gap-4 border-b border-zinc-100 py-2 last:border-b-0">'
-      + '<span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">' + LP.esc(label) + '</span>'
-      + '<span class="text-right text-sm text-zinc-800">' + value + '</span></div>';
+    return '<div class="flex items-start justify-between gap-4 border-b border-slate-100 py-2 last:border-b-0">'
+      + '<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">' + LP.esc(label) + '</span>'
+      + '<span class="text-right text-sm text-slate-800">' + value + '</span></div>';
   }
 
   async function bookingOpenDetail(id) {
@@ -386,16 +381,16 @@
     const riwayat = Array.isArray(data.payments) ? data.payments : [];
 
     const ringkasan = '<div class="grid gap-4 lg:grid-cols-2">'
-      + '<div class="rounded-xl border border-zinc-200 p-4">'
+      + '<div class="rounded-xl border border-slate-200 p-4">'
       + bookingDetailRow('Kode Booking', '<span class="font-semibold">' + LP.esc(data.booking_code) + '</span>')
       + bookingDetailRow('Tanggal Booking', LP.esc(LP.date(data.booking_date)))
       + bookingDetailRow('Status', LP.badge(data.status))
       + bookingDetailRow('Serah Terima', LP.badge(data.delivery_status))
       + bookingDetailRow('Status Pelunasan', LP.esc(data.settlement_status || data.status))
       + '</div>'
-      + '<div class="rounded-xl border border-zinc-200 p-4">'
-      + bookingDetailRow('Konsumen', LP.esc(lead.name || '-') + '<span class="block text-xs text-zinc-500">' + LP.esc(lead.phone || '') + '</span>')
-      + bookingDetailRow('Unit', LP.esc(unit.unit_code || '-') + '<span class="block text-xs text-zinc-500">' + LP.esc(unit.unit_type || '') + '</span>')
+      + '<div class="rounded-xl border border-slate-200 p-4">'
+      + bookingDetailRow('Konsumen', LP.esc(lead.name || '-') + '<span class="block text-xs text-slate-500">' + LP.esc(lead.phone || '') + '</span>')
+      + bookingDetailRow('Unit', LP.esc(unit.unit_code || '-') + '<span class="block text-xs text-slate-500">' + LP.esc(unit.unit_type || '') + '</span>')
       + bookingDetailRow('Cluster', LP.esc(unit.cluster ? unit.cluster.name : '-'))
       + bookingDetailRow('Skema', LP.esc(data.payment_scheme ? data.payment_scheme.scheme_name : '-'))
       + bookingDetailRow('Sales', LP.esc(profil.user ? profil.user.name : '-') + ' (' + LP.esc(profil.sales_code || '-') + ')')
@@ -409,16 +404,16 @@
       + '</div>';
 
     const catatan = data.notes
-      ? '<p class="mt-4 rounded-xl bg-zinc-50 p-4 text-sm text-zinc-700">' + LP.esc(data.notes) + '</p>'
+      ? '<p class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">' + LP.esc(data.notes) + '</p>'
       : '';
 
-    const tabelBayar = riwayat.length ? '<p class="mt-2 text-xs text-zinc-500">Nominal di bawah adalah pembayaran yang sudah tercatat pada booking ini.</p>' : '';
+    const tabelBayar = riwayat.length ? '<p class="mt-2 text-xs text-slate-500">Nominal di bawah adalah pembayaran yang sudah tercatat pada booking ini.</p>' : '';
 
     dialog.body.innerHTML = '<div>' + ringkasan + nominal + catatan + tabelBayar
-      + '<h4 class="mt-5 text-sm font-semibold text-zinc-900">Riwayat Pembayaran (' + riwayat.length + ')</h4>'
+      + '<h4 class="mt-5 text-sm font-semibold text-slate-900">Riwayat Pembayaran (' + riwayat.length + ')</h4>'
       + (riwayat.length
         ? '<div id="booking-detail-payments" class="mt-3"></div>'
-        : '<p class="mt-2 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 text-center text-sm text-zinc-500">Belum ada pembayaran tercatat untuk booking ini.</p>')
+        : '<p class="mt-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">Belum ada pembayaran tercatat untuk booking ini.</p>')
       + '</div>';
 
     if (riwayat.length) {

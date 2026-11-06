@@ -5,25 +5,25 @@
 @section('page_desc', 'Telusuri dan saring unit; buka Detail untuk mengubah informasi unit. Tambah dan hapus unit hanya milik Manajer.')
 
 @section('page_actions')
-    <button id="btn-add-unit" type="button" class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 disabled:opacity-60">
+    <button id="btn-add-unit" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] disabled:opacity-60 transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Tambah Unit
     </button>
 @endsection
 
 @section('content')
-    <!-- Kotak Statistik diperbarui agar persis seperti gambar referensi -->
+    <!-- Kotak Statistik dengan variasi warna lembut -->
     <div id="unit-stats" class="mb-4"></div>
 
-    <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari Unit</span>
-                <input id="unit-search" type="search" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10" placeholder="kode unit, tipe, atau cluster">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Unit</span>
+                <input id="unit-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="kode unit, tipe, atau cluster">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Unit</span>
-                <select id="unit-status" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Unit</span>
+                <select id="unit-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="available">Tersedia</option>
                     <option value="booking">Booking</option>
@@ -32,18 +32,18 @@
                 </select>
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cluster</span>
-                <select id="unit-cluster" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cluster</span>
+                <select id="unit-cluster" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Cluster</option>
                 </select>
             </label>
-            <p id="unit-count" class="self-end text-sm text-zinc-500">Memuat data unit...</p>
+            <p id="unit-count" class="self-end text-sm text-slate-500">Memuat data unit...</p>
         </div>
     </section>
 
     <div id="unit-table"></div>
 
-    <p class="mt-4 text-xs text-zinc-500">
+    <p class="mt-4 text-xs text-slate-500">
         Status unit berubah otomatis oleh sistem: menjadi Booking saat pemesanan dibuat dan Terjual saat pelunasan terverifikasi.
         Foto unit digunakan pada halaman publik daftar unit.
     </p>
@@ -86,29 +86,24 @@
     });
   }
 
-  // FUNGSI INI YANG MENGATUR KOTAK STATISTIK AGAR PERSIS SEPERTI GAMBAR REFERENSI ANDA
+  // KOTAK STATISTIK DENGAN VARIASI WARNA LEMBUT (PUTIH, HIJAU, KUNING, BIRU)
   function unitStats() {
     const host = document.getElementById('unit-stats');
     const hitung = (status) => unitAll.filter((row) => row.status === status).length;
 
     const items = [
-      { label: 'Total Unit', value: LP.number(unitAll.length), hint: 'Seluruh unit terdaftar', tone: 'zinc' },
-      { label: 'Tersedia', value: LP.number(hitung('available')), hint: 'Siap dibooking', tone: 'emerald' },
-      { label: 'Sedang Booking', value: LP.number(hitung('booking')), hint: 'Menunggu pembayaran', tone: 'amber' },
-      { label: 'Terjual', value: LP.number(hitung('sold_out') + hitung('delivery_process')), hint: 'Termasuk proses serah terima', tone: 'sky' },
+      { label: 'Total Unit', value: LP.number(unitAll.length), hint: 'Seluruh unit terdaftar', bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+      { label: 'Tersedia', value: LP.number(hitung('available')), hint: 'Siap dibooking', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      { label: 'Sedang Booking', value: LP.number(hitung('booking')), hint: 'Menunggu pembayaran', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Terjual', value: LP.number(hitung('sold_out') + hitung('delivery_process')), hint: 'Termasuk proses serah terima', bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
     ];
 
-    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;">'
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;" class="max-xl:grid-cols-2">'
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
-          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-
-          return `<div style="padding: 14px 18px; border-radius: 12px; min-height: 85px; display: flex; flex-direction: column; justify-content: space-between;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 2px;">${LP.esc(item.label)}</p>
-            <p style="font-size: 22px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 2px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 11px; color: #64748b; margin-top: 4px;">${LP.esc(item.hint)}</p>` : ''}
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -127,7 +122,7 @@
         { label: 'No.', render: (row, index) => String(index + 1) },
         {
           label: 'Blok / Kode Unit',
-          render: (row) => '<span class="font-semibold text-zinc-900">' + LP.esc(row.unit_code) + '</span>',
+          render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(row.unit_code) + '</span>',
         },
         { label: 'Cluster', render: (row) => LP.esc(unitClusterName(row)) },
         { label: 'Tipe Unit', render: (row) => LP.esc(row.unit_type) },
@@ -138,7 +133,7 @@
         {
           label: 'Aksi',
           render: (row, index) => '<div class="flex flex-wrap gap-2">'
-            + '<a href="/data-unit/' + LP.esc(row.id) + '" class="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50">Detail</a>'
+            + '<a href="/data-unit/' + LP.esc(row.id) + '" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</a>'
             + (LP.can(['manager'])
               ? '<button type="button" data-unit-action="delete" data-index="' + index + '"'
                 + ' class="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50">Hapus</button>'

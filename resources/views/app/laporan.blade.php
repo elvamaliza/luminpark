@@ -8,34 +8,34 @@
 
 @section('page_actions')
 <div class="lp-no-print flex flex-wrap items-center gap-2">
-    <button id="lap-export" type="button" class="rounded-xl border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Ekspor Excel (CSV)</button>
-    <button id="lap-print" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cetak</button>
+    <button id="lap-export" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">Ekspor Excel (CSV)</button>
+    <button id="lap-print" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Cetak</button>
 </div>
 @endsection
 
 @section('content')
 <div class="space-y-6">
-    <section class="lp-no-print rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="lp-no-print rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <form id="lap-filter" class="space-y-4">
             <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Jenis laporan">
-                <button type="button" role="tab" data-type="sales" class="rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-semibold text-white">Penjualan</button>
-                <button type="button" role="tab" data-type="settlement" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700">Pelunasan</button>
-                <button type="button" role="tab" data-type="performance" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700">Kinerja Sales</button>
-                <button type="button" role="tab" data-type="consumers" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700">Konsumen</button>
+                <button type="button" role="tab" data-type="sales" class="rounded-xl border border-[#1b3225] bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white transition-all shadow-sm">Penjualan</button>
+                <button type="button" role="tab" data-type="settlement" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">Pelunasan</button>
+                <button type="button" role="tab" data-type="performance" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">Kinerja Sales</button>
+                <button type="button" role="tab" data-type="consumers" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">Konsumen</button>
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <label class="block">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Dari Tanggal</span>
-                    <input id="lap-start" name="start_date" type="date" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Dari Tanggal</span>
+                    <input id="lap-start" name="start_date" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                 </label>
                 <label class="block">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Sampai Tanggal</span>
-                    <input id="lap-end" name="end_date" type="date" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Sampai Tanggal</span>
+                    <input id="lap-end" name="end_date" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                 </label>
                 <label id="lap-status-wrap" class="hidden">
-                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Konsumen</span>
-                    <select id="lap-status" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Konsumen</span>
+                    <select id="lap-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                         <option value="">Semua status</option>
                         <option value="cold">Cold</option>
                         <option value="warm">Warm</option>
@@ -44,26 +44,26 @@
                     </select>
                 </label>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white">Tampilkan Laporan</button>
+                    <button type="submit" class="w-full rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">Tampilkan Laporan</button>
                 </div>
             </div>
         </form>
     </section>
 
-    <p id="lap-period" class="text-sm text-zinc-600">Memuat laporan...</p>
+    <p id="lap-period" class="text-sm text-slate-600">Memuat laporan...</p>
 
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Ringkasan Laporan</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Ringkasan Laporan</h2>
         <div id="lap-summary"></div>
     </section>
 
     <section id="lap-recap-wrap" class="hidden">
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Rekapitulasi Pelunasan</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Rekapitulasi Pelunasan</h2>
         <div id="lap-recap" class="grid gap-4 lg:grid-cols-3"></div>
     </section>
 
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Detail Laporan</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Detail Laporan</h2>
         <div id="lap-table"></div>
     </section>
 </div>
@@ -92,9 +92,9 @@
         { label: 'Serah Terima', render: (r) => LP.badge(r.delivery_status) },
       ],
       summary: (payload) => [
-        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), tone: 'zinc' },
-        { label: 'Nilai Penjualan', value: LP.shortMoney(payload.total_sales_value), tone: 'emerald' },
-        { label: 'Total Sisa Pembayaran', value: LP.shortMoney(payload.total_remaining_value), tone: 'amber' },
+        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+        { label: 'Nilai Penjualan', value: LP.shortMoney(payload.total_sales_value), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+        { label: 'Total Sisa Pembayaran', value: LP.shortMoney(payload.total_remaining_value), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
       ],
     },
     settlement: {
@@ -114,8 +114,8 @@
         { label: 'Waktu Verifikasi', render: (r) => LP.datetime(r.verified_at) },
       ],
       summary: (payload) => [
-        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), tone: 'zinc' },
-        { label: 'Total Dana Masuk', value: LP.shortMoney(payload.total_settled_amount), tone: 'emerald' },
+        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+        { label: 'Total Dana Masuk', value: LP.shortMoney(payload.total_settled_amount), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
       ],
     },
     performance: {
@@ -123,7 +123,7 @@
       path: '/reports/performance',
       exportType: 'performance',
       columns: [
-        { label: 'Sales', render: (r) => LP.esc(r.name) + '<span class="block text-xs text-zinc-500">' + LP.esc(r.sales_code) + '</span>' },
+        { label: 'Sales', render: (r) => LP.esc(r.name) + '<span class="block text-xs text-slate-500">' + LP.esc(r.sales_code) + '</span>' },
         { label: 'Status', render: (r) => LP.badge(r.status) },
         { label: 'Lead', align: 'right', render: (r) => LP.number(r.total_leads) },
         { label: 'Booking', align: 'right', render: (r) => LP.number(r.total_bookings) },
@@ -136,10 +136,10 @@
       summary: (payload) => {
         const t = payload.totals || {};
         return [
-          { label: 'Total Lead', value: LP.number(t.total_leads), tone: 'violet' },
-          { label: 'Total Booking', value: LP.number(t.total_bookings), tone: 'amber' },
-          { label: 'Total Closing', value: LP.shortMoney(t.total_closing), tone: 'emerald' },
-          { label: 'Unit Terjual', value: LP.number(t.units_sold), tone: 'zinc' },
+          { label: 'Total Lead', value: LP.number(t.total_leads), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+          { label: 'Total Booking', value: LP.number(t.total_bookings), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+          { label: 'Total Closing', value: LP.shortMoney(t.total_closing), bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
+          { label: 'Unit Terjual', value: LP.number(t.units_sold), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
         ];
       },
     },
@@ -162,11 +162,11 @@
       summary: (payload) => {
         const t = payload.totals || {};
         return [
-          { label: 'Total Konsumen', value: LP.number(t.total), tone: 'zinc' },
-          { label: 'Cold', value: LP.number(t.cold), tone: 'sky' },
-          { label: 'Warm', value: LP.number(t.warm), tone: 'amber' },
-          { label: 'Hot', value: LP.number(t.hot), tone: 'emerald' },
-          { label: 'Sudah Booking', value: LP.number(t.customer), tone: 'violet' },
+          { label: 'Total Konsumen', value: LP.number(t.total), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+          { label: 'Cold', value: LP.number(t.cold), bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
+          { label: 'Warm', value: LP.number(t.warm), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+          { label: 'Hot', value: LP.number(t.hot), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+          { label: 'Sudah Booking', value: LP.number(t.customer), bg: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)', border: '#e9d5ff' },
         ];
       },
     },
@@ -178,32 +178,27 @@
   function progressBar(text, percent) {
     const pct = Math.max(0, Math.min(100, Number(percent || 0)));
     return '<div class="min-w-[140px]">'
-      + '<span class="text-xs font-medium text-zinc-700">' + LP.esc(text) + ' (' + LP.number(pct) + '%)</span>'
-      + '<span class="mt-1 block h-1.5 w-full rounded-full bg-zinc-200">'
-      + '<span class="block h-1.5 rounded-full bg-emerald-500" style="width:' + pct + '%"></span></span></div>';
+      + '<span class="text-xs font-medium text-slate-700">' + LP.esc(text) + ' (' + LP.number(pct) + '%)</span>'
+      + '<span class="mt-1 block h-1.5 w-full rounded-full bg-slate-200">'
+      + '<span class="block h-1.5 rounded-full bg-[#5c7361]" style="width:' + pct + '%"></span></span></div>';
   }
 
   function recapTable(title, map) {
     const rows = Object.entries(map || {}).map(([name, value]) => ({ name: name, transactions: value.transactions, total_amount: value.total_amount }));
-    return '<div class="rounded-2xl border border-zinc-200 bg-white shadow-sm">'
-      + '<p class="border-b border-zinc-100 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">' + LP.esc(title) + '</p>'
+    return '<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">'
+      + '<p class="border-b border-slate-100 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">' + LP.esc(title) + '</p>'
       + '<div class="p-1" id="recap-' + LP.esc(title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) + '"></div></div>';
   }
 
-  // KOTAK RINGKASAN DISESUAIKAN MENJADI 4 KOLOM KECIL, PADAT, DAN PERSEGI PENDEK
+  // KOTAK RINGKASAN DENGAN VARIASI WARNA LEMBUT KONSISTEN
   function gridCard(items) {
-    return '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+    const cols = items.length === 5 ? 'repeat(5, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))';
+    return `<div style="display: grid; grid-template-columns: ${cols}; gap: 10px;" class="max-xl:grid-cols-2">`
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'emerald') toneClass = 'border-emerald-200 bg-emerald-50/30';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-          if (item.tone === 'violet') toneClass = 'border-violet-200 bg-violet-50/30';
-          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
-
-          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
             <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -221,8 +216,8 @@
   function setTypeButtons() {
     document.querySelectorAll('[data-type]').forEach((button) => {
       const active = button.dataset.type === currentType;
-      button.className = 'rounded-xl border px-4 py-2 text-sm '
-        + (active ? 'border-zinc-900 bg-zinc-900 font-semibold text-white' : 'border-zinc-300 bg-white font-medium text-zinc-700');
+      button.className = 'rounded-xl border px-4 py-2 text-sm transition-all '
+        + (active ? 'border-[#1b3225] bg-[#1b3225] font-semibold text-white shadow-sm' : 'border-slate-200 bg-white font-medium text-slate-700 hover:bg-slate-50');
       button.setAttribute('aria-selected', active ? 'true' : 'false');
     });
   }

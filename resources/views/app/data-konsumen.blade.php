@@ -5,26 +5,26 @@
 @section('page_desc', 'Daftar calon konsumen dan konsumen. Buka tombol Detail untuk mengubah data, menyesuaikan status, atau mencatat follow up.')
 
 @section('page_actions')
-    <a href="/booking" class="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Booking Unit</a>
-    <button id="btn-add-lead" type="button" class="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800">
+    <a href="/booking" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Booking Unit</a>
+    <button id="btn-add-lead" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Tambah Konsumen
     </button>
 @endsection
 
 @section('content')
-    <!-- Kotak statistik disesuaikan menjadi 4 kolom kecil, padat, dan persegi pendek -->
+    <!-- Kotak statistik dengan variasi warna lembut seperti halaman sales -->
     <div id="lead-stats" class="mb-4"></div>
 
-    <section class="mb-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari Konsumen</span>
-                <input id="lead-search" type="search" class="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10" placeholder="nama, nomor telepon, atau email">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Konsumen</span>
+                <input id="lead-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="nama, nomor telepon, atau email">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Status Konsumen</span>
-                <select id="lead-status" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Konsumen</span>
+                <select id="lead-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="cold">Cold</option>
                     <option value="warm">Warm</option>
@@ -33,18 +33,18 @@
                 </select>
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Sales Penanganan</span>
-                <select id="lead-sales" class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Sales Penanganan</span>
+                <select id="lead-sales" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Sales</option>
                 </select>
             </label>
-            <p id="lead-count" class="self-end text-sm text-zinc-500">Memuat data konsumen...</p>
+            <p id="lead-count" class="self-end text-sm text-slate-500">Memuat data konsumen...</p>
         </div>
     </section>
 
     <div id="lead-table"></div>
 
-    <p class="mt-4 text-xs text-zinc-500">
+    <p class="mt-4 text-xs text-slate-500">
         Klik baris konsumen untuk membuka detail beserta riwayat interaksinya. Booking hanya dapat dibuat untuk konsumen berstatus Hot.
     </p>
 @endsection
@@ -108,29 +108,24 @@
     });
   }
 
-  // KOTAK STATISTIK DIUBAH JADI 4 KOLOM KECIL & PERSEGI PENDEK
+  // KOTAK STATISTIK DENGAN VARIASI WARNA LEMBUT (PUTIH, HIJAU, KUNING, BIRU)
   function leadRenderStats() {
     const host = document.getElementById('lead-stats');
     const jumlah = (status) => leadAll.filter((row) => row.status === status).length;
 
     const items = [
-      { label: 'Total Konsumen', value: LP.number(leadAll.length), tone: 'zinc' },
-      { label: 'Hot', value: LP.number(jumlah('hot')), hint: 'Siap dibuat booking', tone: 'rose' },
-      { label: 'Sudah Booking', value: LP.number(jumlah('booking')), tone: 'amber' },
-      { label: 'Perlu Follow Up', value: LP.number(leadAll.filter(leadStale).length), hint: 'Belum ada kontak 7 hari terakhir', tone: 'sky' },
+      { label: 'Total Konsumen', value: LP.number(leadAll.length), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
+      { label: 'Hot', value: LP.number(jumlah('hot')), hint: 'Siap dibuat booking', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      { label: 'Sudah Booking', value: LP.number(jumlah('booking')), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Perlu Follow Up', value: LP.number(leadAll.filter(leadStale).length), hint: 'Belum ada kontak 7 hari terakhir', bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
     ];
 
-    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">'
+    host.innerHTML = '<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;" class="max-xl:grid-cols-2">'
       + items.map((item) => {
-          let toneClass = 'border-slate-200 bg-white';
-          if (item.tone === 'rose') toneClass = 'border-rose-200 bg-rose-50/30';
-          if (item.tone === 'amber') toneClass = 'border-amber-200 bg-amber-50/30';
-          if (item.tone === 'sky') toneClass = 'border-sky-200 bg-sky-50/30';
-
-          return `<div style="padding: 8px 12px; border-radius: 8px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;" class="border ${toneClass} shadow-sm">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 1px;">${LP.esc(item.label)}</p>
+          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
+            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
             <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #64748b; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
+            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
           </div>`;
       }).join('') + '</div>';
   }
@@ -149,8 +144,8 @@
       columns: [
         {
           label: 'Konsumen',
-          render: (row) => '<span class="font-semibold text-zinc-900">' + LP.esc(row.name) + '</span>'
-            + '<span class="block text-xs text-zinc-500">' + LP.esc(row.email || 'Tanpa email') + '</span>',
+          render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(row.name) + '</span>'
+            + '<span class="block text-xs text-slate-500">' + LP.esc(row.email || 'Tanpa email') + '</span>',
         },
         { label: 'No. Telepon', render: (row) => LP.esc(row.phone) },
         { label: 'Status', render: (row) => LP.badge(row.status) },
@@ -160,7 +155,7 @@
         {
           label: 'Aksi',
           render: (row, index) => '<div class="flex flex-wrap gap-1.5" data-stop>'
-            + '<a href="/data-konsumen/' + LP.esc(row.id) + '" class="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50">Detail</a>'
+            + '<a href="/data-konsumen/' + LP.esc(row.id) + '" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</a>'
             + (leadBolehKelola()
               ? '<button type="button" data-lead-action="delete" data-index="' + index + '" class="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50">Hapus</button>'
               : '')
