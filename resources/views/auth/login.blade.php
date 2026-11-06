@@ -43,7 +43,7 @@
             <img src="/images/logo-wordmark.svg" alt="Logo Luminpark" class="h-12 w-auto self-start lg:hidden">
 
             <h2 class="mt-6 text-2xl font-bold text-zinc-900 lg:mt-0">Masuk ke Sistem</h2>
-            <p class="mt-1 text-sm text-zinc-500">Khusus Manajer, Admin Sales, dan Sales. Konsumen cukup memakai halaman publik.</p>
+            <p class="mt-1 text-sm text-zinc-500">Khusus Super Admin, Admin Sales, dan Sales. Konsumen cukup memakai halaman publik.</p>
 
             <form id="login-form" class="mt-8 space-y-5" novalidate>
                 <div>
@@ -87,7 +87,7 @@
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.7-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"/><path d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9z"/><path d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.6 9.4 5.9 12 5.9z"/></svg>
                     <span id="google-btn-label">Masuk dengan Google</span>
                 </button>
-                <p id="google-note" class="mt-2 text-center text-xs text-zinc-400">Menunggu konfigurasi Manajer pada halaman Pengaturan.</p>
+                <p id="google-note" class="mt-2 text-center text-xs text-zinc-400">Menunggu konfigurasi Super Admin pada halaman Pengaturan.</p>
             </div>
 
             <p class="mt-8 text-center text-xs text-zinc-400">&copy; {{ date('Y') }} Perumahan Luminpark</p>
@@ -156,7 +156,7 @@
 
     googleBtn.addEventListener('click', function () {
         if (googleBtn.disabled) {
-            LP.toast('Masuk dengan Google belum diaktifkan oleh Manajer.', 'info');
+            LP.toast('Masuk dengan Google belum diaktifkan oleh Super Admin.', 'info');
             return;
         }
         location.href = '/auth/google/redirect';

@@ -50,7 +50,7 @@ function record(def) {
   console.log(`${def.id} [${def.status}] ${def.method} ${def.path} -> ${def.actualStatus}`);
 }
 
-const mgr = await json(null, 'POST', '/login', { email: 'manager@luminpark.com', password: 'password123' });
+const mgr = await json(null, 'POST', '/login', { email: 'superadmin@gmail.com', password: 'password123' });
 ctx.managerToken = mgr.json?.access_token;
 const sales = await json(null, 'POST', '/login', { email: 'sales@luminpark.com', password: 'password123' });
 ctx.salesToken = sales.json?.access_token;
@@ -136,7 +136,7 @@ if (receiptRes.json?.data?.id) {
 
 /* TC-J04 Waktu respons proses umum */
 const samples = [
-  ['POST', '/login', { email: 'manager@luminpark.com', password: 'password123' }],
+  ['POST', '/login', { email: 'superadmin@gmail.com', password: 'password123' }],
   ['GET', '/units'],
   ['GET', '/dashboard/manager'],
   ['GET', '/reports/sales?start_date=2026-10-01&end_date=2026-10-31'],

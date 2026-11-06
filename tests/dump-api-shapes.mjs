@@ -37,7 +37,7 @@ async function get(token, key, path) {
 }
 
 async function main() {
-  const manager = await login('manager@luminpark.com');
+  const manager = await login('superadmin@gmail.com');
   const adminSales = await login('admin.sales@luminpark.com');
   const sales = await login('sales@luminpark.com');
 

@@ -5,7 +5,7 @@ const { readFileSync } = await import('node:fs');
 const login = async () => {
   const r = await fetch(BASE + '/login', {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ email: 'manager@luminpark.com', password: 'password123' }),
+    body: JSON.stringify({ email: 'superadmin@gmail.com', password: 'password123' }),
   });
   return (await r.json()).access_token;
 };

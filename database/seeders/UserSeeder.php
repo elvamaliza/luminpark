@@ -10,14 +10,14 @@ use Illuminate\Database\Seeder;
 class UserSeeder extends Seeder
 {
     /**
-     * Empat aktor laporan: Manajer/Super Admin, Admin Sales, Sales, dan Konsumen.
+     * Empat aktor laporan: Super Admin (role manager), Admin Sales, Sales, dan Konsumen.
      * Konsumen tidak memiliki akun login karena seluruh interaksinya lewat halaman publik.
+     * Aktor Manajer dan Admin lama adalah orang yang sama, jadi cukup satu akun super admin.
      */
     public function run(): void
     {
         $users = [
-            ['name' => 'Manajer Lumin Park', 'email' => 'manager@luminpark.com', 'role' => User::ROLE_MANAGER, 'phone' => '0811000000002'],
-            ['name' => 'Manajer Utama', 'email' => 'admin@luminpark.com', 'role' => User::ROLE_MANAGER, 'phone' => '0811000000001'],
+            ['name' => 'Super Admin', 'email' => 'superadmin@gmail.com', 'role' => User::ROLE_MANAGER, 'phone' => '0811000000002'],
             ['name' => 'Admin Sales', 'email' => 'admin.sales@luminpark.com', 'role' => User::ROLE_ADMIN_SALES, 'phone' => '0811000000003'],
             ['name' => 'Budi Sales Utama', 'email' => 'sales@luminpark.com', 'role' => User::ROLE_SALES, 'phone' => '0812345678101', 'sales_code' => 'SL-001', 'whatsapp' => '62812345678101', 'birth_date' => '1995-03-14'],
             ['name' => 'Sari Sales Timur', 'email' => 'sales2@luminpark.com', 'role' => User::ROLE_SALES, 'phone' => '0812345678102', 'sales_code' => 'SL-002', 'whatsapp' => '62812345678102', 'birth_date' => '1997-11-02'],
@@ -55,6 +55,9 @@ class UserSeeder extends Seeder
 
         // Akun konsumen hasil rancangan lama dihapus: konsumen tidak lagi masuk ke sistem.
         User::where('role', User::ROLE_CONSUMER)->delete();
+
+        // Akun admin dan manajer hasil rancangan lama dihapus: super admin cukup superadmin@gmail.com.
+        User::whereIn('email', ['admin@luminpark.com', 'manager@luminpark.com'])->delete();
 
         // Beberapa lead belum tertangani (dibuat publik melalui form kontak).
         CustomerLead::updateOrCreate(

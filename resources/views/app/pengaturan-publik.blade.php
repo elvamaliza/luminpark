@@ -299,7 +299,7 @@
       if (hapus) {
         const row = posts.find((p) => String(p.id) === hapus.dataset.newsDel);
         if (!row) return;
-        const setuju = await LP.confirm('Kabar "' + row.title + '" akan dihapus permanen dari halaman publik.', {
+        const setuju = await LP.confirm('Kabar "' + row.title + '" akan dikeluarkan dari daftar kabar terbaru. Riwayatnya tetap tersimpan di basis data dan dapat dipulihkan administrator.', {
           title: 'Hapus Kabar Terbaru', okLabel: 'Ya, Hapus', danger: true,
         });
         if (!setuju) return;

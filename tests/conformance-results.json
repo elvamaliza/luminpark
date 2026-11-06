@@ -5,14 +5,14 @@
     "skenario": "Autentikasi",
     "deskripsi": "Manajer (Super Admin) login dengan kredensial valid dan menerima token bearer.",
     "langkah": "1. POST /api/login 2. Periksa access_token dan token_expires_at",
-    "dataUji": "email=manager@luminpark.com, password=password123",
+    "dataUji": "email=superadmin@gmail.com, password=password123",
     "ekspektasi": "HTTP 200, body memuat access_token, token_type=Bearer, dan token_expires_at",
     "method": "POST",
     "path": "/login",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"60|AtBca6e4EuE2GbN5OtvAPsBrlVtkn6jtYdKu1Hxt0ed25808\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-02T16:22:30+00:00\",\"user\":{\"id\":2,\"name\":\"Manajer Lumin Park\",\"email\":\"manager@luminpark.com\",\"rol ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"3|xjDdQdux188oTkoPYdiAmsXwQ40cHOs5LLVNVoNf4fbbe65e\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-03T03:08:28+00:00\",\"user\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"role\":\"manag ...[dipotong]",
     "status": "Pass",
-    "catatan": "Token terbit dan kedaluwarsa pada 2026-11-02T16:22:30+00:00.",
+    "catatan": "Token terbit dan kedaluwarsa pada 2026-11-03T03:08:28+00:00.",
     "kebutuhan": "Kebutuhan a (login, batas waktu logout)"
   },
   {
@@ -26,7 +26,7 @@
     "method": "POST",
     "path": "/login",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"61|4k9sgOXssxktzhOIfMUeWYRxBlkZ8Na2EBaktMZvacbde10b\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-02T16:22:30+00:00\",\"user\":{\"id\":3,\"name\":\"Admin Sales\",\"email\":\"admin.sales@luminpark.com\",\"role\": ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"4|SDSmJpN2iV4wHuCdLeSz8Amg2srIwweMkpP3PfZb9c004ce3\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-03T03:08:29+00:00\",\"user\":{\"id\":2,\"name\":\"Admin Sales\",\"email\":\"admin.sales@luminpark.com\",\"role\":\" ...[dipotong]",
     "status": "Pass",
     "catatan": "Peran Admin Sales dikenali sistem.",
     "kebutuhan": "Kebutuhan a (RBAC)"
@@ -42,7 +42,7 @@
     "method": "POST",
     "path": "/login",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"62|LnVl6bVYCYxaOzTKR4dFDNuf3oiCNYJtCXn9jGgM198953ff\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-02T16:22:31+00:00\",\"user\":{\"id\":4,\"name\":\"Sari Sales Timur\",\"email\":\"sales@luminpark.com\",\"role\":\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"5|Msfu26FEB1FHPQpgshY6ZUkcOPeozNg3hHLf5imv59e18948\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-03T03:08:30+00:00\",\"user\":{\"id\":3,\"name\":\"Budi Sales Utama\",\"email\":\"sales@luminpark.com\",\"role\":\"s ...[dipotong]",
     "status": "Pass",
     "catatan": "Profil sales SL-001 ikut dikembalikan.",
     "kebutuhan": "Kebutuhan a (login)"
@@ -80,12 +80,28 @@
     "kebutuhan": "Keputusan 4 aktor (konsumen tanpa akun login)"
   },
   {
+    "id": "TC-A04c",
+    "nama": "Akun Super Admin Lama Ditolak",
+    "skenario": "Autentikasi negatif",
+    "deskripsi": "Akun admin dan manajer adalah orang yang sama, jadi hanya satu akun super admin yang berlaku (superadmin@gmail.com). Kedua akun lama dihapus dari seeder dan tidak bisa login lagi.",
+    "langkah": "1. POST /api/login memakai admin@luminpark.com 2. POST /api/login memakai manager@luminpark.com",
+    "dataUji": "email=admin@luminpark.com dan manager@luminpark.com, password=password123",
+    "ekspektasi": "Keduanya HTTP 401 dan tanpa access_token",
+    "method": "POST",
+    "path": "/login",
+    "actualStatus": 401,
+    "actualBody": "HTTP 401 — (kosong)",
+    "status": "Pass",
+    "catatan": "Hanya superadmin@gmail.com yang aktif: admin@luminpark.com=401, manager@luminpark.com=401",
+    "kebutuhan": "Keputusan akun: satu super admin"
+  },
+  {
     "id": "TC-A05",
     "nama": "Login Password Salah",
     "skenario": "Autentikasi negatif",
     "deskripsi": "Kredensial salah ditolak dan token tidak diberikan.",
     "langkah": "POST /api/login dengan password salah",
-    "dataUji": "email=manager@luminpark.com, password=rahasia-salah",
+    "dataUji": "email=superadmin@gmail.com, password=rahasia-salah",
     "ekspektasi": "HTTP 401 tanpa access_token",
     "method": "POST",
     "path": "/login",
@@ -154,7 +170,7 @@
     "method": "GET",
     "path": "/me",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":2,\"name\":\"Manajer Lumin Park\",\"email\":\"manager@luminpark.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_at\":\"2026-11-01T14:54:45.00 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_at\":\"2026-11-02T03:08:03.000000Z\",\" ...[dipotong]",
     "status": "Pass",
     "catatan": "Kolom status akun (ERD) terpakai.",
     "kebutuhan": "Kebutuhan a + ERD tabel pengguna (status akun)"
@@ -218,9 +234,9 @@
     "method": "GET",
     "path": "/units",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — [{\"id\":1,\"cluster_id\":1,\"unit_code\":\"LT-001\",\"unit_type\":\"Modern Tropical 60\",\"land_size\":72,\"building_size\":60,\"price\":\"750000000.00\",\"status\":\"sold_out\",\"description\":\"Modern Tropical 60 di Cluster Asena \\u2014 72m\\u00b2 \\/ 60m\\u00b2.\",\"image\":\"units\\/tKmhIy ...[dipotong]",
+    "actualBody": "HTTP 200 — [{\"id\":1,\"cluster_id\":1,\"unit_code\":\"LT-001\",\"unit_type\":\"Modern Tropical 60\",\"land_size\":72,\"building_size\":60,\"price\":\"750000000.00\",\"status\":\"sold_out\",\"description\":\"Modern Tropical 60 di Cluster Asena \\u2014 72m\\u00b2 \\/ 60m\\u00b2.\",\"image\":null,\"created_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "10 unit terbaca oleh Admin Sales.",
+    "catatan": "9 unit terbaca oleh Admin Sales.",
     "kebutuhan": "Kebutuhan b (Admin Sales melihat unit)"
   },
   {
@@ -236,7 +252,7 @@
     "actualStatus": 200,
     "actualBody": "HTTP 200 — [{\"id\":3,\"cluster_id\":1,\"unit_code\":\"LT-003\",\"unit_type\":\"Skandinavia 120\",\"land_size\":120,\"building_size\":120,\"price\":\"1450000000.00\",\"status\":\"available\",\"description\":\"Skandinavia 120 di Cluster Asena \\u2014 120m\\u00b2 \\/ 120m\\u00b2.\",\"image\":null,\"created_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "6 unit tersedia.",
+    "catatan": "7 unit tersedia.",
     "kebutuhan": "Kebutuhan b (Sales melihat unit tersedia)"
   },
   {
@@ -250,9 +266,9 @@
     "method": "GET",
     "path": "/sessions",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":60,\"user_id\":2,\"token_id\":\"60\",\"ip_address\":\"127.0.0.1\",\"user_agent\":\"node\",\"login_at\":\"2026-11-01T16:22:30.000000Z\",\"logout_at\":null,\"status\":\"active\",\"created_at\":\"2026-11-01T16:22:30.000000Z\",\"updated_at\":\"2026-11-01T16:22:30.0 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":3,\"user_id\":1,\"token_id\":\"3\",\"ip_address\":\"127.0.0.1\",\"user_agent\":\"node\",\"login_at\":\"2026-11-02T03:08:28.000000Z\",\"logout_at\":null,\"status\":\"active\",\"created_at\":\"2026-11-02T03:08:28.000000Z\",\"updated_at\":\"2026-11-02T03:08:28.000 ...[dipotong]",
     "status": "Pass",
-    "catatan": "login_at=2026-11-01T16:22:30.000000Z, ip=127.0.0.1, token_id=60, status=active",
+    "catatan": "login_at=2026-11-02T03:08:28.000000Z, ip=127.0.0.1, token_id=3, status=active",
     "kebutuhan": "ERD tabel sesi_login"
   },
   {
@@ -298,7 +314,7 @@
     "method": "GET",
     "path": "/units/clusters",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":1,\"project_id\":1,\"name\":\"Cluster Asena\",\"description\":\"Cluster depan dengan akses langsung ke fasilitas utama.\",\"created_at\":\"2026-10-30T07:53:37.000000Z\",\"updated_at\":\"2026-10-30T07:53:37.000000Z\",\"project\":{\"id\":1,\"name\":\"Peruma ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":1,\"project_id\":1,\"name\":\"Cluster Asena\",\"description\":\"Cluster depan dengan akses langsung ke fasilitas utama.\",\"created_at\":\"2026-11-02T03:08:09.000000Z\",\"updated_at\":\"2026-11-02T03:08:09.000000Z\",\"project\":{\"id\":1,\"name\":\"Peruma ...[dipotong]",
     "status": "Pass",
     "catatan": "3 cluster, contoh Cluster Asena (project_id=1).",
     "kebutuhan": "ERD tabel cluster"
@@ -316,7 +332,7 @@
     "actualStatus": 201,
     "actualBody": "HTTP 201 — {\"message\":\"Data unit berhasil disimpan.\",\"data\":{\"cluster_id\":1,\"unit_code\":\"LT-TEST-01\",\"unit_type\":\"Modern Tropical Tes\",\"land_size\":60,\"building_size\":45,\"price\":\"725000000.00\",\"status\":\"available\",\"description\":\"Unit uji fungsional.\",\"updated_at\":\"2026-11 ...[dipotong]",
     "status": "Pass",
-    "catatan": "Unit id=16 terbentuk.",
+    "catatan": "Unit id=10 terbentuk.",
     "kebutuhan": "Kebutuhan b (menambah data unit)"
   },
   {
@@ -360,9 +376,9 @@
     "dataUji": "status=delivery_process",
     "ekspektasi": "HTTP 200 dengan status delivery_process",
     "method": "PUT",
-    "path": "/units/16",
+    "path": "/units/10",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"message\":\"Data unit berhasil diperbarui.\",\"data\":{\"id\":16,\"cluster_id\":1,\"unit_code\":\"LT-TEST-01\",\"unit_type\":\"Modern Tropical Tes\",\"land_size\":60,\"building_size\":45,\"price\":\"725000000.00\",\"status\":\"delivery_process\",\"description\":\"Unit uji fungsional.\",\"ima ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"message\":\"Data unit berhasil diperbarui.\",\"data\":{\"id\":10,\"cluster_id\":1,\"unit_code\":\"LT-TEST-01\",\"unit_type\":\"Modern Tropical Tes\",\"land_size\":60,\"building_size\":45,\"price\":\"725000000.00\",\"status\":\"delivery_process\",\"description\":\"Unit uji fungsional.\",\"ima ...[dipotong]",
     "status": "Pass",
     "catatan": "Status unit berhasil diperbarui.",
     "kebutuhan": "Kebutuhan b (memperbarui status unit)"
@@ -376,9 +392,9 @@
     "dataUji": "id unit hasil TC-B03",
     "ekspektasi": "HTTP 200 dengan data.id sesuai",
     "method": "GET",
-    "path": "/units/16",
+    "path": "/units/10",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"message\":\"Detail unit berhasil ditemukan.\",\"data\":{\"id\":16,\"cluster_id\":1,\"unit_code\":\"LT-TEST-01\",\"unit_type\":\"Modern Tropical Tes\",\"land_size\":60,\"building_size\":45,\"price\":\"725000000.00\",\"status\":\"delivery_process\",\"description\":\"Unit uji fungsional.\",\"im ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"message\":\"Detail unit berhasil ditemukan.\",\"data\":{\"id\":10,\"cluster_id\":1,\"unit_code\":\"LT-TEST-01\",\"unit_type\":\"Modern Tropical Tes\",\"land_size\":60,\"building_size\":45,\"price\":\"725000000.00\",\"status\":\"delivery_process\",\"description\":\"Unit uji fungsional.\",\"im ...[dipotong]",
     "status": "Pass",
     "catatan": "tipe=Modern Tropical Tes, harga=725000000.00",
     "kebutuhan": "Kebutuhan b"
@@ -408,7 +424,7 @@
     "dataUji": "id unit hasil TC-B03",
     "ekspektasi": "HTTP 200",
     "method": "DELETE",
-    "path": "/units/16",
+    "path": "/units/10",
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"message\":\"Data unit berhasil dihapus.\"}",
     "status": "Pass",
@@ -444,7 +460,7 @@
     "actualStatus": 201,
     "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Calon konsumen berhasil ditambahkan\",\"data\":{\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"warm\",\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"source\":\"manual\",\"sales ...[dipotong]",
     "status": "Pass",
-    "catatan": "sales_id=5 berasal dari token login.",
+    "catatan": "sales_id=1 berasal dari token login.",
     "kebutuhan": "Kebutuhan e (Sales menambah calon konsumen)"
   },
   {
@@ -488,9 +504,9 @@
     "dataUji": "status=hot",
     "ekspektasi": "HTTP 200 dengan status hot",
     "method": "PUT",
-    "path": "/customer-leads/16",
+    "path": "/customer-leads/6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data calon konsumen berhasil diperbarui\",\"data\":{\"id\":16,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"8 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data calon konsumen berhasil diperbarui\",\"data\":{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"80 ...[dipotong]",
     "status": "Pass",
     "catatan": "status=hot",
     "kebutuhan": "Kebutuhan e (memperbarui status)"
@@ -506,9 +522,9 @@
     "method": "POST",
     "path": "/follow-ups",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Riwayat follow-up berhasil dicatat\",\"data\":{\"lead_id\":16,\"follow_up_date\":\"2026-10-20T09:30:00.000000Z\",\"status_before\":\"warm\",\"status_after\":\"hot\",\"method\":\"whatsapp\",\"note\":\"Menjelaskan skema cash bertahap dan menjadwalkan survey.\" ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Riwayat follow-up berhasil dicatat\",\"data\":{\"lead_id\":6,\"follow_up_date\":\"2026-10-20T09:30:00.000000Z\",\"status_before\":\"warm\",\"status_after\":\"hot\",\"method\":\"whatsapp\",\"note\":\"Menjelaskan skema cash bertahap dan menjadwalkan survey.\", ...[dipotong]",
     "status": "Pass",
-    "catatan": "follow up id=21, sales_id=5",
+    "catatan": "follow up id=4, sales_id=1",
     "kebutuhan": "Kebutuhan e (riwayat follow up)"
   },
   {
@@ -520,9 +536,9 @@
     "dataUji": "id lead hasil TC-C01",
     "ekspektasi": "HTTP 200 dengan status=hot dan last_follow_up=2026-10-20",
     "method": "GET",
-    "path": "/customer-leads/16",
+    "path": "/customer-leads/6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":16,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_u ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_up ...[dipotong]",
     "status": "Pass",
     "catatan": "status=hot, last_follow_up=2026-10-20T00:00:00.000000Z",
     "kebutuhan": "Kebutuhan e (status terkini)"
@@ -536,9 +552,9 @@
     "dataUji": "lead_id dari TC-C01",
     "ekspektasi": "HTTP 200 berisi minimal satu riwayat",
     "method": "GET",
-    "path": "/follow-ups?lead_id=16",
+    "path": "/follow-ups?lead_id=6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":21,\"lead_id\":16,\"sales_id\":5,\"follow_up_date\":\"2026-10-20T09:30:00.000000Z\",\"status_before\":\"warm\",\"status_after\":\"hot\",\"method\":\"whatsapp\",\"note\":\"Menjelaskan skema cash bertahap dan menjadwalkan survey.\",\"created_at\":\"2026-11-01 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":4,\"lead_id\":6,\"sales_id\":1,\"follow_up_date\":\"2026-10-20T09:30:00.000000Z\",\"status_before\":\"warm\",\"status_after\":\"hot\",\"method\":\"whatsapp\",\"note\":\"Menjelaskan skema cash bertahap dan menjadwalkan survey.\",\"created_at\":\"2026-11-02T0 ...[dipotong]",
     "status": "Pass",
     "catatan": "1 riwayat follow up terbaca oleh Admin Sales.",
     "kebutuhan": "Kebutuhan e (Admin Sales memantau follow up)"
@@ -554,7 +570,7 @@
     "method": "GET",
     "path": "/customer-leads?status=hot",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":16,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_u ...[dipotong]",
     "status": "Pass",
     "catatan": "1 lead hot lintas sales.",
     "kebutuhan": "Kebutuhan e (filter status)"
@@ -570,9 +586,9 @@
     "method": "GET",
     "path": "/customer-leads",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":16,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"hot\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follow_u ...[dipotong]",
     "status": "Pass",
-    "catatan": "7 lead, seluruhnya milik sales ini (lead sales2 id=17 tersembunyi).",
+    "catatan": "3 lead, seluruhnya milik sales ini (lead sales2 id=7 tersembunyi).",
     "kebutuhan": "Kebutuhan a + e (hak akses berjenjang)"
   },
   {
@@ -581,10 +597,10 @@
     "skenario": "RBAC negatif",
     "deskripsi": "Sales tidak dapat mengubah lead yang belonging sales lain.",
     "langkah": "PUT /api/customer-leads/{id} memakai token sales1 atas lead milik sales2",
-    "dataUji": "lead_id=17 milik sales_id=6",
+    "dataUji": "lead_id=7 milik sales_id=2",
     "ekspektasi": "HTTP 403",
     "method": "PUT",
-    "path": "/customer-leads/17",
+    "path": "/customer-leads/7",
     "actualStatus": 403,
     "actualBody": "HTTP 403 — {\"success\":false,\"message\":\"Anda hanya dapat mengubah data calon konsumen Anda sendiri.\"}",
     "status": "Pass",
@@ -618,9 +634,9 @@
     "method": "POST",
     "path": "/payment-schemes",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"data\":{\"scheme_name\":\"Cash Bertahap 24\",\"scheme_type\":\"cash bertahap\",\"description\":\"Uji perhitungan skema.\",\"down_payment_percent\":\"25.00\",\"installment_months\":24,\"interest_rate\":\"0.00\",\"is_active\":true,\"updated_at\":\"2026-11-01T16:22:48.00000 ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"data\":{\"scheme_name\":\"Cash Bertahap 24\",\"scheme_type\":\"cash bertahap\",\"description\":\"Uji perhitungan skema.\",\"down_payment_percent\":\"25.00\",\"installment_months\":24,\"interest_rate\":\"0.00\",\"is_active\":true,\"updated_at\":\"2026-11-02T03:08:54.00000 ...[dipotong]",
     "status": "Pass",
-    "catatan": "scheme_type wajib (tanpa tipe → HTTP 422); skema baru id=5",
+    "catatan": "scheme_type wajib (tanpa tipe → HTTP 422); skema baru id=4",
     "kebutuhan": "Kebutuhan b/c (tiga skema pembayaran)"
   },
   {
@@ -632,7 +648,7 @@
     "dataUji": "unit harga 1.000.000.000, DP 25%, tenor 24 bulan, bunga 0%",
     "ekspektasi": "HTTP 200 dengan down_payment_amount=250.000.000 dan installment_amount=31.250.000",
     "method": "POST",
-    "path": "/payment-schemes/5/simulate",
+    "path": "/payment-schemes/4/simulate",
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"down_payment_amount\":250000000,\"installment_amount\":31250000,\"installment_months\":24,\"interest_total\":0,\"total_price\":1000000000,\"scheme_name\":\"Cash Bertahap 24\",\"scheme_type\":\"cash bertahap\"}}",
     "status": "Pass",
@@ -677,14 +693,14 @@
     "skenario": "Pemesanan validasi",
     "deskripsi": "Klien tidak lagi mengirim booking_code, DP, angsuran, atau sisa pembayaran; semuanya dihitung server.",
     "langkah": "POST /api/bookings tanpa field turunan",
-    "dataUji": "lead_id=16 (hot), unit_id=6 (available), skema Cash Bertahap 30%/36 bulan",
+    "dataUji": "lead_id=6 (hot), unit_id=4 (available), skema Cash Bertahap 30%/36 bulan",
     "ekspektasi": "HTTP 201 dengan booking_code otomatis dan DP = 30% harga unit",
     "method": "POST",
     "path": "/bookings",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pemesanan (Booking) berhasil dibuat\",\"data\":{\"booking_code\":\"BK2026110005\",\"lead_id\":16,\"sales_id\":5,\"unit_id\":6,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"1450000000.00\",\"down_payment_amount\":\" ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pemesanan (Booking) berhasil dibuat\",\"data\":{\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"750000000.00\",\"down_payment_amount\":\"22 ...[dipotong]",
     "status": "Pass",
-    "catatan": "kode=BK2026110005, harga=1.450.000.000, DP=435.000.000, angsuran=28.194.444,44, sisa=1.450.000.000",
+    "catatan": "kode=BK2026110003, harga=750.000.000, DP=225.000.000, angsuran=14.583.333,33, sisa=750.000.000",
     "kebutuhan": "Kebutuhan c.2–c.3 (skema & perhitungan otomatis)"
   },
   {
@@ -693,12 +709,12 @@
     "skenario": "Dampak pemesanan",
     "deskripsi": "Sistem mengubah status unit menjadi dipesan setelah booking berhasil.",
     "langkah": "GET /api/units/{id} setelah booking",
-    "dataUji": "unit_id=6 (hasil TC-D05)",
+    "dataUji": "unit_id=4 (hasil TC-D05)",
     "ekspektasi": "HTTP 200 dengan status=booking",
     "method": "GET",
-    "path": "/units/6",
+    "path": "/units/4",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"message\":\"Detail unit berhasil ditemukan.\",\"data\":{\"id\":6,\"cluster_id\":2,\"unit_code\":\"LT-006\",\"unit_type\":\"Skandinavia 120\",\"land_size\":120,\"building_size\":120,\"price\":\"1450000000.00\",\"status\":\"booking\",\"description\":\"Skandinavia 120 di Cluster Bruna \\u2014  ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"message\":\"Detail unit berhasil ditemukan.\",\"data\":{\"id\":4,\"cluster_id\":2,\"unit_code\":\"LT-004\",\"unit_type\":\"Modern Tropical 60\",\"land_size\":72,\"building_size\":60,\"price\":\"750000000.00\",\"status\":\"booking\",\"description\":\"Modern Tropical 60 di Cluster Bruna \\u20 ...[dipotong]",
     "status": "Pass",
     "catatan": "status unit=booking",
     "kebutuhan": "Kebutuhan c.4"
@@ -709,12 +725,12 @@
     "skenario": "Dampak pemesanan",
     "deskripsi": "Calon konsumen yang sudah booking berubah status menjadi booking (konsumen).",
     "langkah": "GET /api/customer-leads/{id}",
-    "dataUji": "lead_id=16 (hasil TC-C01)",
+    "dataUji": "lead_id=6 (hasil TC-C01)",
     "ekspektasi": "HTTP 200 dengan status=booking",
     "method": "GET",
-    "path": "/customer-leads/16",
+    "path": "/customer-leads/6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":16,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"booking\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_foll ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"address\":\"Jl. Uji Coba 1\",\"status\":\"booking\",\"interested_unit\":null,\"budget\":\"800000000.00\",\"note\":\"Lead pengujian.\",\"last_follo ...[dipotong]",
     "status": "Pass",
     "catatan": "status lead=booking",
     "kebutuhan": "Kebutuhan e + ERD"
@@ -730,9 +746,9 @@
     "method": "GET",
     "path": "/bookings?status=menunggu%20dp",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":7,\"booking_code\":\"BK2026110005\",\"lead_id\":16,\"sales_id\":5,\"unit_id\":6,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"1450000000.00\",\"down_payment_amount\":\"435000000.00\",\"installment_amount\":\"2819 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":3,\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"750000000.00\",\"down_payment_amount\":\"225000000.00\",\"installment_amount\":\"145833 ...[dipotong]",
     "status": "Pass",
-    "catatan": "BK2026110005: Consumer Uji / Sari Sales Timur / LT-006 / Cash Bertahap",
+    "catatan": "BK2026110003: Consumer Uji / Budi Sales Utama / LT-004 / Cash Bertahap",
     "kebutuhan": "ERD tabel pemesanan"
   },
   {
@@ -741,12 +757,12 @@
     "skenario": "Membaca pemesanan",
     "deskripsi": "Detail booking menyertakan status pelunasan hasil turunan, bukan masukan pengguna.",
     "langkah": "GET /api/bookings/{id}",
-    "dataUji": "booking_id=7 (hasil TC-D05)",
+    "dataUji": "booking_id=3 (hasil TC-D05)",
     "ekspektasi": "HTTP 200 dengan settlement_status=menunggu dp",
     "method": "GET",
-    "path": "/bookings/7",
+    "path": "/bookings/3",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":7,\"booking_code\":\"BK2026110005\",\"lead_id\":16,\"sales_id\":5,\"unit_id\":6,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"1450000000.00\",\"down_payment_amount\":\"435000000.00\",\"installment_amount\":\"28194 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":3,\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"750000000.00\",\"down_payment_amount\":\"225000000.00\",\"installment_amount\":\"1458333 ...[dipotong]",
     "status": "Pass",
     "catatan": "settlement_status=menunggu dp, pembayaran=0",
     "kebutuhan": "Kebutuhan d.3 (status pelunasan otomatis)"
@@ -760,9 +776,9 @@
     "dataUji": "status=lunas, remaining_amount=0",
     "ekspektasi": "HTTP 200 tetapi status tetap menunggu dp karena diturunkan dari ledger",
     "method": "PUT",
-    "path": "/bookings/7",
+    "path": "/bookings/3",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data booking berhasil diperbarui\",\"data\":{\"id\":7,\"booking_code\":\"BK2026110005\",\"lead_id\":16,\"sales_id\":5,\"unit_id\":6,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"1450000000.00\",\"down_payment_amoun ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data booking berhasil diperbarui\",\"data\":{\"id\":3,\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"750000000.00\",\"down_payment_amount\" ...[dipotong]",
     "status": "Pass",
     "catatan": "status dipertahankan sistem pada \"menunggu dp\".",
     "kebutuhan": "Kebutuhan d.3 (perhitungan otomatis)"
@@ -773,14 +789,14 @@
     "skenario": "Membuat pembayaran",
     "deskripsi": "Sales mencatat pembayaran uang muka; status verifikasi awal selalu pending.",
     "langkah": "POST /api/payments",
-    "dataUji": "booking_id=7, nominal = uang muka 435000000, jenis cash bertahap",
+    "dataUji": "booking_id=3, nominal = uang muka 225000000, jenis cash bertahap",
     "ekspektasi": "HTTP 201 dengan verification_status=pending dan verified_by kosong",
     "method": "POST",
     "path": "/payments",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pembayaran berhasil dicatat, menunggu verifikasi\",\"data\":{\"booking_id\":7,\"payment_type\":\"cash bertahap\",\"amount\":\"435000000.00\",\"payment_date\":\"2026-10-22T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":\"8890122345\",\"account_hol ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pembayaran berhasil dicatat, menunggu verifikasi\",\"data\":{\"booking_id\":3,\"payment_type\":\"cash bertahap\",\"amount\":\"225000000.00\",\"payment_date\":\"2026-10-22T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":\"8890122345\",\"account_hol ...[dipotong]",
     "status": "Pass",
-    "catatan": "payment id=17, verifikasi=pending",
+    "catatan": "payment id=5, verifikasi=pending",
     "kebutuhan": "Kebutuhan d.1 (mencatat pembayaran DP)"
   },
   {
@@ -808,7 +824,7 @@
     "dataUji": "verification_status=verified, token sales",
     "ekspektasi": "HTTP 403",
     "method": "PUT",
-    "path": "/payments/17/verify",
+    "path": "/payments/5/verify",
     "actualStatus": 403,
     "actualBody": "HTTP 403 — {\"success\":false,\"message\":\"Forbidden. Anda tidak memiliki akses ke resource ini.\"}",
     "status": "Pass",
@@ -824,11 +840,11 @@
     "dataUji": "verification_status=verified",
     "ekspektasi": "HTTP 200 dengan verified_by = id manajer dan verified_at terisi",
     "method": "PUT",
-    "path": "/payments/17/verify",
+    "path": "/payments/5/verify",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":17,\"booking_id\":7,\"payment_type\":\"cash bertahap\",\"amount\":\"435000000.00\",\"payment_date\":\"2026-10-22T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":\"8890122345\",\"acc ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":5,\"booking_id\":3,\"payment_type\":\"cash bertahap\",\"amount\":\"225000000.00\",\"payment_date\":\"2026-10-22T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":\"8890122345\",\"acco ...[dipotong]",
     "status": "Pass",
-    "catatan": "verified_by=2 (2), verified_at=2026-11-01T16:22:54.000000Z",
+    "catatan": "verified_by=1 (1), verified_at=2026-11-02T03:09:02.000000Z",
     "kebutuhan": "Kebutuhan d.2 + ERD (pihak & waktu verifikasi)"
   },
   {
@@ -837,14 +853,14 @@
     "skenario": "Dampak verifikasi",
     "deskripsi": "Setelah DP terverifikasi, status pemesanan otomatis berubah menjadi dp lunas.",
     "langkah": "GET /api/bookings/{id}",
-    "dataUji": "booking_id=7",
+    "dataUji": "booking_id=3",
     "ekspektasi": "HTTP 200 dengan status=dp lunas dan sisa pembayaran berkurang",
     "method": "GET",
-    "path": "/bookings/7",
+    "path": "/bookings/3",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":7,\"booking_code\":\"BK2026110005\",\"lead_id\":16,\"sales_id\":5,\"unit_id\":6,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"1450000000.00\",\"down_payment_amount\":\"435000000.00\",\"installment_amount\":\"28194 ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":3,\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_scheme_id\":3,\"booking_date\":\"2026-10-21T00:00:00.000000Z\",\"total_price\":\"750000000.00\",\"down_payment_amount\":\"225000000.00\",\"installment_amount\":\"1458333 ...[dipotong]",
     "status": "Pass",
-    "catatan": "status=dp lunas, sisa=1.015.000.000 (harapan 1.015.000.000)",
+    "catatan": "status=dp lunas, sisa=525.000.000 (harapan 525.000.000)",
     "kebutuhan": "Kebutuhan d.3 (status pelunasan & sisa otomatis)"
   },
   {
@@ -853,14 +869,14 @@
     "skenario": "Verifikasi ditolak",
     "deskripsi": "Pembayaran yang ditolak tidak mengubah sisa pembayaran maupun status pelunasan.",
     "langkah": "1. Catat pembayaran kedua 2. Verifikasi dengan status rejected 3. Periksa booking",
-    "dataUji": "nominal angsuran 28194444.44, verification_status=rejected",
+    "dataUji": "nominal angsuran 14583333.33, verification_status=rejected",
     "ekspektasi": "HTTP 200 dengan verification_status=rejected dan sisa tidak berubah",
     "method": "PUT",
-    "path": "/payments/18/verify",
+    "path": "/payments/6/verify",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":18,\"booking_id\":7,\"payment_type\":\"cash bertahap\",\"amount\":\"28194444.44\",\"payment_date\":\"2026-10-23T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":null,\"account_hold ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":6,\"booking_id\":3,\"payment_type\":\"cash bertahap\",\"amount\":\"14583333.33\",\"payment_date\":\"2026-10-23T00:00:00.000000Z\",\"bank_name\":\"BCA\",\"account_number\":null,\"account_holde ...[dipotong]",
     "status": "Pass",
-    "catatan": "sisa sebelum=1.015.000.000, sesudah=1.015.000.000, status booking=dp lunas",
+    "catatan": "sisa sebelum=525.000.000, sesudah=525.000.000, status booking=dp lunas",
     "kebutuhan": "Kebutuhan d.2 (terverifikasi/ditolak)"
   },
   {
@@ -872,9 +888,9 @@
     "dataUji": "nominal angsuran lalu nominal sisa pembayaran",
     "ekspektasi": "HTTP 200 dengan booking status=lunas dan unit status=sold_out",
     "method": "PUT",
-    "path": "/payments/20/verify",
+    "path": "/payments/8/verify",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":20,\"booking_id\":7,\"payment_type\":\"cash bertahap\",\"amount\":\"986805555.56\",\"payment_date\":\"2026-10-25T00:00:00.000000Z\",\"bank_name\":\"BNI\",\"account_number\":null,\"account_hol ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Status verifikasi pembayaran berhasil diperbarui\",\"data\":{\"id\":8,\"booking_id\":3,\"payment_type\":\"cash bertahap\",\"amount\":\"510416666.67\",\"payment_date\":\"2026-10-25T00:00:00.000000Z\",\"bank_name\":\"BNI\",\"account_number\":null,\"account_hold ...[dipotong]",
     "status": "Pass",
     "catatan": "booking setelah angsuran=cicilan, booking akhir=lunas, unit=sold_out, sisa=0",
     "kebutuhan": "Kebutuhan d.3 + b (sold out)"
@@ -901,12 +917,12 @@
     "skenario": "Membaca pembayaran",
     "deskripsi": "Sales memantau status pembayaran konsumennya melalui filter booking dan verifikasi.",
     "langkah": "1. GET /api/payments?booking_id={id} 2. GET /api/payments?verification_status=pending",
-    "dataUji": "booking_id=7",
+    "dataUji": "booking_id=3",
     "ekspektasi": "HTTP 200 berisi riwayat pembayaran booking tersebut",
     "method": "GET",
-    "path": "/payments?booking_id=7",
+    "path": "/payments?booking_id=3",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":20,\"booking_id\":7,\"payment_type\":\"cash bertahap\",\"amount\":\"986805555.56\",\"payment_date\":\"2026-10-25T00:00:00.000000Z\",\"bank_name\":\"BNI\",\"account_number\":null,\"account_holder\":null,\"transfer_receipt\":null,\"verification_status\":\"ver ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":8,\"booking_id\":3,\"payment_type\":\"cash bertahap\",\"amount\":\"510416666.67\",\"payment_date\":\"2026-10-25T00:00:00.000000Z\",\"bank_name\":\"BNI\",\"account_number\":null,\"account_holder\":null,\"transfer_receipt\":null,\"verification_status\":\"veri ...[dipotong]",
     "status": "Pass",
     "catatan": "4 pembayaran (3 terverifikasi, 1 ditolak).",
     "kebutuhan": "Kebutuhan d.4 (Sales memantau pembayaran)"
@@ -917,14 +933,14 @@
     "skenario": "Koreksi data",
     "deskripsi": "Menghapus pembayaran terverifikasi menaikkan kembali sisa pembayaran.",
     "langkah": "DELETE /api/payments/{id} lalu periksa booking",
-    "dataUji": "payment_id=19 (angsuran terverifikasi 28.194.444,44)",
+    "dataUji": "payment_id=7 (angsuran terverifikasi 14.583.333,33)",
     "ekspektasi": "HTTP 200 dan remaining_amount bertambah sesuai nominal yang dihapus",
     "method": "DELETE",
-    "path": "/payments/19",
+    "path": "/payments/7",
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data pembayaran berhasil dihapus\"}",
     "status": "Pass",
-    "catatan": "sisa dihitung ulang 28.194.444,44 (= angsuran yang dihapus), status booking=cicilan",
+    "catatan": "sisa dihitung ulang 14.583.333,33 (= angsuran yang dihapus), status booking=cicilan",
     "kebutuhan": "Kebutuhan d.3 (sinkronisasi sisa)"
   },
   {
@@ -949,7 +965,7 @@
     "skenario": "Validasi sales",
     "deskripsi": "Email telah dipakai sehingga pendaftaran sales baru ditolak.",
     "langkah": "POST /api/sales memakai email yang sudah ada",
-    "dataUji": "email=manager@luminpark.com",
+    "dataUji": "email=superadmin@gmail.com",
     "ekspektasi": "HTTP 422",
     "method": "POST",
     "path": "/sales",
@@ -968,9 +984,9 @@
     "dataUji": "name=New Sales Revisi, whatsapp_number=6281233000888",
     "ekspektasi": "HTTP 200 dengan nama terbaru",
     "method": "PUT",
-    "path": "/sales/13",
+    "path": "/sales/6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data sales berhasil diperbarui\",\"data\":{\"id\":13,\"name\":\"New Sales Revisi\",\"email\":\"new.sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000777\",\"address\":\"Jl. Target No. 9\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verif ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data sales berhasil diperbarui\",\"data\":{\"id\":6,\"name\":\"New Sales Revisi\",\"email\":\"new.sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000777\",\"address\":\"Jl. Target No. 9\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verifi ...[dipotong]",
     "status": "Pass",
     "catatan": "name=New Sales Revisi, wa=6281233000888",
     "kebutuhan": "Kebutuhan h.3 (Admin Sales mengelola sales)"
@@ -984,7 +1000,7 @@
     "dataUji": "password baru=passwordBaru123",
     "ekspektasi": "HTTP 200 dan token lama tidak lagi berlaku",
     "method": "POST",
-    "path": "/sales/13/reset-password",
+    "path": "/sales/6/reset-password",
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Password sales berhasil direset dan sesi login dihapus.\",\"auth\":{\"password_source\":\"manual\",\"password_default\":null}}",
     "status": "Pass",
@@ -1000,9 +1016,9 @@
     "dataUji": "account_status=nonaktif",
     "ekspektasi": "HTTP 200 saat perubahan dan HTTP 403 saat login",
     "method": "PUT",
-    "path": "/sales/13",
+    "path": "/sales/6",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data sales berhasil diperbarui\",\"data\":{\"id\":13,\"name\":\"New Sales Revisi\",\"email\":\"new.sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000777\",\"address\":\"Jl. Target No. 9\",\"status\":\"nonaktif\",\"must_change_password\":false,\"email_ve ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Data sales berhasil diperbarui\",\"data\":{\"id\":6,\"name\":\"New Sales Revisi\",\"email\":\"new.sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000777\",\"address\":\"Jl. Target No. 9\",\"status\":\"nonaktif\",\"must_change_password\":false,\"email_ver ...[dipotong]",
     "status": "Pass",
     "catatan": "status akun=nonaktif, percobaan login→HTTP 403",
     "kebutuhan": "ERD tabel pengguna (status akun)"
@@ -1013,14 +1029,14 @@
     "skenario": "Memantau kinerja",
     "deskripsi": "Endpoint kinerja mengembalikan metrik leads, booking, closing, dan capaian target.",
     "langkah": "GET /api/sales/{id}/performance?start_date&end_date",
-    "dataUji": "user id=4, periode 2026-10-01 s/d 2026-10-31",
+    "dataUji": "user id=3, periode 2026-10-01 s/d 2026-10-31",
     "ekspektasi": "HTTP 200 dengan blok metrics dan target",
     "method": "GET",
-    "path": "/sales/4/performance?start_date=2026-10-01&end_date=2026-10-31",
+    "path": "/sales/3/performance?start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales\":{\"id\":5,\"user_id\":4,\"name\":\"Sari Sales Timur\",\"sales_code\":\"SL-001\"},\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"metrics\":{\"total_leads\":7,\"new_leads\":1,\"total_follow_ups\":4,\"bookings\":4,\"units_sold\":1,\"booked_ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales\":{\"id\":1,\"user_id\":3,\"name\":\"Budi Sales Utama\",\"sales_code\":\"SL-001\"},\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"metrics\":{\"total_leads\":3,\"new_leads\":0,\"total_follow_ups\":2,\"bookings\":2,\"units_sold\":1,\"booked_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "leads=7, booking=4, unit terjual=1, pembayaran terverifikasi=3.936.805.555,56, target=belum ada",
+    "catatan": "leads=3, booking=2, unit terjual=1, pembayaran terverifikasi=1.485.416.666,67, target=belum ada",
     "kebutuhan": "Kebutuhan h.2 + ERD target_sales"
   },
   {
@@ -1029,10 +1045,10 @@
     "skenario": "Integritas data sales",
     "deskripsi": "Sales dengan data pemesanan tidak dapat dihapus.",
     "langkah": "DELETE /api/sales/{id} pada sales yang memiliki booking",
-    "dataUji": "user id=4",
+    "dataUji": "user id=3",
     "ekspektasi": "HTTP 422",
     "method": "DELETE",
-    "path": "/sales/4",
+    "path": "/sales/3",
     "actualStatus": 422,
     "actualBody": "HTTP 422 — {\"success\":false,\"message\":\"Sales tidak dapat dihapus karena masih memiliki data pemesanan. Ubah status menjadi nonaktif.\"}",
     "status": "Pass",
@@ -1045,10 +1061,10 @@
     "skenario": "Menghapus data sales",
     "deskripsi": "Sales tanpa transaksi dapat dihapus oleh Manajer.",
     "langkah": "DELETE /api/sales/{id} pada sales hasil TC-F01",
-    "dataUji": "user id=13",
+    "dataUji": "user id=6",
     "ekspektasi": "HTTP 200",
     "method": "DELETE",
-    "path": "/sales/13",
+    "path": "/sales/6",
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Sales berhasil dihapus\"}",
     "status": "Pass",
@@ -1066,9 +1082,9 @@
     "method": "GET",
     "path": "/dashboard/manager",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"total_units\":10,\"units_available\":5,\"units_booking\":1,\"units_sold_out\":4,\"units_not_delivered\":1,\"total_revenue\":4158122222.23,\"total_sales\":3,\"total_prospects\":10,\"total_customers\":5,\"total_leads\":15,\"total_bookings\":5,\"active_booking ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"total_units\":9,\"units_available\":6,\"units_booking\":1,\"units_sold_out\":2,\"units_not_delivered\":1,\"total_revenue\":1706733333.34,\"total_sales\":3,\"total_prospects\":4,\"total_customers\":3,\"total_leads\":7,\"total_bookings\":3,\"active_bookings\": ...[dipotong]",
     "status": "Pass",
-    "catatan": "units_sold_out=4, units_not_delivered=1, total_revenue=4.158.122.222,23, total_sales=3, total_prospects=10, total_customers=5",
+    "catatan": "units_sold_out=2, units_not_delivered=1, total_revenue=1.706.733.333,34, total_sales=3, total_prospects=4, total_customers=3",
     "kebutuhan": "Kebutuhan f.1"
   },
   {
@@ -1082,9 +1098,9 @@
     "method": "GET",
     "path": "/dashboard/admin-sales",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"sales_count\":3,\"total_bookings\":5,\"total_revenue\":0,\"total_leads\":12},\"counters\":{\"total_units\":10,\"units_available\":5,\"units_sold_out\":4,\"total_customers\":5,\"activ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"sales_count\":3,\"total_bookings\":3,\"total_revenue\":0,\"total_leads\":6},\"counters\":{\"total_units\":9,\"units_available\":6,\"units_sold_out\":2,\"total_customers\":3,\"active_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "3 sales; total booking=5, omzet=0",
+    "catatan": "3 sales; total booking=3, omzet=0",
     "kebutuhan": "Kebutuhan f.2"
   },
   {
@@ -1098,9 +1114,9 @@
     "method": "GET",
     "path": "/dashboard/sales",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales_id\":5,\"sales_code\":\"SL-001\",\"total_leads\":7,\"leads_by_status\":{\"cold\":3,\"warm\":1,\"hot\":0,\"booking\":3},\"total_bookings\":4,\"bookings_by_status\":{\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":3,\"lunas\":1},\"total_closing\":4000000000,\"paymen ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales_id\":1,\"sales_code\":\"SL-001\",\"total_leads\":3,\"leads_by_status\":{\"cold\":1,\"warm\":1,\"hot\":0,\"booking\":1},\"total_bookings\":2,\"bookings_by_status\":{\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":1,\"lunas\":1},\"total_closing\":1500000000,\"paymen ...[dipotong]",
     "status": "Pass",
-    "catatan": "sales_id=5 (dari token), status={\"cold\":3,\"warm\":1,\"hot\":0,\"booking\":3}, booking={\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":3,\"lunas\":1}, closing=4.000.000.000",
+    "catatan": "sales_id=1 (dari token), status={\"cold\":1,\"warm\":1,\"hot\":0,\"booking\":1}, booking={\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":1,\"lunas\":1}, closing=1.500.000.000",
     "kebutuhan": "Kebutuhan f.3 + a (RBAC peran)"
   },
   {
@@ -1130,9 +1146,9 @@
     "method": "GET",
     "path": "/reports/sales?start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"total_transactions\":5,\"total_sales_value\":5050000000,\"total_remaining_value\":891877777.77,\"data\":[{\"id\":5,\"booking_code\":\"BK2026110003\",\"lead_id\":7,\"sales_id\":5,\"unit_id\":4,\"payment_ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"total_transactions\":3,\"total_sales_value\":2550000000,\"total_remaining_value\":843266666.66,\"data\":[{\"id\":3,\"booking_code\":\"BK2026110003\",\"lead_id\":6,\"sales_id\":1,\"unit_id\":4,\"payment_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "5 transaksi, nilai 5.050.000.000, sisa 891.877.777,77",
+    "catatan": "3 transaksi, nilai 2.550.000.000, sisa 843.266.666,66",
     "kebutuhan": "Kebutuhan f.4 (laporan penjualan)"
   },
   {
@@ -1146,9 +1162,9 @@
     "method": "GET",
     "path": "/reports/settlement?start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"total_transactions\":10,\"total_settled_amount\":4158122222.23,\"recap\":{\"by_consumer\":{\"Consumer Uji\":{\"transactions\":6,\"total_amount\":3186805555.56},\"Dimas Prakoso\":{\"transactions\":2,\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"total_transactions\":6,\"total_settled_amount\":1706733333.34,\"recap\":{\"by_consumer\":{\"Consumer Uji\":{\"transactions\":2,\"total_amount\":735416666.67},\"Dimas Prakoso\":{\"transactions\":2,\"to ...[dipotong]",
     "status": "Pass",
-    "catatan": "rekap 3 konsumen, 5 unit, 3 skema; total 4.158.122.222,23",
+    "catatan": "rekap 3 konsumen, 3 unit, 3 skema; total 1.706.733.333,34",
     "kebutuhan": "Kebutuhan d.5 (rekap per konsumen, unit, skema)"
   },
   {
@@ -1162,9 +1178,9 @@
     "method": "GET",
     "path": "/reports/performance",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"total_leads\":12,\"total_bookings\":5,\"total_closing\":5050000000,\"units_sold\":0},\"data\":[{\"sales_id\":5,\"sales_code\":\"SL-001\",\"name\":\"Sari Sales Timur\",\"email\":\"sales@luminpark ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"total_leads\":6,\"total_bookings\":3,\"total_closing\":2550000000,\"units_sold\":0},\"data\":[{\"sales_id\":1,\"sales_code\":\"SL-001\",\"name\":\"Budi Sales Utama\",\"email\":\"sales@luminpark. ...[dipotong]",
     "status": "Pass",
-    "catatan": "contoh: Sari Sales Timur leads=7 booking=4 closing=4.000.000.000",
+    "catatan": "contoh: Budi Sales Utama leads=3 booking=2 closing=1.500.000.000",
     "kebutuhan": "Kebutuhan f.4 (laporan kinerja sales)"
   },
   {
@@ -1178,7 +1194,7 @@
     "method": "GET",
     "path": "/reports/consumers?status=booking",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"total\":3,\"cold\":0,\"warm\":0,\"hot\":0,\"customer\":3},\"data\":[{\"id\":7,\"sales_id\":5,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"addres ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"total\":3,\"cold\":0,\"warm\":0,\"hot\":0,\"customer\":3},\"data\":[{\"id\":6,\"sales_id\":1,\"unit_id\":null,\"name\":\"Consumer Uji\",\"phone\":\"081233990001\",\"email\":\"uji@consumer.com\",\"addres ...[dipotong]",
     "status": "Pass",
     "catatan": "total=3, cold=0, warm=0, hot=0, konsumen=3",
     "kebutuhan": "Kebutuhan f.4 (laporan konsumen & calon konsumen)"
@@ -1194,9 +1210,9 @@
     "method": "GET",
     "path": "/reports/export?type=sales&start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — \"Kode Booking\",Tanggal,\"Calon Konsumen\",Sales,Unit,Cluster,Skema,\"Harga Total\",\"Uang Muka\",Angsuran,Sisa,Status,\"Status Serah Terima\" BK2026110003,2026-10-21,\"Consumer Uji\",\"Sari Sales Timur\",LT-004,\"Cluster Bruna\",\"Cash Bertahap\",750000000.00,225000000.00,145 ...[dipotong]",
+    "actualBody": "HTTP 200 — \"Kode Booking\",Tanggal,\"Calon Konsumen\",Sales,Unit,Cluster,Skema,\"Harga Total\",\"Uang Muka\",Angsuran,Sisa,Status,\"Status Serah Terima\" BK2026110003,2026-10-21,\"Consumer Uji\",\"Budi Sales Utama\",LT-004,\"Cluster Bruna\",\"Cash Bertahap\",750000000.00,225000000.00,145 ...[dipotong]",
     "status": "Pass",
-    "catatan": "5 baris data; berkas=\"filename=\"laporan-sales-2026-10-01-2026-10-31.csv\"\"",
+    "catatan": "3 baris data; berkas=\"filename=\"laporan-sales-2026-10-01-2026-10-31.csv\"\"",
     "kebutuhan": "Kebutuhan f.4 (mencetak/mengekspor laporan)"
   },
   {
@@ -1210,7 +1226,7 @@
     "method": "GET",
     "path": "/reports/export?type=performance&start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — \"Kode Sales\",Nama,Leads,Booking,\"Closing (Rp)\",\"Unit Terjual\",\"Target Unit\",\"Capaian Unit\",\"Progress Unit (%)\" SL-001,\"Sari Sales Timur\",7,4,4000000000,1,,, SL-002,\"Sari Sales Timur\",4,1,1050000000,0,,, SL-003,\"Andi Sales Barat\",1,0,0,0,,,",
+    "actualBody": "HTTP 200 — \"Kode Sales\",Nama,Leads,Booking,\"Closing (Rp)\",\"Unit Terjual\",\"Target Unit\",\"Capaian Unit\",\"Progress Unit (%)\" SL-001,\"Budi Sales Utama\",3,2,1500000000,1,,, SL-002,\"Sari Sales Timur\",2,1,1050000000,0,,, SL-003,\"Andi Sales Barat\",1,0,0,0,,,",
     "status": "Pass",
     "catatan": "header=\"Kode Sales\",Nama,Leads,Booking,\"Closing (Rp)\",\"Unit Terjual\",\"Target Unit\",\"Capaian Unit\",\"Progress Unit (%)\"; 3 baris sales",
     "kebutuhan": "Kebutuhan f.4"
@@ -1226,9 +1242,9 @@
     "method": "POST",
     "path": "/reports/summarize",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Ringkasan penjualan tersimpan.\",\"data\":{\"id\":1,\"period_start\":\"2026-10-01T00:00:00.000000Z\",\"period_end\":\"2026-10-31T00:00:00.000000Z\",\"units_sold\":1,\"total_revenue\":\"5050000000.00\",\"total_leads\":4,\"total_closing\":\"4158122222.23\",\"ge ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Ringkasan penjualan tersimpan.\",\"data\":{\"period_start\":\"2026-10-01T00:00:00.000000Z\",\"period_end\":\"2026-10-31T00:00:00.000000Z\",\"units_sold\":1,\"total_revenue\":\"2550000000.00\",\"total_leads\":0,\"total_closing\":\"1706733333.34\",\"generated ...[dipotong]",
     "status": "Pass",
-    "catatan": "unit=1, omzet=5.050.000.000, leads=4, closing=4.158.122.222,23",
+    "catatan": "unit=1, omzet=2.550.000.000, leads=0, closing=1.706.733.333,34",
     "kebutuhan": "ERD tabel laporan_penjualan"
   },
   {
@@ -1244,7 +1260,7 @@
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":3,\"unit_code\":\"LT-003\",\"unit_type\":\"Skandinavia 120\",\"land_size\":120,\"building_size\":120,\"price\":1450000000,\"description\":\"Skandinavia 120 di Cluster Asena \\u2014 120m\\u00b2 \\/ 120m\\u00b2.\",\"image\":null,\"image_url\":null,\"cluster\": ...[dipotong]",
     "status": "Pass",
-    "catatan": "5 unit; contoh LT-003 Skandinavia 120 LT120/LB120 Rp 1.450.000.000",
+    "catatan": "6 unit; contoh LT-003 Skandinavia 120 LT120/LB120 Rp 1.450.000.000",
     "kebutuhan": "Kebutuhan g.1"
   },
   {
@@ -1306,9 +1322,9 @@
     "method": "GET",
     "path": "/public/sales-contacts",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"sales_code\":\"SL-001\",\"name\":\"Sari Sales Timur\",\"whatsapp_number\":\"62812345678101\",\"whatsapp_link\":\"https:\\/\\/wa.me\\/62812345678101\"},{\"sales_code\":\"SL-002\",\"name\":\"Sari Sales Timur\",\"whatsapp_number\":\"62812345678102\",\"whatsapp_link\":\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"sales_code\":\"SL-001\",\"name\":\"Budi Sales Utama\",\"whatsapp_number\":\"62812345678101\",\"whatsapp_link\":\"https:\\/\\/wa.me\\/62812345678101\"},{\"sales_code\":\"SL-002\",\"name\":\"Sari Sales Timur\",\"whatsapp_number\":\"62812345678102\",\"whatsapp_link\":\" ...[dipotong]",
     "status": "Pass",
-    "catatan": "Sari Sales Timur (https://wa.me/62812345678101); Sari Sales Timur (https://wa.me/62812345678102); Andi Sales Barat (https://wa.me/62812345678103)",
+    "catatan": "Budi Sales Utama (https://wa.me/62812345678101); Sari Sales Timur (https://wa.me/62812345678102); Andi Sales Barat (https://wa.me/62812345678103)",
     "kebutuhan": "Kebutuhan g.4 + deskripsi sistem (tiga kontak WhatsApp)"
   },
   {
@@ -1322,9 +1338,9 @@
     "method": "POST",
     "path": "/public/contact",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pesan Anda berhasil dikirim! Tim sales kami akan segera menghubungi Anda.\",\"data\":{\"id\":18,\"name\":\"Web Visitor\",\"status\":\"cold\"}}",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Pesan Anda berhasil dikirim! Tim sales kami akan segera menghubungi Anda.\",\"data\":{\"id\":8,\"name\":\"Web Visitor\",\"status\":\"cold\"}}",
     "status": "Pass",
-    "catatan": "lead id=18, status=cold (sumber website)",
+    "catatan": "lead id=8, status=cold (sumber website)",
     "kebutuhan": "Kebutuhan g + ERD calon_konsumen"
   },
   {
@@ -1356,7 +1372,7 @@
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"news\":[{\"id\":3,\"title\":\"Kawasan Hunian yang Asri dan Islami\",\"date\":\"2026-10-12\",\"content\":\"Taman lingkungan, mushola, dan sistem satu gerbang mulai beroperasi tahun depan.\",\"image_url\":null},{\"id\":2,\"title\":\"Progres Pembangunan Cluste ...[dipotong]",
     "status": "Pass",
-    "catatan": "3 berita, 1 galeri",
+    "catatan": "3 berita, 0 galeri",
     "kebutuhan": "Wireframe halaman publik"
   },
   {
@@ -1370,9 +1386,9 @@
     "method": "GET",
     "path": "/notifications",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":104,\"user_id\":2,\"title\":\"Pembayaran terverifikasi\",\"message\":\"Pembayaran booking BK2026110005 berstatus terverifikasi.\",\"type\":\"payment\",\"link\":\"\\/pembayaran\",\"is_read\":false,\"created_at\":\"2026-11-01T16:23:01.000000Z\",\"updated_at\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":25,\"user_id\":1,\"title\":\"Pembayaran terverifikasi\",\"message\":\"Pembayaran booking BK2026110003 berstatus terverifikasi.\",\"type\":\"payment\",\"link\":\"\\/pembayaran\",\"is_read\":false,\"created_at\":\"2026-11-02T03:09:10.000000Z\",\"updated_at\": ...[dipotong]",
     "status": "Pass",
-    "catatan": "27 notifikasi (3 booking, 24 payment). Contoh: \"Booking baru dibuat\"",
+    "catatan": "9 notifikasi (1 booking, 8 payment). Contoh: \"Booking baru dibuat\"",
     "kebutuhan": "ERD tabel notifikasi"
   },
   {
@@ -1386,9 +1402,9 @@
     "method": "GET",
     "path": "/notifications/unread-count",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"unread_count\":25}}",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"unread_count\":9}}",
     "status": "Pass",
-    "catatan": "unread_count=25",
+    "catatan": "unread_count=9",
     "kebutuhan": "ERD tabel notifikasi"
   },
   {
@@ -1397,12 +1413,12 @@
     "skenario": "Notifikasi",
     "deskripsi": "Notifikasi hanya dapat diubah oleh pemiliknya.",
     "langkah": "PUT /api/notifications/{id}/read",
-    "dataUji": "notifikasi id=104 milik manajer",
+    "dataUji": "notifikasi id=25 milik manajer",
     "ekspektasi": "HTTP 200 dengan is_read=true",
     "method": "PUT",
-    "path": "/notifications/104/read",
+    "path": "/notifications/25/read",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Notifikasi ditandai sudah dibaca\",\"data\":{\"id\":104,\"user_id\":2,\"title\":\"Pembayaran terverifikasi\",\"message\":\"Pembayaran booking BK2026110005 berstatus terverifikasi.\",\"type\":\"payment\",\"link\":\"\\/pembayaran\",\"is_read\":true,\"created_at\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Notifikasi ditandai sudah dibaca\",\"data\":{\"id\":25,\"user_id\":1,\"title\":\"Pembayaran terverifikasi\",\"message\":\"Pembayaran booking BK2026110003 berstatus terverifikasi.\",\"type\":\"payment\",\"link\":\"\\/pembayaran\",\"is_read\":true,\"created_at\": ...[dipotong]",
     "status": "Pass",
     "catatan": "is_read=true",
     "kebutuhan": "ERD tabel notifikasi"
@@ -1416,11 +1432,11 @@
     "dataUji": "token sales",
     "ekspektasi": "HTTP 404 untuk notifikasi milik pengguna lain, dan daftar sales hanya berisi miliknya",
     "method": "PUT",
-    "path": "/notifications/104/read",
+    "path": "/notifications/25/read",
     "actualStatus": 404,
     "actualBody": "HTTP 404 — {\"success\":false,\"message\":\"Notifikasi tidak ditemukan\"}",
     "status": "Pass",
-    "catatan": "ubah notifikasi milik manajer → HTTP 404; daftar sales berisi 24 entri, seluruhnya milik user 4.",
+    "catatan": "ubah notifikasi milik manajer → HTTP 404; daftar sales berisi 8 entri, seluruhnya milik user 3.",
     "kebutuhan": "Kebutuhan a (RBAC)"
   },
   {
@@ -1434,9 +1450,9 @@
     "method": "GET",
     "path": "/system-logs",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":94,\"user_id\":13,\"activity\":\"login\",\"description\":\"User berhasil login\",\"ip_address\":\"127.0.0.1\",\"user_agent\":\"node\",\"created_at\":\"2026-11-01T16:23:08.000000Z\",\"updated_at\":\"2026-11-01T16:23:08.000000Z\",\"user\":null},{\"id\":93,\"user_ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":[{\"id\":14,\"user_id\":6,\"activity\":\"login\",\"description\":\"User berhasil login\",\"ip_address\":\"127.0.0.1\",\"user_agent\":\"node\",\"created_at\":\"2026-11-02T03:09:19.000000Z\",\"updated_at\":\"2026-11-02T03:09:19.000000Z\",\"user\":null},{\"id\":13,\"user_i ...[dipotong]",
     "status": "Pass",
-    "catatan": "66 entri login; ip=127.0.0.1",
+    "catatan": "9 entri login; ip=127.0.0.1",
     "kebutuhan": "ERD tabel log_sistem"
   },
   {
@@ -1466,9 +1482,9 @@
     "method": "GET",
     "path": "/public/settings",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"estate_name\":\"Perumahan Lumin Park Padang\",\"estate_address\":\"Jalan Lubuk Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota Padang, Sumatera Barat\",\"estate_phone\":\"(0751) 550100\",\"estate_email\":\"info@luminpark.co.i ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"estate_name\":\"Perumahan Lumin Park\",\"estate_address\":\"Jalan Lubuk Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota Padang, Sumatera Barat\",\"estate_phone\":\"(0751) 550100\",\"estate_email\":\"info@luminpark.co.id\",\"est ...[dipotong]",
     "status": "Pass",
-    "catatan": "Perumahan Lumin Park Padang — Senin - Sabtu, 08.00 - 17.00 WIB",
+    "catatan": "Perumahan Lumin Park — Senin - Sabtu, 08.00 - 17.00 WIB",
     "kebutuhan": "Wireframe 2.51 (Kontak) & 2.52 (Tentang Kami)"
   },
   {
@@ -1484,7 +1500,7 @@
     "actualStatus": 200,
     "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"items\":[{\"id\":6,\"key\":\"about_text\",\"value\":\"Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah dan cluster dengan skema pem ...[dipotong]",
     "status": "Pass",
-    "catatan": "25 kunci tersimpan; minimal DP=15%",
+    "catatan": "25 kunci tersimpan; minimal DP=10%",
     "kebutuhan": "Wireframe 2.34 (Pengaturan)"
   },
   {
@@ -1562,9 +1578,9 @@
     "method": "GET",
     "path": "/profile",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":4,\"name\":\"Sari Sales Timur\",\"email\":\"sales@luminpark.com\",\"username\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000111\",\"address\":\"Koto Tangah, Padang\",\"avatar_url\":\"http:\\/\\/127.0.0.1:8080\\/storage\\/avatars\\/ojISyC9IAD6qb ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":3,\"name\":\"Budi Sales Utama\",\"email\":\"sales@luminpark.com\",\"username\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"0812345678101\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"avatar_url\":null,\"status\":\"aktif\",\"sales_code\":\"SL-001\",\"join ...[dipotong]",
     "status": "Pass",
-    "catatan": "kode=SL-001, status=aktif, target=1, sesi aktif=10",
+    "catatan": "kode=SL-001, status=aktif, target=1, sesi aktif=2",
     "kebutuhan": "Wireframe 2.47 (Profil Sales)"
   },
   {
@@ -1578,9 +1594,9 @@
     "method": "POST",
     "path": "/profile",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Profil berhasil diperbarui.\",\"data\":{\"id\":4,\"name\":\"Sari Sales Timur\",\"email\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000111\",\"address\":\"Koto Tangah, Padang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_a ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Profil berhasil diperbarui.\",\"data\":{\"id\":3,\"name\":\"Budi Sales Utama\",\"email\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"0812345678101\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_ve ...[dipotong]",
     "status": "Pass",
-    "catatan": "tersedia di http://127.0.0.1:8080/storage/avatars/p5ZcvDW3XdDtRRXS3NaBkEbWhyRxJ8hbnwkDe2GP.png",
+    "catatan": "tersedia di http://127.0.0.1:8080/storage/avatars/J53JX7fZBciwm2axbY6Bw9Qzpgrfgo4CwAfKLIgG.png",
     "kebutuhan": "Wireframe 2.47 (Ganti Foto)"
   },
   {
@@ -1594,7 +1610,7 @@
     "method": "PUT",
     "path": "/profile",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Profil berhasil diperbarui.\",\"data\":{\"id\":4,\"name\":\"Sari Sales Timur\",\"email\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000111\",\"address\":\"Koto Tangah, Padang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_a ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"message\":\"Profil berhasil diperbarui.\",\"data\":{\"id\":3,\"name\":\"Budi Sales Utama\",\"email\":\"sales@luminpark.com\",\"role\":\"sales\",\"phone\":\"081233000111\",\"address\":\"Koto Tangah, Padang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_a ...[dipotong]",
     "status": "Pass",
     "catatan": "telepon=081233000111, alamat=Koto Tangah, Padang, role setelah percobaan ubah (HTTP 200)=sales",
     "kebutuhan": "Wireframe 2.47 (Edit Profil) + kebutuhan a (RBAC)"
@@ -1610,7 +1626,7 @@
     "method": "GET",
     "path": "/profile",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":2,\"name\":\"Manajer Lumin Park\",\"email\":\"manager@luminpark.com\",\"username\":\"manager@luminpark.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"avatar_url\":null,\"status\":\"aktif\",\"sales_code\":null,\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"username\":\"superadmin@gmail.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"avatar_url\":null,\"status\":\"aktif\",\"sales_code\":null,\"join_date ...[dipotong]",
     "status": "Pass",
     "catatan": "role=manager, targets=0",
     "kebutuhan": "Wireframe 2.34 (Pengaturan akun)"
@@ -1626,7 +1642,7 @@
     "method": "GET",
     "path": "/dashboard/manager",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"total_units\":10,\"units_available\":5,\"units_booking\":1,\"units_sold_out\":4,\"units_not_delivered\":1,\"total_revenue\":4158122222.23,\"total_sales\":3,\"total_prospects\":11,\"total_customers\":5,\"total_leads\":16,\"total_bookings\":5,\"active_booking ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"total_units\":9,\"units_available\":6,\"units_booking\":1,\"units_sold_out\":2,\"units_not_delivered\":1,\"total_revenue\":1706733333.34,\"total_sales\":3,\"total_prospects\":5,\"total_customers\":3,\"total_leads\":8,\"total_bookings\":3,\"active_bookings\": ...[dipotong]",
     "status": "Pass",
     "catatan": "6 bulan; booking terbaru=BK2026110002/Yoga Saputra/cicilan",
     "kebutuhan": "Wireframe 2.27 (Dashboard Super Admin)"
@@ -1642,9 +1658,9 @@
     "method": "GET",
     "path": "/dashboard/admin-sales",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"sales_count\":3,\"total_bookings\":5,\"total_revenue\":0,\"total_leads\":12},\"counters\":{\"total_units\":10,\"units_available\":5,\"units_sold_out\":4,\"total_customers\":5,\"activ ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"sales_count\":3,\"total_bookings\":3,\"total_revenue\":0,\"total_leads\":6},\"counters\":{\"total_units\":9,\"units_available\":6,\"units_sold_out\":2,\"total_customers\":3,\"active_ ...[dipotong]",
     "status": "Pass",
-    "catatan": "unit=10, tersedia=5, booking aktif=4, pending=0",
+    "catatan": "unit=9, tersedia=6, booking aktif=2, pending=0",
     "kebutuhan": "Wireframe 2.35 (Dashboard Admin Sales)"
   },
   {
@@ -1658,9 +1674,9 @@
     "method": "GET",
     "path": "/dashboard/sales",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales_id\":5,\"sales_code\":\"SL-001\",\"total_leads\":7,\"leads_by_status\":{\"cold\":3,\"warm\":1,\"hot\":0,\"booking\":3},\"total_bookings\":4,\"bookings_by_status\":{\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":3,\"lunas\":1},\"total_closing\":4000000000,\"paymen ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"sales_id\":1,\"sales_code\":\"SL-001\",\"total_leads\":3,\"leads_by_status\":{\"cold\":1,\"warm\":1,\"hot\":0,\"booking\":1},\"total_bookings\":2,\"bookings_by_status\":{\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":1,\"lunas\":1},\"total_closing\":1500000000,\"paymen ...[dipotong]",
     "status": "Pass",
-    "catatan": "pembayaran=11, unit tersedia=5, 4 booking terbaru seluruhnya milik Sari Sales Timur",
+    "catatan": "pembayaran=5, unit tersedia=6, 2 booking terbaru seluruhnya milik Budi Sales Utama",
     "kebutuhan": "Wireframe 2.42 (Dashboard Sales)"
   },
   {
@@ -1674,9 +1690,9 @@
     "method": "GET",
     "path": "/reports/my-sales?start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"sales\":{\"id\":5,\"sales_code\":\"SL-001\",\"name\":\"Sari Sales Timur\"},\"summary\":{\"total_customers\":4,\"total_prospects\":1,\"total_bookings\":4,\"units_sold\":1,\"total_revenue\":3936805555.56},\"d ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"period\":{\"start_date\":\"2026-10-01\",\"end_date\":\"2026-10-31\"},\"sales\":{\"id\":1,\"sales_code\":\"SL-001\",\"name\":\"Budi Sales Utama\"},\"summary\":{\"total_customers\":2,\"total_prospects\":0,\"total_bookings\":2,\"units_sold\":1,\"total_revenue\":1485416666.67},\"d ...[dipotong]",
     "status": "Pass",
-    "catatan": "baris=5; ringkas={\"total_customers\":4,\"total_prospects\":1,\"total_bookings\":4,\"units_sold\":1,\"total_revenue\":3936805555.56}",
+    "catatan": "baris=2; ringkas={\"total_customers\":2,\"total_prospects\":0,\"total_bookings\":2,\"units_sold\":1,\"total_revenue\":1485416666.67}",
     "kebutuhan": "Wireframe 2.46 (Laporan Sales)"
   },
   {
@@ -1706,9 +1722,9 @@
     "method": "GET",
     "path": "/reports/my-sales/export?start_date=2026-10-01&end_date=2026-10-31",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — Tanggal,Pelanggan,Unit,\"Kode Booking\",\"Pembayaran (Rp)\",\"Sisa (Rp)\",Status 2026-10-31,\"Rina Wulandari\",,-,0,0,\"Calon Pembeli\" 2026-10-22,\"Dimas Prakoso\",LT-001,BK2026110001,750000000,0,Terjual 2026-10-21,\"Consumer Uji\",LT-004,BK2026110003,735416666.67,14583333 ...[dipotong]",
+    "actualBody": "HTTP 200 — Tanggal,Pelanggan,Unit,\"Kode Booking\",\"Pembayaran (Rp)\",\"Sisa (Rp)\",Status 2026-10-23,\"Dimas Prakoso\",LT-001,BK2026110001,750000000,0,Terjual 2026-10-21,\"Consumer Uji\",LT-004,BK2026110003,735416666.67,14583333.33,Pemesanan",
     "status": "Pass",
-    "catatan": "5 baris data; header=\"Tanggal,Pelanggan,Unit,Kode Booking,Pembayaran (Rp),Sisa (Rp),Status\"",
+    "catatan": "2 baris data; header=\"Tanggal,Pelanggan,Unit,Kode Booking,Pembayaran (Rp),Sisa (Rp),Status\"",
     "kebutuhan": "Wireframe 2.46 (Ekspor Excel)"
   },
   {
@@ -1802,7 +1818,7 @@
     "method": "POST",
     "path": "/units",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"message\":\"Data unit berhasil disimpan.\",\"data\":{\"cluster_id\":1,\"unit_code\":\"TC-SOFT-1\",\"unit_type\":\"Type Uji Soft Delete\",\"land_size\":60,\"building_size\":45,\"price\":\"500000000.00\",\"status\":\"available\",\"updated_at\":\"2026-11-01T16:23:35.000000Z\",\"created_at\":\"2 ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"message\":\"Data unit berhasil disimpan.\",\"data\":{\"cluster_id\":1,\"unit_code\":\"TC-SOFT-1\",\"unit_type\":\"Type Uji Soft Delete\",\"land_size\":60,\"building_size\":45,\"price\":\"500000000.00\",\"status\":\"available\",\"updated_at\":\"2026-11-02T03:09:51.000000Z\",\"created_at\":\"2 ...[dipotong]",
     "status": "Pass",
     "catatan": "hapus=200 detail=404 simpanUlang=201 (unit TC-SOFT-1 kedua juga dihapus lembut)",
     "kebutuhan": "Permintaan 6 (hapus tidak permanen di backend)"
@@ -1818,7 +1834,7 @@
     "method": "POST",
     "path": "/customer-leads",
     "actualStatus": 201,
-    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Calon konsumen berhasil ditambahkan\",\"data\":{\"name\":\"Konsumen Uji Soft Delete\",\"phone\":\"081299900222\",\"status\":\"cold\",\"source\":\"manual\",\"updated_at\":\"2026-11-01T16:23:39.000000Z\",\"created_at\":\"2026-11-01T16:23:39.000000Z\",\"id\":19,\"sa ...[dipotong]",
+    "actualBody": "HTTP 201 — {\"success\":true,\"message\":\"Calon konsumen berhasil ditambahkan\",\"data\":{\"name\":\"Konsumen Uji Soft Delete\",\"phone\":\"081299900222\",\"status\":\"cold\",\"source\":\"manual\",\"updated_at\":\"2026-11-02T03:09:55.000000Z\",\"created_at\":\"2026-11-02T03:09:55.000000Z\",\"id\":9,\"sal ...[dipotong]",
     "status": "Pass",
     "catatan": "hapus=200 detail=404 barisDiDaftar=0",
     "kebutuhan": "Permintaan 6 (hapus tidak permanen di backend)"
@@ -1866,7 +1882,7 @@
     "method": "GET",
     "path": "/profile",
     "actualStatus": 200,
-    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":2,\"name\":\"Manajer Lumin Park\",\"email\":\"manager@luminpark.com\",\"username\":\"manager@luminpark.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"avatar_url\":null,\"status\":\"aktif\",\"sales_code\":null,\" ...[dipotong]",
+    "actualBody": "HTTP 200 — {\"success\":true,\"data\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"username\":\"superadmin@gmail.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"avatar_url\":null,\"status\":\"aktif\",\"sales_code\":null,\"join_date ...[dipotong]",
     "status": "Pass",
     "catatan": "profil=200 link=422 (Masuk dengan Google belum diaktifkan oleh Manajer.)",
     "kebutuhan": "Permintaan 4 (hubungkan akun Google)"

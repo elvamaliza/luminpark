@@ -3,14 +3,14 @@
     "id": "TC-001",
     "nama": "Login Success (Super Admin)",
     "skenario": "Autentikasi - Positif",
-    "deskripsi": "User dengan role superadmin memasukkan email & password yang benar.",
+    "deskripsi": "User dengan role manager (super admin) memasukkan email & password yang benar.",
     "langkah": "1. Kirim POST /api/login 2. Sertakan email & password valid",
-    "dataUji": "{\"email\":\"admin@luminpark.com\",\"password\":\"password123\"}",
+    "dataUji": "{\"email\":\"superadmin@gmail.com\",\"password\":\"password123\"}",
     "ekspektasi": "HTTP 200, success=true, field access_token terisi, token_type=Bearer",
     "method": "POST",
     "path": "/login",
     "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"2|k0By6HavghSiVJnp4rHY3q34gP8bTg4p89vmNiQff6892061\",\"token_type\":\"Bearer\",\"user\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"admin@luminpark.com\",\"role\":\"superadmin\",\"phone\":null,\"address\":null,\"email_verified_at\":null,\"created ...[truncated]"
+    "actualBody": "{\"success\":true,\"message\":\"Login berhasil\",\"access_token\":\"116|wg9mi0nFbtpHAhlsdu0IYBhCmXHHJNE5M6jPaXSc6ab91bc3\",\"token_type\":\"Bearer\",\"token_expires_at\":\"2026-11-03T02:36:39+00:00\",\"user\":{\"id\":2,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"role\":\"manager\",\"phone\":\"08110 ...[truncated]"
   },
   {
     "id": "TC-002",
@@ -18,7 +18,7 @@
     "skenario": "Autentikasi - Negatif",
     "deskripsi": "Email valid dengan password salah harus ditolak.",
     "langkah": "1. Kirim POST /api/login 2. Password sengaja salah",
-    "dataUji": "{\"email\":\"admin@luminpark.com\",\"password\":\"salah123\"}",
+    "dataUji": "{\"email\":\"superadmin@gmail.com\",\"password\":\"salah123\"}",
     "ekspektasi": "HTTP 401, success=false, message \"Email atau password salah\"",
     "method": "POST",
     "path": "/login",
@@ -62,7 +62,7 @@
     "method": "GET",
     "path": "/me",
     "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":{\"id\":1,\"name\":\"Super Admin\",\"email\":\"admin@luminpark.com\",\"role\":\"superadmin\",\"phone\":null,\"address\":null,\"email_verified_at\":null,\"created_at\":\"2026-10-26T15:58:30.000000Z\",\"updated_at\":\"2026-10-26T15:58:30.000000Z\"}}"
+    "actualBody": "{\"success\":true,\"data\":{\"id\":2,\"name\":\"Super Admin\",\"email\":\"superadmin@gmail.com\",\"role\":\"manager\",\"phone\":\"0811000000002\",\"address\":\"Jl. Contoh No. 1, Semarang\",\"status\":\"aktif\",\"must_change_password\":false,\"email_verified_at\":\"2026-11-02T02:34:10.000000Z\",\"created_at\":\"2026-10 ...[truncated]"
   },
   {
     "id": "TC-007",
@@ -100,8 +100,8 @@
     "ekspektasi": "HTTP 200, success=true, berisi total_revenue, total_bookings, occupancy_rate",
     "method": "GET",
     "path": "/dashboard/manager",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'amount' in 'field list' (Connection: mysql, SQL: select sum(`amount`) as aggregate from `payments` where `verification_status` = verified)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lar ...[truncated]"
+    "actualStatus": 200,
+    "actualBody": "{\"success\":true,\"data\":{\"total_units\":9,\"units_available\":1,\"units_booking\":1,\"units_sold_out\":7,\"units_not_delivered\":1,\"total_revenue\":4158122222.23,\"total_sales\":3,\"total_prospects\":14,\"total_customers\":5,\"total_leads\":19,\"total_bookings\":5,\"active_bookings\":4,\"payments_pendin ...[truncated]"
   },
   {
     "id": "TC-011",
@@ -126,8 +126,8 @@
     "ekspektasi": "HTTP 200 berisi pending_payment_verifications, active_bookings",
     "method": "GET",
     "path": "/dashboard/admin-sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'verification_status' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `payments` where `verification_status` = pending)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": ...[truncated]"
+    "actualStatus": 200,
+    "actualBody": "{\"success\":true,\"data\":{\"period\":{\"start_date\":\"2026-11-01\",\"end_date\":\"2026-11-30\"},\"totals\":{\"sales_count\":3,\"total_bookings\":5,\"total_revenue\":0,\"total_leads\":12},\"counters\":{\"total_units\":9,\"units_available\":1,\"units_sold_out\":7,\"total_customers\":5,\"active_bookings\":4,\"paymen ...[truncated]"
   },
   {
     "id": "TC-013",
@@ -139,8 +139,8 @@
     "ekspektasi": "HTTP 400, message \"sales_id diperlukan\"",
     "method": "GET",
     "path": "/dashboard/sales",
-    "actualStatus": 400,
-    "actualBody": "{\"message\":\"sales_id diperlukan\"}"
+    "actualStatus": 200,
+    "actualBody": "{\"success\":true,\"data\":{\"sales_id\":5,\"sales_code\":\"SL-001\",\"total_leads\":7,\"leads_by_status\":{\"cold\":3,\"warm\":1,\"hot\":0,\"booking\":3},\"total_bookings\":4,\"bookings_by_status\":{\"menunggu dp\":0,\"dp lunas\":0,\"cicilan\":3,\"lunas\":1},\"total_closing\":4000000000,\"payments_total\":11,\"paymen ...[truncated]"
   },
   {
     "id": "TC-020",
@@ -152,8 +152,8 @@
     "ekspektasi": "HTTP 200, success=true, data = array daftar sales",
     "method": "GET",
     "path": "/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sales_profiles.user_id' in 'where clause' (Connection: mysql, SQL: select * from `sales_profiles` where `sales_profiles`.`user_id` in (3))\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lar ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-021",
@@ -165,21 +165,21 @@
     "ekspektasi": "HTTP 201, success=true, data memuat user baru + salesProfile.sales_code=SLD-001",
     "method": "POST",
     "path": "/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sales_code' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `sales_profiles` where `sales_code` = SLD-001)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\larago ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-022",
     "nama": "Create Sales Email Duplikat",
     "skenario": "CRUD Sales - Negatif",
     "deskripsi": "Email yang sudah dipakai harus ditolak aturan unique:users,email.",
-    "langkah": "1. POST /api/sales 2. Email sudah terdaftar (admin@luminpark.com)",
-    "dataUji": "{\"name\":\"Dup\",\"email\":\"admin@luminpark.com\",\"password\":\"rahasia123\",\"phone\":\"081234567890\",\"sales_code\":\"SLD-002\"}",
+    "langkah": "1. POST /api/sales 2. Email sudah terdaftar (superadmin@gmail.com)",
+    "dataUji": "{\"name\":\"Dup\",\"email\":\"superadmin@gmail.com\",\"password\":\"rahasia123\",\"phone\":\"081234567890\",\"sales_code\":\"SLD-002\"}",
     "ekspektasi": "HTTP 422, error validasi \"email sudah diambil\"",
     "method": "POST",
     "path": "/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sales_code' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `sales_profiles` where `sales_code` = SLD-002)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\larago ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-023",
@@ -191,8 +191,8 @@
     "ekspektasi": "HTTP 422, error validasi field sales_code wajib diisi",
     "method": "POST",
     "path": "/sales",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The sales code field is required.\",\"errors\":{\"sales_code\":[\"The sales code field is required.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-024",
@@ -204,8 +204,8 @@
     "ekspektasi": "HTTP 404, message \"Sales tidak ditemukan\"",
     "method": "GET",
     "path": "/sales/99999",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Sales tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-025",
@@ -217,8 +217,8 @@
     "ekspektasi": "HTTP 200, success=true, data.name = \"Budi Updated\"",
     "method": "PUT",
     "path": "/sales/3",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sales_profiles.user_id' in 'where clause' (Connection: mysql, SQL: select * from `sales_profiles` where `sales_profiles`.`user_id` = 3 and `sales_profiles`.`user_id` is not null limit 1)\", \"exception\": \"Illumin ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-026",
@@ -230,8 +230,8 @@
     "ekspektasi": "HTTP 200 berisi data kinerja sales",
     "method": "GET",
     "path": "/sales/3/performance",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"Method App\\\\Http\\\\Controllers\\\\Api\\\\SalesController::performance does not exist.\", \"exception\": \"BadMethodCallException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Routing\\\\Controller.php\", \"line\": 68, \"trace\": [ { \"file ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-030",
@@ -243,8 +243,8 @@
     "ekspektasi": "HTTP 200, array unit dengan field block_number, unit_type, price, status",
     "method": "GET",
     "path": "/units",
-    "actualStatus": 200,
-    "actualBody": "[]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-031",
@@ -256,8 +256,8 @@
     "ekspektasi": "HTTP 201, message \"Data unit berhasil disimpan.\", data.id terisi",
     "method": "POST",
     "path": "/units",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'block_number' in 'field list' (Connection: mysql, SQL: insert into `units` (`block_number`, `unit_type`, `land_size`, `building_size`, `price`, `status`, `description`, `updated_at`, `created_at`) values (A-01, ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-032",
@@ -269,8 +269,8 @@
     "ekspektasi": "HTTP 422, error validasi status harus available/booked/sold",
     "method": "POST",
     "path": "/units",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected status is invalid.\",\"errors\":{\"status\":[\"The selected status is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-033",
@@ -282,8 +282,8 @@
     "ekspektasi": "HTTP 422, error validasi \"price harus lebih besar atau sama dengan 0\"",
     "method": "POST",
     "path": "/units",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The price field must be at least 0.\",\"errors\":{\"price\":[\"The price field must be at least 0.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-034",
@@ -295,8 +295,8 @@
     "ekspektasi": "HTTP 200, message \"Detail unit berhasil ditemukan.\"",
     "method": "GET",
     "path": "/units/1",
-    "actualStatus": 404,
-    "actualBody": "{ \"message\": \"No query results for model [App\\\\Models\\\\Unit] 1\", \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Exceptions\\\\Handler.php\", \"line\":  ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-035",
@@ -308,8 +308,8 @@
     "ekspektasi": "HTTP 404 Not Found",
     "method": "GET",
     "path": "/units/99999",
-    "actualStatus": 404,
-    "actualBody": "{ \"message\": \"No query results for model [App\\\\Models\\\\Unit] 99999\", \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Exceptions\\\\Handler.php\", \"lin ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-036",
@@ -321,8 +321,8 @@
     "ekspektasi": "HTTP 200, message \"Data unit berhasil diperbarui.\"",
     "method": "PUT",
     "path": "/units/1",
-    "actualStatus": 404,
-    "actualBody": "{ \"message\": \"No query results for model [App\\\\Models\\\\Unit] 1\", \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Exceptions\\\\Handler.php\", \"line\":  ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-037",
@@ -334,8 +334,8 @@
     "ekspektasi": "HTTP 200, seluruh elemen punya status = \"available\"",
     "method": "GET",
     "path": "/units-available",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'where clause' (Connection: mysql, SQL: select * from `units` where `status` = available order by `created_at` desc)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\www\\\\ ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-038",
@@ -347,8 +347,8 @@
     "ekspektasi": "HTTP 200, message \"Data unit berhasil dihapus.\"",
     "method": "DELETE",
     "path": "/units/1",
-    "actualStatus": 404,
-    "actualBody": "{ \"message\": \"No query results for model [App\\\\Models\\\\Unit] 1\", \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Exceptions\\\\Handler.php\", \"line\":  ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-040",
@@ -360,8 +360,8 @@
     "ekspektasi": "HTTP 200, success=true, data array lead",
     "method": "GET",
     "path": "/customer-leads",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-041",
@@ -373,8 +373,8 @@
     "ekspektasi": "HTTP 200, data hanya lead yang cocok dengan kata kunci",
     "method": "GET",
     "path": "/customer-leads?search=Budi",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'where clause' (Connection: mysql, SQL: select * from `customer_leads` where (`name` like %Budi% or `phone` like %Budi% or `email` like %Budi% or `interested_unit` like %Budi%) order by `created_at` de ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-042",
@@ -386,8 +386,8 @@
     "ekspektasi": "HTTP 201, message \"Customer Lead berhasil ditambahkan\"",
     "method": "POST",
     "path": "/customer-leads",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected sales id is invalid.\",\"errors\":{\"sales_id\":[\"The selected sales id is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-043",
@@ -399,8 +399,8 @@
     "ekspektasi": "HTTP 422, error validasi \"sales_id terpilih tidak valid\"",
     "method": "POST",
     "path": "/customer-leads",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected sales id is invalid.\",\"errors\":{\"sales_id\":[\"The selected sales id is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-044",
@@ -412,8 +412,8 @@
     "ekspektasi": "HTTP 422, error validasi nilai status",
     "method": "POST",
     "path": "/customer-leads",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected sales id is invalid. (and 1 more error)\",\"errors\":{\"sales_id\":[\"The selected sales id is invalid.\"],\"status\":[\"The selected status is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-045",
@@ -425,8 +425,8 @@
     "ekspektasi": "HTTP 200, message \"Data Customer Lead berhasil diperbarui\"",
     "method": "PUT",
     "path": "/customer-leads/1",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Data tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-046",
@@ -438,8 +438,8 @@
     "ekspektasi": "HTTP 404, message \"Data tidak ditemukan\"",
     "method": "DELETE",
     "path": "/customer-leads/99999",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Data tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-050",
@@ -451,8 +451,8 @@
     "ekspektasi": "HTTP 200, success=true, data array riwayat",
     "method": "GET",
     "path": "/follow-ups",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S02]: Base table or view not found: 1146 Table 'luminpark.follow_up_history' doesn't exist (Connection: mysql, SQL: select * from `follow_up_history` order by `follow_up_date` desc)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\larag ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-051",
@@ -464,8 +464,8 @@
     "ekspektasi": "HTTP 201, message \"Riwayat follow-up berhasil dicatat\", status lead ikut berubah jadi hot",
     "method": "POST",
     "path": "/follow-ups",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected lead id is invalid. (and 1 more error)\",\"errors\":{\"lead_id\":[\"The selected lead id is invalid.\"],\"sales_id\":[\"The selected sales id is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-052",
@@ -477,8 +477,8 @@
     "ekspektasi": "HTTP 422, error validasi field method",
     "method": "POST",
     "path": "/follow-ups",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected lead id is invalid. (and 2 more errors)\",\"errors\":{\"lead_id\":[\"The selected lead id is invalid.\"],\"sales_id\":[\"The selected sales id is invalid.\"],\"method\":[\"The selected method is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-060",
@@ -490,8 +490,8 @@
     "ekspektasi": "HTTP 200, success=true, data array skema",
     "method": "GET",
     "path": "/payment-schemes",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-061",
@@ -503,8 +503,8 @@
     "ekspektasi": "HTTP 201, success=true, data.scheme_name = \"KPR 15 Tahun\"",
     "method": "POST",
     "path": "/payment-schemes",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'scheme_name' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `payment_schemes` where `scheme_name` = KPR 15 Tahun)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C: ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-062",
@@ -516,8 +516,8 @@
     "ekspektasi": "HTTP 422, error validasi scheme_name unik",
     "method": "POST",
     "path": "/payment-schemes",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'scheme_name' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `payment_schemes` where `scheme_name` = KPR 15 Tahun)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C: ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-063",
@@ -529,8 +529,8 @@
     "ekspektasi": "HTTP 200, success=true, interest_rate = 8.25",
     "method": "PUT",
     "path": "/payment-schemes/1",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Not found\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-070",
@@ -542,8 +542,8 @@
     "ekspektasi": "HTTP 200, success=true, data array booking",
     "method": "GET",
     "path": "/bookings",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-071",
@@ -555,8 +555,8 @@
     "ekspektasi": "HTTP 201, message \"Pemesanan (Booking) berhasil dibuat\"",
     "method": "POST",
     "path": "/bookings",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'booking_code' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `bookings` where `booking_code` = BK-2026-001)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lara ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-072",
@@ -568,8 +568,8 @@
     "ekspektasi": "HTTP 422, error validasi unit_id terpilih tidak valid",
     "method": "POST",
     "path": "/bookings",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'booking_code' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `bookings` where `booking_code` = BK-X)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\ww ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-073",
@@ -581,8 +581,8 @@
     "ekspektasi": "HTTP 422, error validasi status",
     "method": "POST",
     "path": "/bookings",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'booking_code' in 'where clause' (Connection: mysql, SQL: select count(*) as aggregate from `bookings` where `booking_code` = BK-2026-002)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lara ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-080",
@@ -594,8 +594,8 @@
     "ekspektasi": "HTTP 200, success=true, data array pembayaran",
     "method": "GET",
     "path": "/payments",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-081",
@@ -607,8 +607,8 @@
     "ekspektasi": "HTTP 201, message \"Pembayaran berhasil dicatat, menunggu verifikasi\", verification_status=pending",
     "method": "POST",
     "path": "/payments",
-    "actualStatus": 422,
-    "actualBody": "{\"message\":\"The selected booking id is invalid.\",\"errors\":{\"booking_id\":[\"The selected booking id is invalid.\"]}}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-082",
@@ -620,8 +620,8 @@
     "ekspektasi": "HTTP 200, message \"Status verifikasi pembayaran berhasil diperbarui\", remaining_amount booking berkurang",
     "method": "PUT",
     "path": "/payments/1/verify",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Data pembayaran tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-083",
@@ -633,8 +633,8 @@
     "ekspektasi": "HTTP 422, error validasi verification_status",
     "method": "PUT",
     "path": "/payments/1/verify",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Data pembayaran tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-084",
@@ -646,8 +646,8 @@
     "ekspektasi": "HTTP 404, message \"Data pembayaran tidak ditemukan\"",
     "method": "PUT",
     "path": "/payments/99999/verify",
-    "actualStatus": 404,
-    "actualBody": "{\"message\":\"Data pembayaran tidak ditemukan\"}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-090",
@@ -659,8 +659,8 @@
     "ekspektasi": "HTTP 200, success=true, data array log",
     "method": "GET",
     "path": "/system-logs",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-091",
@@ -672,8 +672,8 @@
     "ekspektasi": "HTTP 201, message \"Log aktivitas berhasil dicatat\"",
     "method": "POST",
     "path": "/system-logs",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'user_id' in 'field list' (Connection: mysql, SQL: insert into `system_logs` (`user_id`, `activity`, `description`, `ip_address`, `user_agent`) values (1, manual_test, Dijalankan saat pengujian API, 127.0.0.1, n ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-100",
@@ -685,8 +685,8 @@
     "ekspektasi": "HTTP 200, memuat total_transactions dan total_sales_value",
     "method": "GET",
     "path": "/reports/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total_price' in 'field list' (Connection: mysql, SQL: select sum(`total_price`) as aggregate from `bookings`)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\ve ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-101",
@@ -698,8 +698,8 @@
     "ekspektasi": "HTTP 200, memuat total_settled_amount",
     "method": "GET",
     "path": "/reports/settlement",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'amount' in 'field list' (Connection: mysql, SQL: select sum(`amount`) as aggregate from `payments` where `verification_status` = verified)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lar ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-102",
@@ -711,8 +711,8 @@
     "ekspektasi": "HTTP 200, data memuat customer_leads_count, bookings_count, bookings_sum_total_price",
     "method": "GET",
     "path": "/reports/performance",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"Call to undefined method App\\\\Models\\\\SalesProfile::customerLeads()\", \"exception\": \"BadMethodCallException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Support\\\\Traits\\\\ForwardsCalls.php\", \"line\": 67, \"trace\": [ { \"file\": ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-103",
@@ -724,8 +724,8 @@
     "ekspektasi": "HTTP 200, report_type=sales, exported_at terisi",
     "method": "GET",
     "path": "/reports/export?type=sales",
-    "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"report_type\":\"sales\",\"exported_at\":\"2026-10-26 16:02:07\",\"data\":[]}"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-110",
@@ -737,8 +737,8 @@
     "ekspektasi": "HTTP 200, success=true, hanya unit status tersedia",
     "method": "GET",
     "path": "/public/units",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'where clause' (Connection: mysql, SQL: select * from `units` where `status` = tersedia)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\lara ...[truncated]"
+    "actualStatus": 200,
+    "actualBody": "{\"success\":true,\"data\":[{\"id\":3,\"unit_code\":\"LT-003\",\"unit_type\":\"Skandinavia 120\",\"land_size\":120,\"building_size\":120,\"price\":1450000000,\"description\":\"Skandinavia 120 di Cluster Asena \\u2014 120m\\u00b2 \\/ 120m\\u00b2.\",\"image\":null,\"image_url\":null,\"cluster\":\"Cluster Asena\",\"pro ...[truncated]"
   },
   {
     "id": "TC-111",
@@ -750,8 +750,8 @@
     "ekspektasi": "HTTP 200 bila unit tersedia, 404 bila tidak",
     "method": "GET",
     "path": "/public/units/1",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'where clause' (Connection: mysql, SQL: select * from `units` where `status` = tersedia and `units`.`id` = 1 limit 1)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\www\\ ...[truncated]"
+    "actualStatus": 404,
+    "actualBody": "{\"message\":\"Unit tidak ditemukan atau sudah dipesan\"}"
   },
   {
     "id": "TC-112",
@@ -764,7 +764,7 @@
     "method": "GET",
     "path": "/public/news-gallery",
     "actualStatus": 200,
-    "actualBody": "{\"success\":true,\"data\":{\"news\":[{\"id\":1,\"title\":\"Promo DP 0% Lumin Park\",\"date\":\"2026-10-01\",\"content\":\"Dapatkan promo menarik...\"},{\"id\":2,\"title\":\"Progres Pembangunan Cluster A\",\"date\":\"2026-10-05\",\"content\":\"Pembangunan tahap 1 telah selesai...\"}],\"gallery\":[{\"id\":1,\"title\":\"T ...[truncated]"
+    "actualBody": "{\"success\":true,\"data\":{\"news\":[{\"id\":3,\"title\":\"Kawasan Hunian yang Asri dan Islami\",\"date\":\"2026-10-12\",\"content\":\"Taman lingkungan, mushola, dan sistem satu gerbang mulai beroperasi tahun depan.\",\"image_url\":null},{\"id\":2,\"title\":\"Progres Pembangunan Cluster A\",\"date\":\"2026-10 ...[truncated]"
   },
   {
     "id": "TC-113",
@@ -776,8 +776,8 @@
     "ekspektasi": "HTTP 201, message \"Pesan Anda berhasil dikirim!\", data.status=cold, source=website",
     "method": "POST",
     "path": "/public/contact",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' (Connection: mysql, SQL: insert into `customer_leads` (`name`, `email`, `phone`, `status`, `updated_at`, `created_at`) values (Calon Dari Web, web@mail.com, 081234000111, cold, 2026-10-26  ...[truncated]"
+    "actualStatus": 201,
+    "actualBody": "{\"success\":true,\"message\":\"Pesan Anda berhasil dikirim! Tim sales kami akan segera menghubungi Anda.\",\"data\":{\"id\":38,\"name\":\"Calon Dari Web\",\"status\":\"cold\"}}"
   },
   {
     "id": "TC-114",
@@ -802,8 +802,8 @@
     "ekspektasi": "HTTP 401 (endpoint seharusnya dilindungi autentikasi)",
     "method": "GET",
     "path": "/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sales_profiles.user_id' in 'where clause' (Connection: mysql, SQL: select * from `sales_profiles` where `sales_profiles`.`user_id` in (3))\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\lar ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-121",
@@ -815,8 +815,8 @@
     "ekspektasi": "HTTP 401 (seharusnya butuh autentikasi)",
     "method": "GET",
     "path": "/reports/sales",
-    "actualStatus": 500,
-    "actualBody": "{ \"message\": \"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total_price' in 'field list' (Connection: mysql, SQL: select sum(`total_price`) as aggregate from `bookings`)\", \"exception\": \"Illuminate\\\\Database\\\\QueryException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\ve ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-122",
@@ -828,8 +828,8 @@
     "ekspektasi": "HTTP 401 (operasi hapus harus dilindungi)",
     "method": "DELETE",
     "path": "/units/2",
-    "actualStatus": 404,
-    "actualBody": "{ \"message\": \"No query results for model [App\\\\Models\\\\Unit] 2\", \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException\", \"file\": \"C:\\\\laragon\\\\www\\\\luminpark-main\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Exceptions\\\\Handler.php\", \"line\":  ...[truncated]"
+    "actualStatus": 401,
+    "actualBody": "{\"message\":\"Unauthenticated.\"}"
   },
   {
     "id": "TC-130",

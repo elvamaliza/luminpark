@@ -247,8 +247,8 @@ t = doc.add_table(rows=1, cols=4); t.style = "Light List Accent 1"
 for i, hd in enumerate(["Email", "Password", "Role", "Ketersediaan Login"]):
     r = t.rows[0].cells[i].paragraphs[0].add_run(hd); r.bold = True
     shade(t.rows[0].cells[i], "D9E2F3")
-for e, p_, rl, ok in [("admin@luminpark.com", "password123", "superadmin", "Berhasil (HTTP 200)"),
-                      ("manager@luminpark.com", "password123", "manager", "Berhasil (HTTP 200)"),
+for e, p_, rl, ok in [("superadmin@gmail.com", "password123", "manager (super admin)", "Berhasil (HTTP 200)"),
+                      ("admin.sales@luminpark.com", "password123", "admin_sales", "Berhasil (HTTP 200)"),
                       ("sales@luminpark.com", "password123", "sales", "Berhasil (HTTP 200)")]:
     c = t.add_row().cells
     for i, v in enumerate([e, p_, rl, ok]):

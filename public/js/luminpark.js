@@ -219,7 +219,7 @@ window.LP = (() => {
   /* ---------- vocabulary ---------- */
 
   const ROLE_LABEL = {
-    manager: 'Manajer (Super Admin)', admin_sales: 'Admin Sales', sales: 'Sales', consumer: 'Konsumen',
+    manager: 'Super Admin (Manajer)', admin_sales: 'Admin Sales', sales: 'Sales', consumer: 'Konsumen',
   };
 
   const STATUS = {

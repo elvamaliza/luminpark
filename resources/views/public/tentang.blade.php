@@ -22,18 +22,18 @@
         <div id="tentang-project" class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"></div>
     </section>
 
-    <section>
+    <section data-seksi="skema">
         <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Skema Pembayaran</h2>
         <p class="mt-1 text-sm text-zinc-500">Tiga metode pembiayaan yang kami sediakan untuk memudahkan kepemilikan rumah.</p>
         <div id="tentang-schemes" class="mt-6"></div>
     </section>
 
-    <section>
+    <section data-seksi="gallery">
         <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Galeri Perumahan</h2>
         <div id="tentang-gallery" class="mt-6"></div>
     </section>
 
-    <section>
+    <section data-seksi="sales">
         <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Tim Sales Kami</h2>
         <p class="mt-1 text-sm text-zinc-500">Siap membantu Anda menemukan unit yang tepat.</p>
         <div id="tentang-sales" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
@@ -156,8 +156,23 @@
     }
 
     loadProject();
-    loadSchemes();
-    loadGallery();
-    loadSales();
+
+    LP.fillSettings().then(function (nilai) {
+        const aktif = {};
+        ['skema', 'gallery', 'sales'].forEach(function (nama) {
+            const node = document.querySelector('[data-seksi="' + nama + '"]');
+            if (!node) return;
+            const nyala = String(nilai && nilai['public_show_' + nama] === '0' ? '0' : '1') === '1';
+            node.classList.toggle('hidden', !nyala);
+            aktif[nama] = nyala;
+        });
+        if (aktif.skema) loadSchemes();
+        if (aktif.gallery) loadGallery();
+        if (aktif.sales) loadSales();
+    }).catch(function () {
+        loadSchemes();
+        loadGallery();
+        loadSales();
+    });
 </script>
 @endpush

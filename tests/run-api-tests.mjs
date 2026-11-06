@@ -8,18 +8,18 @@ const add = (o) => T.push(o);
 
 // ---------------- AUTH ----------------
 add({ id: 'TC-001', nama: 'Login Success (Super Admin)', skenario: 'Autentikasi - Positif',
-  deskripsi: 'User dengan role superadmin memasukkan email & password yang benar.',
+  deskripsi: 'User dengan role manager (super admin) memasukkan email & password yang benar.',
   langkah: '1. Kirim POST /api/login 2. Sertakan email & password valid',
-  dataUji: '{"email":"admin@luminpark.com","password":"password123"}',
+  dataUji: '{"email":"superadmin@gmail.com","password":"password123"}',
   ekspektasi: 'HTTP 200, success=true, field access_token terisi, token_type=Bearer',
-  method: 'POST', path: '/login', body: { email: 'admin@luminpark.com', password: 'password123' }, expectStatus: 200 });
+  method: 'POST', path: '/login', body: { email: 'superadmin@gmail.com', password: 'password123' }, expectStatus: 200 });
 
 add({ id: 'TC-002', nama: 'Login Wrong Password', skenario: 'Autentikasi - Negatif',
   deskripsi: 'Email valid dengan password salah harus ditolak.',
   langkah: '1. Kirim POST /api/login 2. Password sengaja salah',
-  dataUji: '{"email":"admin@luminpark.com","password":"salah123"}',
+  dataUji: '{"email":"superadmin@gmail.com","password":"salah123"}',
   ekspektasi: 'HTTP 401, success=false, message "Email atau password salah"',
-  method: 'POST', path: '/login', body: { email: 'admin@luminpark.com', password: 'salah123' }, expectStatus: 401 });
+  method: 'POST', path: '/login', body: { email: 'superadmin@gmail.com', password: 'salah123' }, expectStatus: 401 });
 
 add({ id: 'TC-003', nama: 'Login Invalid Email Format', skenario: 'Validasi Input - Negatif',
   deskripsi: 'Field email tidak mengikuti format email seharusnya divalidasi.',
@@ -102,10 +102,10 @@ add({ id: 'TC-021', nama: 'Create Sales Baru', skenario: 'CRUD Sales - Create',
 
 add({ id: 'TC-022', nama: 'Create Sales Email Duplikat', skenario: 'CRUD Sales - Negatif',
   deskripsi: 'Email yang sudah dipakai harus ditolak aturan unique:users,email.',
-  langkah: '1. POST /api/sales 2. Email sudah terdaftar (admin@luminpark.com)',
-  dataUji: '{"name":"Dup","email":"admin@luminpark.com","password":"rahasia123","phone":"081234567890","sales_code":"SLD-002"}',
+  langkah: '1. POST /api/sales 2. Email sudah terdaftar (superadmin@gmail.com)',
+  dataUji: '{"name":"Dup","email":"superadmin@gmail.com","password":"rahasia123","phone":"081234567890","sales_code":"SLD-002"}',
   ekspektasi: 'HTTP 422, error validasi "email sudah diambil"',
-  method: 'POST', path: '/sales', body: { name: 'Dup', email: 'admin@luminpark.com', password: 'rahasia123', phone: '081234567890', sales_code: 'SLD-002' }, expectStatus: 422 });
+  method: 'POST', path: '/sales', body: { name: 'Dup', email: 'superadmin@gmail.com', password: 'rahasia123', phone: '081234567890', sales_code: 'SLD-002' }, expectStatus: 422 });
 
 add({ id: 'TC-023', nama: 'Create Sales Tanpa Sales Code', skenario: 'CRUD Sales - Negatif',
   deskripsi: 'Field wajib sales_code dikosongkan.',
@@ -488,7 +488,7 @@ salesToken = salesJson.access_token || '';
 
 const mgrLogin = await fetch(BASE + '/login', {
   method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-  body: JSON.stringify({ email: 'manager@luminpark.com', password: 'password123' })
+  body: JSON.stringify({ email: 'superadmin@gmail.com', password: 'password123' })
 });
 managerToken = (await mgrLogin.json().catch(() => ({}))).access_token || '';
 

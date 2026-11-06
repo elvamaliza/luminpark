@@ -215,7 +215,7 @@ table(
          "dan menghidupkan kembali sesi saat logout.",
          "app/Http/Controllers/Api/AuthController.php, config/sanctum.php"],
         ["Otorisasi (RBAC)", "Seluruh rute bisnis dibungkus auth:sanctum lalu dibatasi per peran memakai middleware "
-         "role:.... Rute verifikasi pembayaran khusus manager/superadmin; rute notifikasi hanya atas nama pemilik; "
+         "role:.... Rute verifikasi pembayaran khusus manager (super admin); rute notifikasi hanya atas nama pemilik; "
          "indeks lead discoping per sales.",
          "routes/api.php, app/Http/Middleware/RoleMiddleware.php"],
         ["Dashboard & laporan", "Angka dashboard dihitung memakai konstanta status (tidak lagi mencampur bahasa). "
@@ -227,8 +227,9 @@ table(
         ["Notifikasi & log sistem", "Notifikasi dibuat otomatis pada peristiwa booking, pembayaran menunggu verifikasi, "
          "dan hasil verifikasi. Aktivitas penting (login gagal, mutasi data) ditulis ke system_logs.",
          "app/Http/Controllers/Api/NotificationController.php, SystemLogController.php"],
-        ["Seeder & konfigurasi", "Seeder mengisi basis data uji: 7 pengguna (peran superadmin, manager, admin_sales, "
-         "sales x3, consumer), 1 proyek, 3 cluster, 9 unit, 3 skema pembayaran, 4 calon konsumen, 3 riwayat follow-up, "
+        ["Seeder & konfigurasi", "Seeder mengisi basis data uji: 5 akun login (satu manager sebagai super admin, "
+         "admin_sales, dan sales x3; peran consumer tidak diberi akun login), 1 proyek, 3 cluster, 9 unit, "
+         "3 skema pembayaran, 4 calon konsumen, 3 riwayat follow-up, "
          "2 pemesanan, 4 pembayaran, dan 3 target sales. Notifikasi, log sistem, serta sesi login dibuat pada saat "
          "sistem dijalankan, bukan dari seeder.",
          "database/seeders/*.php, .env"],
@@ -296,7 +297,7 @@ matrix = [
      "AuthController::sessions + tabel login_sessions menyimpan waktu login/logout dan status sesi.",
      "TC-A15, TC-A16, TC-F04", "Sesuai", ""),
     ("5", "b.1", "Admin Sales dan Manajer melihat seluruh data unit beserta statusnya",
-     "UnitController::index dengan filter status, dibatasi role:manager,admin_sales,superadmin.",
+     "UnitController::index dengan filter status, dibatasi role:manager,admin_sales.",
      "TC-A13, TC-B01", "Sesuai", ""),
     ("6", "b.2", "Sales melihat informasi unit yang tersedia",
      "UnitController::availableUnits (GET /api/units-available).", "TC-A14", "Sesuai", ""),
@@ -324,7 +325,7 @@ matrix = [
      "PaymentController::store menerima multipart transfer_receipt (jpg/jpeg/png/pdf, maks 5 MB) dan menyimpannya "
      "pada disk public.", "TC-E01, TC-E02, TC-E08, TC-J02", "Sesuai", ""),
     ("15", "d.2", "Manajer memverifikasi bukti pembayaran (terverifikasi/ditolak)",
-     "PUT /api/payments/{id}/verify dengan middleware role:manager,superadmin; kolom verified_by dan verified_at "
+     "PUT /api/payments/{id}/verify dengan middleware role:manager (super admin); kolom verified_by dan verified_at "
      "terisi; penolakan tidak mengubah sisa pembayaran.", "TC-E03, TC-E04, TC-E06, TC-J03", "Sesuai", ""),
     ("16", "d.3", "Sistem memperbarui status pelunasan dan sisa pembayaran otomatis",
      "PaymentController::recalculateBooking + Booking::settlementStatus() menurunkan status (menunggu DP, dp lunas, "
@@ -344,7 +345,7 @@ matrix = [
      "apiResource follow-ups; penyimpanan status_before/status_after, metode komunikasi, dan sinkronisasi last_follow_up "
      "pada lead.", "TC-C05, TC-C06, TC-C07", "Sesuai", ""),
     ("22", "e.5", "Admin Sales dan Manajer melihat seluruh calon konsumen dari semua sales dengan filter status",
-     "Indeks tidak discoping untuk role manager/admin_sales/superadmin.", "TC-C08", "Sesuai", ""),
+     "Indeks tidak discoping untuk role manager/admin_sales.", "TC-C08", "Sesuai", ""),
     ("23", "e.6", "Admin Sales dan Manajer memantau perkembangan follow-up setiap sales",
      "Daftar follow-up gabungan (lead + sales) dan laporan konsumen/per-performance sales.", "TC-C07, TC-G07, TC-G08",
      "Sesuai", ""),
@@ -354,7 +355,7 @@ matrix = [
     ("25", "f.2", "Admin Sales melihat dashboard rekapitulasi penjualan seluruh sales",
      "DashboardController::adminSalesDashboard.", "TC-G02", "Sesuai", ""),
     ("26", "f.3", "Sales melihat dashboard jumlah calon konsumen yang ditangani berdasarkan status",
-     "DashboardController::salesDashboard (dibatasi role:sales,superadmin).", "TC-G03, TC-G04", "Sesuai", ""),
+     "DashboardController::salesDashboard (dibatasi role:sales).", "TC-G03, TC-G04", "Sesuai", ""),
     ("27", "f.4", "Manajer dan Admin Sales melihat dan mencetak laporan penjualan unit, pelunasan, kinerja sales, serta "
      "laporan konsumen beserta calon konsumen",
      "ReportController::salesReport/settlementReport/salesPerformanceReport/consumerReport dan exportReport (stream CSV).",
@@ -378,7 +379,7 @@ matrix = [
      "SalesController::index + performance (pencapaian unit/nominal dibanding target pada periode).", "TC-F06, TC-G07",
      "Sesuai", ""),
     ("34", "h.3", "Admin Sales mengelola data sales dengan hak yang sama",
-     "Group role:manager,admin_sales,superadmin pada apiResource sales.", "TC-F03", "Sesuai", ""),
+     "Group role:manager,admin_sales pada apiResource sales.", "TC-F03", "Sesuai", ""),
     ("35", "ERD", "Struktur basis data sesuai ERD (Gambar 2.24) — narasi menyebut 14 tabel dan mendaftar 15 nama tabel",
      "15 tabel domain dibuat mengikuti narasi ERD: users, sales_profiles, projects, clusters, units, customer_leads, "
      "follow_up_histories, bookings, payment_schemes, payments, sales_targets, sales_reports, notifications, system_logs, "
@@ -567,7 +568,7 @@ steps = [
     "php artisan storage:link — wajib agar berkas hasil unggah (gambar unit, bukti transfer) dapat diakses melalui "
     "/storage.",
     "php artisan serve --host=127.0.0.1 --port=8080.",
-    "Regresi otomatis: node tests/run-conformance-tests.mjs (90 test case) — hasilnya ditulis ke "
+    f"Regresi otomatis: node tests/run-conformance-tests.mjs ({len(rows)} test case) — hasilnya ditulis ke "
     "tests/conformance-results.json.",
     "Verifikasi manual unggah berkas dan waktu respons: node tests/run-manual-checks.mjs (4 test case) — hasilnya "
     "ditulis ke tests/manual-check-results.json.",
@@ -659,7 +660,9 @@ table(["Entitas", "Istilah pada laporan", "Nilai pada sistem", "Tempat definisi"
            "diturunkan dari Booking::settlementStatus() atas besarnya pembayaran, bukan dari kolom tersendiri",
            "App\\Models\\Payment (TYPES) + Booking::settlementStatus()"],
           ["payments.verification_status", "terverifikasi / ditolak", "pending, verified, rejected", "App\\Models\\Payment"],
-          ["users.role", "Manajer, Admin Sales, Sales, Konsumen", "manager, admin_sales, sales, consumer, superadmin",
+          ["users.role", "Manajer, Admin Sales, Sales, Konsumen",
+           "manager (satu akun super admin), admin_sales, sales; consumer dipakai sebagai penanda peran tetapi tidak "
+           "lulus daftar akun login",
            "App\\Models\\User"],
           ["users.status", "status akun", "aktif, nonaktif", "App\\Models\\User"],
       ],
@@ -692,19 +695,22 @@ head("C.1 Akun hasil seeder (semua memakai password123)", 2)
 table(["Email", "Peran", "Fungsi dalam pengujian"],
       [Cm(6.0), Cm(4.0), Cm(16.2)],
       [
-          ["admin@luminpark.com", "superadmin", "uji hak akses penuh dan dashboard"],
-          ["manager@luminpark.com", "manager", "aktor utama CRUD unit/sales, verifikasi pembayaran, laporan"],
-          ["admin.sales@luminpark.com", "admin_sales", "uji kesetaraan hak dengan manajer (kebutuhan h.3)"],
+          ["superadmin@gmail.com", "manager (super admin)", "aktor utama CRUD unit/sales, verifikasi pembayaran, laporan, pengaturan"],
+          ["admin.sales@luminpark.com", "admin_sales", "uji kesetaraan hak baca dengan manajer (kebutuhan h.3)"],
           ["sales@luminpark.com", "sales", "booking, pembayaran, follow-up, dashboard sales"],
           ["sales2@luminpark.com", "sales", "uji pemisahan data antar sales (TC-C09, TC-C10)"],
           ["sales3@luminpark.com", "sales", "uji reset password dan penonaktifan akun (TC-F04, TC-F05)"],
-          ["konsumen@luminpark.com", "consumer", "uji penolakan akses modul internal (TC-A04, TC-A12)"],
       ], sizes=[9, 9, 9])
+bullet("Hanya tiga akun login internal: super admin, admin sales, dan sales. Akun admin dan manajer yang dahulu "
+       "terpisah kini digabung menjadi satu akun super admin (superadmin@gmail.com) karena perannya sama; "
+       "admin@luminpark.com dan manager@luminpark.com tidak lagi aktif (buktinya TC-A04c).")
+bullet("Konsumen tidak punya akun login; seluruh interaksinya lewat halaman publik, sehingga pengujian penolakan "
+       "akses internal memakai token peran lain (TC-A04, TC-A12).")
 
 head("C.2 Artefak yang dihasilkan", 2)
 for s in [
-    "tests/run-conformance-tests.mjs — perangkat uji regresi 90 test case (satu urutan jalan, dapat diulang).",
-    "tests/conformance-results.json — hasil mesin 90 test case yang menjadi sumber tabel BAB IV.",
+    f"tests/run-conformance-tests.mjs — perangkat uji regresi {len(rows)} test case (satu urutan jalan, dapat diulang).",
+    f"tests/conformance-results.json — hasil mesin {len(rows)} test case yang menjadi sumber tabel BAB IV.",
     "tests/run-manual-checks.mjs + tests/manual-check-results.json — verifikasi unggah berkas multipart (PNG/PDF) "
     "dan pengukuran waktu respons.",
     "tests/routes.json — senarai rute dari php artisan route:list (dasar Lampiran B).",

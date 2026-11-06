@@ -144,10 +144,10 @@ T({
   id: 'TC-A01', nama: 'Login Manajer', skenario: 'Autentikasi',
   deskripsi: 'Manajer (Super Admin) login dengan kredensial valid dan menerima token bearer.',
   langkah: '1. POST /api/login 2. Periksa access_token dan token_expires_at',
-  dataUji: 'email=manager@luminpark.com, password=password123',
+  dataUji: 'email=superadmin@gmail.com, password=password123',
   ekspektasi: 'HTTP 200, body memuat access_token, token_type=Bearer, dan token_expires_at',
   expectStatus: 200, method: 'POST', path: '/login', token: null,
-  body: { email: 'manager@luminpark.com', password: 'password123' },
+  body: { email: 'superadmin@gmail.com', password: 'password123' },
   check: (j) => (j && j.access_token && j.token_type === 'Bearer' && j.token_expires_at
     ? { pass: true, note: `Token terbit dan kedaluwarsa pada ${j.token_expires_at}.` }
     : { pass: false, note: 'Token atau batas waktu token tidak dikembalikan.' }),
@@ -212,13 +212,38 @@ T({
 });
 
 T({
+  id: 'TC-A04c', nama: 'Akun Super Admin Lama Ditolak', skenario: 'Autentikasi negatif',
+  deskripsi: 'Akun admin dan manajer adalah orang yang sama, jadi hanya satu akun super admin yang berlaku '
+    + '(superadmin@gmail.com). Kedua akun lama dihapus dari seeder dan tidak bisa login lagi.',
+  langkah: '1. POST /api/login memakai admin@luminpark.com 2. POST /api/login memakai manager@luminpark.com',
+  dataUji: 'email=admin@luminpark.com dan manager@luminpark.com, password=password123',
+  ekspektasi: 'Keduanya HTTP 401 dan tanpa access_token',
+  expectStatus: 401, method: 'POST', path: '/login', token: null,
+  run: async () => {
+    ctx.lamaSuperAdmin = [];
+    for (const email of ['admin@luminpark.com', 'manager@luminpark.com']) {
+      const hasil = await api(null, 'POST', '/login', { email, password: 'password123' });
+      ctx.lamaSuperAdmin.push(`${email}=${hasil.status}${hasil.json?.access_token ? '+TOKEN' : ''}`);
+    }
+    const masihAdaToken = ctx.lamaSuperAdmin.some((x) => x.includes('+TOKEN'));
+    return { status: masihAdaToken ? 200 : 401, json: {} };
+  },
+  check: (j, status) => ({
+    pass: status === 401,
+    note: (status === 401 ? 'Hanya superadmin@gmail.com yang aktif: ' : 'Akun lama masih bisa login: ')
+      + ctx.lamaSuperAdmin.join(', '),
+  }),
+  kebutuhan: 'Keputusan akun: satu super admin',
+});
+
+T({
   id: 'TC-A05', nama: 'Login Password Salah', skenario: 'Autentikasi negatif',
   deskripsi: 'Kredensial salah ditolak dan token tidak diberikan.',
   langkah: 'POST /api/login dengan password salah',
-  dataUji: 'email=manager@luminpark.com, password=rahasia-salah',
+  dataUji: 'email=superadmin@gmail.com, password=rahasia-salah',
   ekspektasi: 'HTTP 401 tanpa access_token',
   expectStatus: 401, method: 'POST', path: '/login', token: null,
-  body: { email: 'manager@luminpark.com', password: 'rahasia-salah' },
+  body: { email: 'superadmin@gmail.com', password: 'rahasia-salah' },
   check: (j) => (!j?.access_token ? { pass: true, note: 'Pesan error jelas: ' + (j?.message || '-') } : { pass: false }),
   kebutuhan: 'Kebutuhan non-fungsional (pesan error jelas)',
 });
@@ -1051,10 +1076,10 @@ T({
   id: 'TC-F02', nama: 'Email Sales Duplikat', skenario: 'Validasi sales',
   deskripsi: 'Email telah dipakai sehingga pendaftaran sales baru ditolak.',
   langkah: 'POST /api/sales memakai email yang sudah ada',
-  dataUji: 'email=manager@luminpark.com',
+  dataUji: 'email=superadmin@gmail.com',
   ekspektasi: 'HTTP 422',
   expectStatus: 422, method: 'POST', path: '/sales', token: M,
-  body: { name: 'Duplikat', email: 'manager@luminpark.com', password: 'password123', sales_code: 'SL-099' },
+  body: { name: 'Duplikat', email: 'superadmin@gmail.com', password: 'password123', sales_code: 'SL-099' },
   kebutuhan: 'ERD tabel pengguna (email unik)',
 });
 
@@ -1663,7 +1688,7 @@ T({
   dataUji: 'avatar=tests/tmp-unit.png (PNG)',
   ekspektasi: 'HTTP 200 dengan avatar_url berisi path /storage/avatars',
   expectStatus: 200, method: 'POST', path: '/profile', token: S,
-  run: async () => upload(S(), '/profile', { name: 'Sari Sales Timur' }, 'avatar', 'tmp-unit.png', 'image/png'),
+  run: async () => upload(S(), '/profile', { name: 'Budi Sales Utama' }, 'avatar', 'tmp-unit.png', 'image/png'),
   check: (j) => {
     const url = j?.data?.avatar_url || '';
     const ok = url.includes('/storage/avatars/');
@@ -2003,7 +2028,7 @@ T({
     const terlaluKecil = await api(M(), 'PUT', '/settings', { settings: { session_timeout_minutes: '5' } });
     const terlaluBesar = await api(M(), 'PUT', '/settings', { settings: { session_timeout_minutes: '20000' } });
     const simpan = await api(M(), 'PUT', '/settings', { settings: { session_timeout_minutes: '60' } });
-    const masuk = await api(null, 'POST', '/login', { email: 'manager@luminpark.com', password: 'password123' });
+    const masuk = await api(null, 'POST', '/login', { email: 'superadmin@gmail.com', password: 'password123' });
     const menit = masuk.json?.token_expires_at
       ? Math.round((new Date(masuk.json.token_expires_at).getTime() - Date.now()) / 60000)
       : null;
@@ -2072,7 +2097,7 @@ T({
   ------------------------------------------------------------------------ */
 
 async function prelude() {
-  const managerToken = await loginAs('manager@luminpark.com');
+  const managerToken = await loginAs('superadmin@gmail.com');
   const salesToken = await loginAs('sales@luminpark.com');
 
   const me = await api(managerToken, 'GET', '/me');

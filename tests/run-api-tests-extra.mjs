@@ -22,9 +22,9 @@ add({ id: 'TC-005', nama: 'Login Success (Role Sales)', skenario: 'Autentikasi -
 add({ id: 'TC-009', nama: 'Login Success (Role Manager)', skenario: 'Autentikasi - Positif',
   deskripsi: 'Akun default role manager dapat login dan memperoleh token Sanctum.',
   langkah: '1. POST /api/login dengan kredensial manager seeder',
-  dataUji: '{"email":"manager@luminpark.com","password":"password123"}',
+  dataUji: '{"email":"superadmin@gmail.com","password":"password123"}',
   ekspektasi: 'HTTP 200, success=true, user.role=manager',
-  method: 'POST', path: '/login', body: { email: 'manager@luminpark.com', password: 'password123' }, expectStatus: 200 });
+  method: 'POST', path: '/login', body: { email: 'superadmin@gmail.com', password: 'password123' }, expectStatus: 200 });
 
 add({ id: 'TC-027', nama: 'Delete Data Sales', skenario: 'CRUD Sales - Delete',
   deskripsi: 'Menghapus user ber-role sales berdasarkan id.',
@@ -93,7 +93,7 @@ add({ id: 'TC-140', nama: 'Token Hangus Setelah Logout', skenario: 'Autentikasi 
 let token = null;
 for (const tc of T) {
   if (tc.afterLogout) {
-    const l = await login('manager@luminpark.com', 'password123');
+    const l = await login('superadmin@gmail.com', 'password123');
     const t2 = l.json.access_token;
     await fetch(BASE + '/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + t2, Accept: 'application/json' } });
     await call(tc, t2);
