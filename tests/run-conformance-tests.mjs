@@ -8,7 +8,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const BASE = 'http://127.0.0.1:8080/api';
+const BASE = process.env.LP_API_BASE || 'http://127.0.0.1:8080/api';
 const results = [];
 const ctx = {};
 
@@ -141,8 +141,8 @@ async function execute() {
    ------------------------------------------------------------------------ */
 
 T({
-  id: 'TC-A01', nama: 'Login Manajer', skenario: 'Autentikasi',
-  deskripsi: 'Manajer (Super Admin) login dengan kredensial valid dan menerima token bearer.',
+  id: 'TC-A01', nama: 'Login Super Admin', skenario: 'Autentikasi',
+  deskripsi: 'Super Admin login dengan kredensial valid dan menerima token bearer.',
   langkah: '1. POST /api/login 2. Periksa access_token dan token_expires_at',
   dataUji: 'email=superadmin@gmail.com, password=password123',
   ekspektasi: 'HTTP 200, body memuat access_token, token_type=Bearer, dan token_expires_at',
@@ -203,7 +203,7 @@ T({
 T({
   id: 'TC-A04b', nama: 'Tidak Ada Rute Pembuatan Akun', skenario: 'RBAC negatif',
   deskripsi: 'Sistem tidak menyediakan endpoint pendaftaran akun, sehingga akun konsumen tidak mungkin dibuat dari API.',
-  langkah: 'POST /api/register memakai token manajer',
+  langkah: 'POST /api/register memakai token super admin',
   dataUji: 'role=consumer',
   ekspektasi: 'HTTP 404 karena rute pendaftaran memang tidak ada',
   expectStatus: 404, method: 'POST', path: '/register', token: M,
@@ -281,35 +281,35 @@ T({
 T({
   id: 'TC-A09', nama: 'Profil Diri Sendiri', skenario: 'Autentikasi',
   deskripsi: 'Endpoint /me mengembalikan data akun beserta peran dan status akun.',
-  langkah: 'GET /api/me dengan token manajer',
-  dataUji: 'token manajer',
-  ekspektasi: 'HTTP 200, data.role=manager dan data.status=aktif',
+  langkah: 'GET /api/me dengan token super admin',
+  dataUji: 'token super admin',
+  ekspektasi: 'HTTP 200, data.role=super_admin dan data.status=aktif',
   expectStatus: 200, method: 'GET', path: '/me', token: M,
-  check: (j) => (j?.data?.role === 'manager' && j?.data?.status === 'aktif'
+  check: (j) => (j?.data?.role === 'super_admin' && j?.data?.status === 'aktif'
     ? { pass: true, note: 'Kolom status akun (ERD) terpakai.' }
     : { pass: false, note: `role=${j?.data?.role}, status=${j?.data?.status}` }),
   kebutuhan: 'Kebutuhan a + ERD tabel pengguna (status akun)',
 });
 
 T({
-  id: 'TC-A10', nama: 'Sales Menolak Dashboard Manajer', skenario: 'RBAC negatif',
-  deskripsi: 'Sales tidak dapat membuka dashboard manajer.',
-  langkah: 'GET /api/dashboard/manager memakai token sales',
+  id: 'TC-A10', nama: 'Sales Menolak Dashboard Super Admin', skenario: 'RBAC negatif',
+  deskripsi: 'Sales tidak dapat membuka dashboard super admin.',
+  langkah: 'GET /api/dashboard/super-admin memakai token sales',
   dataUji: 'token sales',
   ekspektasi: 'HTTP 403',
-  expectStatus: 403, method: 'GET', path: '/dashboard/manager', token: S,
+  expectStatus: 403, method: 'GET', path: '/dashboard/super-admin', token: S,
   kebutuhan: 'Kebutuhan a (RBAC)',
 });
 
 T({
   id: 'TC-A11', nama: 'Sales Menolak CRUD Unit', skenario: 'RBAC negatif',
-  deskripsi: 'Hak tambah/ubah/hapus unit hanya milik Manajer (dan Admin Sales untuk baca).',
+  deskripsi: 'Hak tambah/ubah/hapus unit hanya milik Super Admin (dan Admin Sales untuk baca).',
   langkah: 'POST /api/units memakai token sales',
   dataUji: 'unit_code=LT-900, cluster_id=<cluster>, price=700000000',
   ekspektasi: 'HTTP 403',
   expectStatus: 403, method: 'POST', path: '/units', token: S,
   body: () => ({ unit_code: 'LT-900', cluster_id: ctx.clusterId, unit_type: 'Type Tes', land_size: 60, building_size: 45, price: 700000000, status: 'available' }),
-  kebutuhan: 'Kebutuhan b (Manajer dapat menambah data unit)',
+  kebutuhan: 'Kebutuhan b (Super Admin dapat menambah data unit)',
 });
 
 T({
@@ -324,7 +324,7 @@ T({
 
 T({
   id: 'TC-A13', nama: 'Admin Sales Dapat Melihat Unit', skenario: 'RBAC positif',
-  deskripsi: 'Admin Sales dan Manajer dapat melihat seluruh data unit beserta statusnya.',
+  deskripsi: 'Admin Sales dan Super Admin dapat melihat seluruh data unit beserta statusnya.',
   langkah: 'GET /api/units memakai token Admin Sales',
   dataUji: 'token admin_sales',
   ekspektasi: 'HTTP 200 berisi daftar unit',
@@ -351,8 +351,8 @@ T({
 T({
   id: 'TC-A15', nama: 'Sesi Login Tercatat', skenario: 'Sesi & log',
   deskripsi: 'Tabel sesi_login mencatat token, IP, user agent, dan waktu login.',
-  langkah: 'GET /api/sessions memakai token manajer',
-  dataUji: 'token manajer',
+  langkah: 'GET /api/sessions memakai token super admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200, minimal satu sesi berstatus active dengan ip_address terisi',
   expectStatus: 200, method: 'GET', path: '/sessions', token: M,
   check: (j) => {
@@ -424,7 +424,7 @@ T({
 
 T({
   id: 'TC-B03', nama: 'Tambah Unit', skenario: 'Membuat data unit',
-  deskripsi: 'Manajer menambahkan unit baru dengan kode unik dan status awal tersedia.',
+  deskripsi: 'Super Admin menambahkan unit baru dengan kode unik dan status awal tersedia.',
   langkah: 'POST /api/units',
   dataUji: 'unit_code=LT-TEST-01, cluster_id=<cluster>, tipe 60/45, harga 725.000.000',
   ekspektasi: 'HTTP 201 dan unit tersimpan dengan status available',
@@ -470,7 +470,7 @@ T({
 
 T({
   id: 'TC-B06', nama: 'Perbarui Status Unit', skenario: 'Memperbarui data unit',
-  deskripsi: 'Manajer dapat memperbarui status unit menjadi proses delivery.',
+  deskripsi: 'Super Admin dapat memperbarui status unit menjadi proses delivery.',
   langkah: 'PUT /api/units/{id}',
   dataUji: 'status=delivery_process',
   ekspektasi: 'HTTP 200 dengan status delivery_process',
@@ -505,7 +505,7 @@ T({
 
 T({
   id: 'TC-B09', nama: 'Hapus Unit', skenario: 'Menghapus data unit',
-  deskripsi: 'Manajer menghapus unit yang belum pernah dipesan.',
+  deskripsi: 'Super Admin menghapus unit yang belum pernah dipesan.',
   langkah: 'DELETE /api/units/{id}',
   dataUji: 'id unit hasil TC-B03',
   ekspektasi: 'HTTP 200',
@@ -522,6 +522,142 @@ T({
   expectStatus: 422, method: 'DELETE', path: () => `/units/${ctx.seededBookedUnitId}`, token: M,
   check: (j) => ({ pass: !!j?.message, note: j?.message || trim(JSON.stringify(j)) }),
   kebutuhan: 'ERD relasi unit_rumah → pemesanan',
+});
+
+/* Cluster adalah induk unit: formulir Tambah Unit tidak dapat dipakai sebelum cluster ada,
+   jadi pembuatan cluster ikut diuji pada blok data unit. */
+
+T({
+  id: 'TC-B11', nama: 'Daftar Proyek untuk Cluster', skenario: 'Membaca data referensi',
+  deskripsi: 'Setiap cluster menempel pada satu proyek, sehingga formulir Tambah Cluster membutuhkan daftar proyek.',
+  langkah: 'GET /api/projects memakai token Super Admin',
+  dataUji: 'tanpa parameter',
+  ekspektasi: 'HTTP 200 dan data berisi proyek dengan id serta nama',
+  expectStatus: 200, method: 'GET', path: '/projects', token: M,
+  check: (j) => {
+    const arr = j?.data || [];
+    if (!arr.length) return { pass: false, note: 'Daftar proyek kosong.' };
+    ctx.projectId = arr[0].id;
+    return { pass: !!arr[0].name, note: `${arr.length} proyek, dipakai ${arr[0].name} (id=${arr[0].id}).` };
+  },
+  kebutuhan: 'ERD tabel proyek → cluster',
+});
+
+T({
+  id: 'TC-B12', nama: 'Tambah Cluster Baru', skenario: 'Membuat data cluster',
+  deskripsi: 'Super Admin menambahkan cluster baru di dalam sebuah proyek; respons memuat proyek induknya.',
+  langkah: 'POST /api/clusters',
+  dataUji: () => `project_id=${ctx.projectId}, name=Cluster Uji Sistem`,
+  ekspektasi: 'HTTP 201 dan data cluster tersimpan dengan nama yang sama',
+  expectStatus: 201, method: 'POST', path: '/clusters', token: M,
+  body: () => ({ project_id: ctx.projectId, name: 'Cluster Uji Sistem', description: 'Cluster hasil pengujian kesesuaian.' }),
+  check: (j) => (j?.data?.name === 'Cluster Uji Sistem' && j?.data?.project?.id === ctx.projectId
+    ? { pass: true, note: `Cluster id=${j.data.id} terbentuk pada proyek ${j.data.project.name}.` }
+    : { pass: false, note: trim(JSON.stringify(j)) }),
+  save: (j, c) => { c.newClusterId = j?.data?.id; },
+  kebutuhan: 'Kebutuhan b.4 (kelola data unit) + permintaan Tambah Cluster',
+});
+
+T({
+  id: 'TC-B13', nama: 'Nama Cluster Duplikat Ditolak', skenario: 'Validasi cluster',
+  deskripsi: 'Indeks unik clusters(project_id, name) masih berlaku di basis data, jadi duplikasi harus ditutup lewat validasi agar tidak menjadi 500.',
+  langkah: 'POST /api/clusters memakai nama dan proyek yang sama dengan TC-B12',
+  dataUji: () => `project_id=${ctx.projectId}, name=Cluster Uji Sistem (sudah ada)`,
+  ekspektasi: 'HTTP 422 dengan pesan kesalahan pada field name',
+  expectStatus: 422, method: 'POST', path: '/clusters', token: M,
+  body: () => ({ project_id: ctx.projectId, name: 'Cluster Uji Sistem' }),
+  check: (j) => ({ pass: !!j?.errors?.name, note: j?.errors?.name?.[0] || trim(JSON.stringify(j)) }),
+  kebutuhan: 'Kebutuhan non-fungsional (integritas data)',
+});
+
+T({
+  id: 'TC-B14', nama: 'Cluster Tanpa Nama Ditolak', skenario: 'Validasi cluster',
+  deskripsi: 'Nama cluster wajib dan proyek induk harus ada; cluster yatim tidak boleh terbentuk.',
+  langkah: '1. POST /api/clusters dengan name kosong 2. POST /api/clusters dengan project_id palsu',
+  dataUji: 'name="" dan project_id=999999',
+  ekspektasi: 'Kedua permintaan ditolak HTTP 422',
+  expectStatus: 422, method: 'POST', path: '/clusters', token: M,
+  run: async () => {
+    const tanpa = await api(M(), 'POST', '/clusters', { project_id: ctx.projectId, name: '' });
+    const yatim = await api(M(), 'POST', '/clusters', { project_id: 999999, name: 'Cluster Yatim' });
+    ctx.clusterInvalid = `name=${tanpa.status} proyek=${yatim.status}`;
+    return { status: tanpa.status, json: {} };
+  },
+  check: () => ({ pass: ctx.clusterInvalid === 'name=422 proyek=422', note: ctx.clusterInvalid }),
+  kebutuhan: 'Kebutuhan non-fungsional (validasi)',
+});
+
+T({
+  id: 'TC-B15', nama: 'Cluster Baru Terbaca sebagai Referensi Unit', skenario: 'Membaca data referensi',
+  deskripsi: 'Daftar referensi formulir unit memuat cluster yang baru dibuat, sehingga dropdown Tambah Unit ikut terisi.',
+  langkah: 'GET /api/units/clusters lalu cari nama cluster hasil TC-B12',
+  dataUji: () => `name=Cluster Uji Sistem, id=${ctx.newClusterId}`,
+  ekspektasi: 'HTTP 200 dan daftar memuat cluster baru beserta proyeknya',
+  expectStatus: 200, method: 'GET', path: '/units/clusters', token: M,
+  check: (j) => {
+    const arr = j?.data || [];
+    const temu = arr.find((x) => x.id === ctx.newClusterId);
+    return {
+      pass: !!temu && !!temu.project,
+      note: temu ? `${arr.length} cluster; ${temu.name} ada dengan relasi proyek ${temu.project?.name}.`
+        : 'Cluster hasil uji tidak muncul di daftar referensi.',
+    };
+  },
+  kebutuhan: 'Kebutuhan b.4 + permintaan Tambah Cluster',
+});
+
+T({
+  id: 'TC-B16', nama: 'Unit Baru pada Cluster Hasil Tambah', skenario: 'Membuat data unit',
+  deskripsi: 'Cluster yang baru dibuat langsung dapat dipakai membuat unit, membuktikan keterhubungan cluster → unit.',
+  langkah: 'POST /api/units memakai cluster_id hasil TC-B12',
+  dataUji: () => `cluster_id=${ctx.newClusterId}, unit_code=LT-CLUSTER-01`,
+  ekspektasi: 'HTTP 201 dan unit tersimpan pada cluster tersebut',
+  expectStatus: 201, method: 'POST', path: '/units', token: M,
+  body: () => ({
+    unit_code: 'LT-CLUSTER-01', cluster_id: ctx.newClusterId, unit_type: 'Skandinavia Uji',
+    land_size: 72, building_size: 54, price: 815000000, status: 'available',
+    description: 'Unit uji untuk cluster baru.',
+  }),
+  check: (j) => (j?.data?.cluster_id === ctx.newClusterId
+    ? { pass: true, note: `Unit id=${j.data.id} tersimpan di cluster ${j.data?.cluster?.name}.` }
+    : { pass: false, note: trim(JSON.stringify(j)) }),
+  save: (j, c) => { c.unitClusterBaruId = j?.data?.id; },
+  kebutuhan: 'Kebutuhan b.4 (menambah data unit)',
+});
+
+T({
+  id: 'TC-B17', nama: 'Admin Sales Tidak Dapat Menambah Cluster', skenario: 'RBAC hanya-lihat',
+  deskripsi: 'Cluster adalah bagian Data Unit yang hanya dapat diubah Super Admin; Admin Sales hanya berhak membaca.',
+  langkah: '1. POST /api/clusters memakai token Admin Sales 2. GET /api/clusters memakai token yang sama',
+  dataUji: 'token admin_sales, project_id + name cluster',
+  ekspektasi: 'Tulis ditolak HTTP 403 dan baca diizinkan HTTP 200',
+  expectStatus: 403, method: 'POST', path: '/clusters', token: A,
+  run: async () => {
+    const tulis = await api(A(), 'POST', '/clusters', { project_id: ctx.projectId, name: 'Cluster Admin Sales' });
+    const baca = await api(A(), 'GET', '/clusters');
+    ctx.clusterAdminSales = `tulis=${tulis.status} baca=${baca.status}`;
+    return { status: tulis.status, json: {} };
+  },
+  check: () => ({ pass: ctx.clusterAdminSales === 'tulis=403 baca=200', note: ctx.clusterAdminSales }),
+  kebutuhan: 'Keputusan RBAC: Admin Sales hanya-lihat pada Data Unit',
+});
+
+T({
+  id: 'TC-B18', nama: 'Modul Cluster Wajib Login', skenario: 'Otorisasi negatif',
+  deskripsi: 'Daftar cluster dan proyek tidak terbuka untuk publik karena memuat data internal pengembang.',
+  langkah: '1. GET /api/clusters tanpa token 2. GET /api/projects tanpa token 3. POST /api/clusters memakai token sales',
+  dataUji: 'tanpa Authorization; token sales untuk tulis',
+  ekspektasi: 'Permintaan tanpa token 401 dan tulisan sales 403',
+  expectStatus: 401, method: 'GET', path: '/clusters', token: null,
+  run: async () => {
+    const tanpa = await api(null, 'GET', '/clusters');
+    const proyekTanpa = await api(null, 'GET', '/projects');
+    const salesTulis = await api(S(), 'POST', '/clusters', { project_id: ctx.projectId, name: 'Cluster Sales' });
+    ctx.clusterAuth = `tanpa=${tanpa.status} proyek=${proyekTanpa.status} sales=${salesTulis.status}`;
+    return { status: tanpa.status, json: {} };
+  },
+  check: () => ({ pass: ctx.clusterAuth === 'tanpa=401 proyek=401 sales=403', note: ctx.clusterAuth }),
+  kebutuhan: 'Kebutuhan a.2 (RBAC)',
 });
 
 /* -------------------------------------------------------------------------
@@ -884,21 +1020,21 @@ T({
 
 T({
   id: 'TC-E03', nama: 'Sales Tidak Dapat Memverifikasi', skenario: 'RBAC negatif',
-  deskripsi: 'Verifikasi bukti transfer adalah hak Manajer.',
+  deskripsi: 'Verifikasi bukti transfer adalah hak Super Admin.',
   langkah: 'PUT /api/payments/{id}/verify memakai token sales',
   dataUji: 'verification_status=verified, token sales',
   ekspektasi: 'HTTP 403',
   expectStatus: 403, method: 'PUT', path: () => `/payments/${ctx.paymentId}/verify`, token: S,
   body: { verification_status: 'verified' },
-  kebutuhan: 'Kebutuhan d.2 (Manajer memverifikasi)',
+  kebutuhan: 'Kebutuhan d.2 (Super Admin memverifikasi)',
 });
 
 T({
-  id: 'TC-E04', nama: 'Verifikasi oleh Manajer', skenario: 'Verifikasi pembayaran',
-  deskripsi: 'Manajer memverifikasi pembayaran; verifikator dan waktu diisi sistem.',
-  langkah: 'PUT /api/payments/{id}/verify memakai token manajer',
+  id: 'TC-E04', nama: 'Verifikasi oleh Super Admin', skenario: 'Verifikasi pembayaran',
+  deskripsi: 'Super Admin memverifikasi pembayaran; verifikator dan waktu diisi sistem.',
+  langkah: 'PUT /api/payments/{id}/verify memakai token super admin',
   dataUji: 'verification_status=verified',
-  ekspektasi: 'HTTP 200 dengan verified_by = id manajer dan verified_at terisi',
+  ekspektasi: 'HTTP 200 dengan verified_by = id super admin dan verified_at terisi',
   expectStatus: 200, method: 'PUT', path: () => `/payments/${ctx.paymentId}/verify`, token: M,
   body: { verification_status: 'verified', notes: 'Bukti sesuai.' },
   check: (j) => {
@@ -1052,7 +1188,7 @@ T({
 
 T({
   id: 'TC-F01', nama: 'Tambah Sales Beserta Target', skenario: 'Membuat data sales',
-  deskripsi: 'Manajer menambah sales; akun, profil, dan target periode berjalan dibuat sekali jalan.',
+  deskripsi: 'Super Admin menambah sales; akun, profil, dan target periode berjalan dibuat sekali jalan.',
   langkah: 'POST /api/sales',
   dataUji: 'email=new.sales@luminpark.com, sales_code=SL-009, target 3 unit / 1 M',
   ekspektasi: 'HTTP 201 dengan sales_profile dan target_sales terisi',
@@ -1085,7 +1221,7 @@ T({
 
 T({
   id: 'TC-F03', nama: 'Admin Sales Mengubah Data Sales', skenario: 'Memperbarui data sales',
-  deskripsi: 'Admin Sales memiliki hak kelola data sales yang sama dengan Manajer.',
+  deskripsi: 'Admin Sales memiliki hak kelola data sales yang sama dengan Super Admin.',
   langkah: 'PUT /api/sales/{id} memakai token Admin Sales',
   dataUji: 'name=New Sales Revisi, whatsapp_number=6281233000888',
   ekspektasi: 'HTTP 200 dengan nama terbaru',
@@ -1097,7 +1233,7 @@ T({
 
 T({
   id: 'TC-F04', nama: 'Reset Password Sales', skenario: 'Kelola akun sales',
-  deskripsi: 'Manajer mereset password sales dan sesi lama dicabut.',
+  deskripsi: 'Super Admin mereset password sales dan sesi lama dicabut.',
   langkah: '1. Login sales baru 2. POST /api/sales/{id}/reset-password 3. GET /me token lama 4. Login password baru',
   dataUji: 'password baru=passwordBaru123',
   ekspektasi: 'HTTP 200 dan token lama tidak lagi berlaku',
@@ -1165,7 +1301,7 @@ T({
 
 T({
   id: 'TC-F08', nama: 'Hapus Sales Tanpa Riwayat', skenario: 'Menghapus data sales',
-  deskripsi: 'Sales tanpa transaksi dapat dihapus oleh Manajer.',
+  deskripsi: 'Sales tanpa transaksi dapat dihapus oleh Super Admin.',
   langkah: 'DELETE /api/sales/{id} pada sales hasil TC-F01',
   dataUji: () => `user id=${ctx.newSalesUserId}`,
   ekspektasi: 'HTTP 200',
@@ -1178,12 +1314,12 @@ T({
    ------------------------------------------------------------------------ */
 
 T({
-  id: 'TC-G01', nama: 'Dashboard Manajer', skenario: 'Dashboard',
-  deskripsi: 'Dashboard manajer memuat unit sold out, belum delivery, pendapatan, jumlah sales, calon konsumen, dan konsumen.',
-  langkah: 'GET /api/dashboard/manager',
-  dataUji: 'token manajer',
+  id: 'TC-G01', nama: 'Dashboard Super Admin', skenario: 'Dashboard',
+  deskripsi: 'Dashboard super admin memuat unit sold out, belum delivery, pendapatan, jumlah sales, calon konsumen, dan konsumen.',
+  langkah: 'GET /api/dashboard/super-admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan seluruh kunci metrik sesuai laporan',
-  expectStatus: 200, method: 'GET', path: '/dashboard/manager', token: M,
+  expectStatus: 200, method: 'GET', path: '/dashboard/super-admin', token: M,
   check: (j) => {
     const d = j?.data || {};
     const keys = ['units_sold_out', 'units_not_delivered', 'total_revenue', 'total_sales', 'total_prospects', 'total_customers'];
@@ -1224,10 +1360,10 @@ T({
 });
 
 T({
-  id: 'TC-G04', nama: 'Dashboard Sales Ditolak Manajer', skenario: 'RBAC negatif',
-  deskripsi: 'Endpoint dashboard sales tidak dapat dibuka oleh manajer.',
-  langkah: 'GET /api/dashboard/sales memakai token manajer',
-  dataUji: 'token manajer',
+  id: 'TC-G04', nama: 'Dashboard Sales Ditolak Super Admin', skenario: 'RBAC negatif',
+  deskripsi: 'Endpoint dashboard sales tidak dapat dibuka oleh super admin.',
+  langkah: 'GET /api/dashboard/sales memakai token super admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 403',
   expectStatus: 403, method: 'GET', path: '/dashboard/sales', token: M,
   kebutuhan: 'Kebutuhan a (RBAC)',
@@ -1462,9 +1598,9 @@ T({
 
 T({
   id: 'TC-I01', nama: 'Notifikasi Booking Tercipta', skenario: 'Notifikasi',
-  deskripsi: 'Booking baru memicu notifikasi ke Manajer dan Admin Sales.',
-  langkah: 'GET /api/notifications memakai token manajer',
-  dataUji: 'token manajer',
+  deskripsi: 'Booking baru memicu notifikasi ke Super Admin dan Admin Sales.',
+  langkah: 'GET /api/notifications memakai token super admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan minimal satu notifikasi bertipe booking',
   expectStatus: 200, method: 'GET', path: '/notifications', token: M,
   check: (j) => {
@@ -1481,7 +1617,7 @@ T({
   id: 'TC-I02', nama: 'Hitung Notifikasi Belum Dibaca', skenario: 'Notifikasi',
   deskripsi: 'Jumlah notifikasi belum dibaca tersedia untuk badge pada antarmuka.',
   langkah: 'GET /api/notifications/unread-count',
-  dataUji: 'token manajer',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan unread_count >= 1',
   expectStatus: 200, method: 'GET', path: '/notifications/unread-count', token: M,
   check: (j) => ({ pass: Number(j?.data?.unread_count) >= 1, note: `unread_count=${j?.data?.unread_count}` }),
@@ -1492,7 +1628,7 @@ T({
   id: 'TC-I03', nama: 'Tandai Satu Notifikasi Dibaca', skenario: 'Notifikasi',
   deskripsi: 'Notifikasi hanya dapat diubah oleh pemiliknya.',
   langkah: 'PUT /api/notifications/{id}/read',
-  dataUji: () => `notifikasi id=${ctx.firstNotifId} milik manajer`,
+  dataUji: () => `notifikasi id=${ctx.firstNotifId} milik super admin`,
   ekspektasi: 'HTTP 200 dengan is_read=true',
   expectStatus: 200, method: 'PUT', path: () => `/notifications/${ctx.firstNotifId}/read`, token: M,
   check: (j) => ({ pass: j?.data?.is_read === true, note: `is_read=${j?.data?.is_read}` }),
@@ -1501,8 +1637,8 @@ T({
 
 T({
   id: 'TC-I04', nama: 'Notifikasi Milik Orang Lain', skenario: 'RBAC negatif',
-  deskripsi: 'Sales tidak dapat membaca notifikasi milik Manajer.',
-  langkah: '1. PUT notifikasi manajer memakai token sales 2. GET /api/notifications memakai token sales',
+  deskripsi: 'Sales tidak dapat membaca notifikasi milik Super Admin.',
+  langkah: '1. PUT notifikasi super admin memakai token sales 2. GET /api/notifications memakai token sales',
   dataUji: 'token sales',
   ekspektasi: 'HTTP 404 untuk notifikasi milik pengguna lain, dan daftar sales hanya berisi miliknya',
   expectStatus: 404, method: 'PUT', path: () => `/notifications/${ctx.firstNotifId}/read`, token: S,
@@ -1518,7 +1654,7 @@ T({
     const murni = arr.every((n) => String(n.user_id) === String(ctx.salesUserId));
     return {
       pass: ctx.foreignNotifStatus === 404 && murni && arr.length >= 1,
-      note: `ubah notifikasi milik manajer → HTTP ${ctx.foreignNotifStatus}; daftar sales berisi ${arr.length} entri${murni ? ', seluruhnya milik user ' + ctx.salesUserId : ' dan ada yang milik pengguna lain'}.`,
+      note: `ubah notifikasi milik super admin → HTTP ${ctx.foreignNotifStatus}; daftar sales berisi ${arr.length} entri${murni ? ', seluruhnya milik user ' + ctx.salesUserId : ' dan ada yang milik pengguna lain'}.`,
     };
   },
   kebutuhan: 'Kebutuhan a (RBAC)',
@@ -1528,7 +1664,7 @@ T({
   id: 'TC-I05', nama: 'Log Aktivitas Sistem', skenario: 'Log sistem',
   deskripsi: 'Aktivitas login tercatat pada tabel log_sistem beserta IP dan user agent.',
   langkah: 'GET /api/system-logs',
-  dataUji: 'token manajer',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan entri activity=login dan ip_address terisi',
   expectStatus: 200, method: 'GET', path: '/system-logs', token: M,
   check: (j) => {
@@ -1585,10 +1721,10 @@ T({
 });
 
 T({
-  id: 'TC-K02', nama: 'Daftar Pengaturan oleh Manajer', skenario: 'Pengaturan sistem',
-  deskripsi: 'Manajer memuat seluruh kunci pengaturan beserta daftar kunci yang boleh diubah.',
-  langkah: 'GET /api/settings memakai token manajer',
-  dataUji: 'token manajer',
+  id: 'TC-K02', nama: 'Daftar Pengaturan oleh Super Admin', skenario: 'Pengaturan sistem',
+  deskripsi: 'Super Admin memuat seluruh kunci pengaturan beserta daftar kunci yang boleh diubah.',
+  langkah: 'GET /api/settings memakai token super admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan items, values, dan editable',
   expectStatus: 200, method: 'GET', path: '/settings', token: M,
   check: (j) => {
@@ -1601,7 +1737,7 @@ T({
 
 T({
   id: 'TC-K03', nama: 'Simpan Perubahan Pengaturan', skenario: 'Pengaturan sistem',
-  deskripsi: 'Manajer memperbarui sebagian kunci dan nilai baru langsung terpakai oleh API publik.',
+  deskripsi: 'Super Admin memperbarui sebagian kunci dan nilai baru langsung terpakai oleh API publik.',
   langkah: '1. PUT /api/settings (estate_name, min_dp_percent) 2. GET /api/public/settings',
   dataUji: 'estate_name=Perumahan Lumin Park Padang, min_dp_percent=15',
   ekspektasi: 'HTTP 200 dan nilai yang sama terbaca pada endpoint publik',
@@ -1647,7 +1783,7 @@ T({
 
 T({
   id: 'TC-K06', nama: 'Sales Tidak Mengubah Pengaturan', skenario: 'RBAC negatif',
-  deskripsi: 'Pengaturan sistem hanya milik Manajer/Super Admin sesuai wireframe.',
+  deskripsi: 'Pengaturan sistem hanya milik Super Admin sesuai wireframe.',
   langkah: '1. GET /api/settings memakai token sales 2. PUT /api/settings memakai token sales',
   dataUji: 'token sales',
   ekspektasi: 'HTTP 403 pada keduanya',
@@ -1711,7 +1847,7 @@ T({
     const after = await api(S(), 'GET', '/me');
     ctx.profilePhone = after.json?.data?.phone;
     ctx.profileAddress = after.json?.data?.address;
-    const roleTry = await api(S(), 'PUT', '/profile', { role: 'manager', status: 'superadmin' });
+    const roleTry = await api(S(), 'PUT', '/profile', { role: 'super_admin', status: 'superadmin' });
     ctx.profileRoleTry = roleTry.status;
     const roleAfter = await api(S(), 'GET', '/me');
     ctx.profileRoleAfter = roleAfter.json?.data?.role;
@@ -1726,27 +1862,27 @@ T({
 });
 
 T({
-  id: 'TC-K10', nama: 'Profil Manajer Tanpa Profil Sales', skenario: 'Profil akun',
+  id: 'TC-K10', nama: 'Profil Super Admin Tanpa Profil Sales', skenario: 'Profil akun',
   deskripsi: 'Akun non-sales tetap memiliki halaman profil; kolom sales dikosongkan, bukan error.',
-  langkah: 'GET /api/profile memakai token manajer',
-  dataUji: 'token manajer',
-  ekspektasi: 'HTTP 200 dengan sales_code null dan role manager',
+  langkah: 'GET /api/profile memakai token super admin',
+  dataUji: 'token super admin',
+  ekspektasi: 'HTTP 200 dengan sales_code null dan role super_admin',
   expectStatus: 200, method: 'GET', path: '/profile', token: M,
   check: (j) => {
     const d = j?.data || {};
-    const ok = d.role === 'manager' && d.sales_code === null && Array.isArray(d.targets) && d.targets.length === 0;
+    const ok = d.role === 'super_admin' && d.sales_code === null && Array.isArray(d.targets) && d.targets.length === 0;
     return { pass: ok, note: ok ? `role=${d.role}, targets=0` : `role=${d.role}, sales_code=${d.sales_code}` };
   },
   kebutuhan: 'Wireframe 2.34 (Pengaturan akun)',
 });
 
 T({
-  id: 'TC-K11', nama: 'Widget Grafik dan Booking Terbaru (Manajer)', skenario: 'Dashboard',
-  deskripsi: 'Dashboard manajer menampilkan grafik penjualan per bulan dan daftar booking terbaru.',
-  langkah: 'GET /api/dashboard/manager',
-  dataUji: 'token manajer',
+  id: 'TC-K11', nama: 'Widget Grafik dan Booking Terbaru (Super Admin)', skenario: 'Dashboard',
+  deskripsi: 'Dashboard super admin menampilkan grafik penjualan per bulan dan daftar booking terbaru.',
+  langkah: 'GET /api/dashboard/super-admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 200 dengan sales_by_month 6 entri (month, revenue, units_sold) dan recent_bookings berisi customer/unit/status',
-  expectStatus: 200, method: 'GET', path: '/dashboard/manager', token: M,
+  expectStatus: 200, method: 'GET', path: '/dashboard/super-admin', token: M,
   check: (j) => {
     const d = j?.data || {};
     const series = d.sales_by_month || [];
@@ -1820,10 +1956,10 @@ T({
 });
 
 T({
-  id: 'TC-K15', nama: 'Manajer Tidak Memakai Laporan Sales Pribadi', skenario: 'RBAC negatif',
-  deskripsi: 'Endpoint laporan pribadi hanya terbuka bagi peran sales; manajer memakai laporan lengkap.',
-  langkah: 'GET /api/reports/my-sales memakai token manajer',
-  dataUji: 'token manajer',
+  id: 'TC-K15', nama: 'Super Admin Tidak Memakai Laporan Sales Pribadi', skenario: 'RBAC negatif',
+  deskripsi: 'Endpoint laporan pribadi hanya terbuka bagi peran sales; super admin memakai laporan lengkap.',
+  langkah: 'GET /api/reports/my-sales memakai token super admin',
+  dataUji: 'token super admin',
   ekspektasi: 'HTTP 403',
   expectStatus: 403, method: 'GET', path: '/reports/my-sales', token: M,
   kebutuhan: 'Kebutuhan a (RBAC)',
@@ -1892,7 +2028,7 @@ T({
 
 T({
   id: 'TC-L02', nama: 'Admin Sales Hanya Melihat Data Konsumen', skenario: 'RBAC hanya-lihat',
-  deskripsi: 'Calon konsumen hanya boleh dibaca Admin Sales; pencatatan milik Manajer dan Sales.',
+  deskripsi: 'Calon konsumen hanya boleh dibaca Admin Sales; pencatatan milik Super Admin dan Sales.',
   langkah: 'POST, PUT, dan DELETE /api/customer-leads memakai token admin_sales',
   dataUji: 'token admin_sales',
   ekspektasi: 'HTTP 403 pada ketiga aksi tulis',
@@ -1935,7 +2071,7 @@ T({
 });
 
 T({
-  id: 'TC-L04', nama: 'Menu Sesi dan Log Aktivitas Khusus Manajer', skenario: 'RBAC negatif',
+  id: 'TC-L04', nama: 'Menu Sesi dan Log Aktivitas Khusus Super Admin', skenario: 'RBAC negatif',
   deskripsi: 'Sesi login, log aktivitas, dan pengaturan sistem disembunyikan dari Admin Sales dan Sales.',
   langkah: '1. GET /api/sessions + /api/system-logs + /api/settings dengan token admin_sales 2. ulangi dengan token sales',
   dataUji: 'token admin_sales dan token sales',
@@ -1955,7 +2091,7 @@ T({
     pass: ctx.menuManagerOnly.every((x) => x === 403),
     note: `admin(sesi,log,setting)=${ctx.menuManagerOnly.slice(0, 3).join(',')} sales=${ctx.menuManagerOnly.slice(3).join(',')}`,
   }),
-  kebutuhan: 'Permintaan 3, 7, 8 (menu hanya lewat ikon profil, milik Manajer)',
+  kebutuhan: 'Permintaan 3, 7, 8 (menu hanya lewat ikon profil, milik Super Admin)',
 });
 
 T({
@@ -2072,7 +2208,7 @@ T({
   id: 'TC-L09', nama: 'Penautan Google pada Profil Pengguna', skenario: 'Pengaturan sistem',
   deskripsi: 'Halaman profil menyiapkan tautan dan pelepasan akun Google atas nama sendiri.',
   langkah: '1. GET /api/profile (periksa flag google_ready/google_linked) 2. POST /api/auth/google/link tanpa kredensial',
-  dataUji: 'token manajer',
+  dataUji: 'token super admin',
   ekspektasi: 'Profil 200 dengan flag Google; permintaan tautan ditolak 4xx selama kredensial belum diisi',
   expectStatus: 200, method: 'GET', path: '/profile', token: M,
   run: async () => {

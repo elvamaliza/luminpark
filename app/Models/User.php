@@ -14,13 +14,13 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    public const ROLE_MANAGER = 'manager';
+    public const ROLE_SUPER_ADMIN = 'super_admin';
     public const ROLE_ADMIN_SALES = 'admin_sales';
     public const ROLE_SALES = 'sales';
     public const ROLE_CONSUMER = 'consumer';
 
     /** Peran yang berhak memakai sistem internal; konsumen hanya berinteraksi lewat halaman publik. */
-    public const ROLE_INTERNAL = [self::ROLE_MANAGER, self::ROLE_ADMIN_SALES, self::ROLE_SALES];
+    public const ROLE_INTERNAL = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN_SALES, self::ROLE_SALES];
 
     public const STATUS_AKTIF = 'aktif';
     public const STATUS_NONAKTIF = 'nonaktif';
@@ -90,6 +90,6 @@ class User extends Authenticatable
 
     public function isOperational(): bool
     {
-        return in_array($this->role, [self::ROLE_MANAGER, self::ROLE_ADMIN_SALES], true);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN_SALES], true);
     }
 }

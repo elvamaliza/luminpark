@@ -41,9 +41,9 @@
             <p id="pf-google-note" class="mt-2 hidden rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-900"></p>
         </div>
         <ul class="mt-4 space-y-1.5 text-sm text-zinc-600">
-            <li>Email, peran, dan status akun diatur oleh Manajer.</li>
+            <li>Email, peran, dan status akun diatur oleh Super Admin.</li>
             <li>Mengganti kata sandi akan mengakhiri seluruh sesi login yang sedang aktif.</li>
-            <li>Batas waktu sesi login diatur Manajer pada halaman Pengaturan Sistem.</li>
+            <li>Batas waktu sesi login diatur Super Admin pada halaman Pengaturan Sistem.</li>
         </ul>
     </section>
 </div>
@@ -93,7 +93,7 @@
       ['Akun Dibuat', LP.date(p.created_at)],
     ];
 
-    if (p.role === 'manager') {
+    if (p.role === 'super_admin') {
       rows.splice(7, 0, ['Sesi Aktif', '<a href="/sesi" class="font-medium text-brand-600 underline">' + LP.number(p.active_sessions) + ' sesi</a>']);
     }
 
@@ -297,7 +297,7 @@
     if (profile) changePassword();
   });
 
-  LP.guard(['manager', 'admin_sales', 'sales'], async () => {
+  LP.guard(['super_admin', 'admin_sales', 'sales'], async () => {
     LP.loading('pf-identity', 'Memuat profil...');
     googleNote();
     try {

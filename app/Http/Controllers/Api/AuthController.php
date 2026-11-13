@@ -52,7 +52,7 @@ class AuthController extends Controller
         if ($user->status !== User::STATUS_AKTIF) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akun Anda dinonaktifkan. Hubungi Manajer atau Admin Sales.',
+                'message' => 'Akun Anda dinonaktifkan. Hubungi Super Admin atau Admin Sales.',
             ], 403);
         }
 

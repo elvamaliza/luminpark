@@ -58,18 +58,18 @@ add({ id: 'TC-008', nama: 'Access Protected Route With Invalid Token', skenario:
 
 // ---------------- ROLE / AUTHZ ----------------
 add({ id: 'TC-010', nama: 'Manager Dashboard Akses Super Admin', skenario: 'Otorisasi Role - Positif',
-  deskripsi: 'Role superadmin diizinkan membuka dashboard manager (role:manager,superadmin).',
-  langkah: '1. Login superadmin 2. GET /api/dashboard/manager',
+  deskripsi: 'Role super_admin diizinkan membuka dashboard super admin (role:super_admin).',
+  langkah: '1. Login superadmin 2. GET /api/dashboard/super-admin',
   dataUji: 'Bearer <token superadmin>',
   ekspektasi: 'HTTP 200, success=true, berisi total_revenue, total_bookings, occupancy_rate',
-  method: 'GET', path: '/dashboard/manager', tokenRef: 'admin', expectStatus: 200 });
+  method: 'GET', path: '/dashboard/super-admin', tokenRef: 'admin', expectStatus: 200 });
 
 add({ id: 'TC-011', nama: 'Manager Dashboard Ditolak Untuk Sales', skenario: 'Otorisasi Role - Negatif',
-  deskripsi: 'Role sales tidak termasuk whitelist role:manager,superadmin sehingga harus 403.',
-  langkah: '1. Login sales 2. GET /api/dashboard/manager',
+  deskripsi: 'Role sales tidak termasuk whitelist role:super_admin sehingga harus 403.',
+  langkah: '1. Login sales 2. GET /api/dashboard/super-admin',
   dataUji: 'Bearer <token sales@luminpark.com>',
   ekspektasi: 'HTTP 403, message "Forbidden. Anda tidak memiliki akses ke resource ini."',
-  method: 'GET', path: '/dashboard/manager', tokenRef: 'sales', expectStatus: 403 });
+  method: 'GET', path: '/dashboard/super-admin', tokenRef: 'sales', expectStatus: 403 });
 
 add({ id: 'TC-012', nama: 'Admin Sales Dashboard Superadmin', skenario: 'Otorisasi Role - Positif',
   deskripsi: 'Hanya superadmin yang boleh membuka /api/dashboard/admin-sales.',

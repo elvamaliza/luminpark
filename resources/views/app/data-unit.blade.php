@@ -2,9 +2,13 @@
 
 @section('title', 'Data Unit Perumahan')
 @section('page_title', 'Data Unit Perumahan')
-@section('page_desc', 'Telusuri dan saring unit; buka Detail untuk mengubah informasi unit. Tambah dan hapus unit hanya milik Manajer.')
+@section('page_desc', 'Telusuri dan saring unit; buka Detail untuk mengubah informasi unit. Tambah cluster dan unit hanya milik Super Admin.')
 
 @section('page_actions')
+    <button id="btn-add-cluster" type="button" class="hidden inline-flex items-center gap-2 rounded-xl border border-[#1b3225] px-4 py-2 text-sm font-semibold text-[#1b3225] shadow-sm hover:bg-[#1b3225]/5 transition-all">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h16M6 20V9l6-4 6 4v11M9 20v-6h6v6"/></svg>
+        Tambah Cluster
+    </button>
     <button id="btn-add-unit" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] disabled:opacity-60 transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Tambah Unit
@@ -51,7 +55,7 @@
 
 @push('scripts')
 <script>
-  const ROLE_PENGELOLA = ['manager', 'admin_sales'];
+  const ROLE_PENGELOLA = ['super_admin', 'admin_sales'];
 
   const UNIT_STATUS_LIST = [
     { value: 'available', label: 'Tersedia' },
@@ -66,6 +70,7 @@
 
   let unitAll = [];
   let unitClusters = [];
+  let unitProjects = [];
   let unitView = [];
 
   function unitClusterName(row) {
@@ -134,7 +139,7 @@
           label: 'Aksi',
           render: (row, index) => '<div class="flex flex-wrap gap-2">'
             + '<a href="/data-unit/' + LP.esc(row.id) + '" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Detail</a>'
-            + (LP.can(['manager'])
+            + (LP.can(['super_admin'])
               ? '<button type="button" data-unit-action="delete" data-index="' + index + '"'
                 + ' class="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50">Hapus</button>'
               : '')
@@ -223,7 +228,7 @@
 
   function unitOpenForm(original) {
     if (!unitClusters.length) {
-      LP.toast('Daftar cluster belum tersedia. Tambahkan cluster lewat Manajer.', 'error');
+      LP.toast('Daftar cluster belum tersedia. Gunakan tombol Tambah Cluster sebelum membuat unit.', 'error');
       return;
     }
 
@@ -237,6 +242,49 @@
       submitLabel: original ? 'Simpan Perubahan' : 'Simpan Unit',
       width: 'max-w-2xl',
       onSubmit: (values, context) => unitSave(values, context, original),
+    });
+  }
+
+  function clusterFields() {
+    return [
+      {
+        name: 'project_id', label: 'Proyek Induk', type: 'select', required: true, col: 2,
+        options: unitProjects.map((item) => ({ value: item.id, label: item.name })),
+        placeholder: 'Pilih proyek',
+      },
+      { name: 'name', label: 'Nama Cluster', type: 'text', required: true, placeholder: 'Cluster Asena', hint: 'Nama harus unik di dalam satu proyek, maksimal 100 karakter.' },
+      { name: 'description', label: 'Deskripsi Cluster', type: 'textarea', rows: 3, col: 2, placeholder: 'Contoh: cluster depan dengan jalur hijau dan taman bermain.' },
+    ];
+  }
+
+  async function clusterSave(values, context) {
+    const nama = (values.name || '').trim();
+    if (!nama) throw new Error('Nama cluster wajib diisi.');
+
+    const hasil = await LP.http.post('/clusters', {
+      project_id: Number(values.project_id),
+      name: nama,
+      description: (values.description || '').trim() || null,
+    });
+
+    LP.toast((hasil.json && hasil.json.message) || 'Cluster baru berhasil ditambahkan.');
+    context.close();
+    await unitLoad();
+  }
+
+  function clusterOpenForm() {
+    if (!unitProjects.length) {
+      LP.toast('Daftar proyek belum tersedia, padahal setiap cluster membutuhkan proyek induk.', 'error');
+      return;
+    }
+
+    LP.formModal({
+      title: 'Tambah Cluster Baru',
+      description: 'Cluster mengelompokkan unit di dalam satu proyek. Unit baru hanya dapat dibuat setelah cluster-nya tersedia.',
+      fields: clusterFields(),
+      values: { project_id: unitProjects.length === 1 ? unitProjects[0].id : '' },
+      submitLabel: 'Simpan Cluster',
+      onSubmit: (values, context) => clusterSave(values, context),
     });
   }
 
@@ -275,6 +323,15 @@
       ]);
       unitAll = Array.isArray(daftar) ? daftar : [];
       unitClusters = Array.isArray(clusters) ? clusters : [];
+
+      // Daftar proyek hanya dibutuhkan tombol Tambah Cluster; kegagalan baca tidak boleh
+      // menghentikan tabel unit.
+      try {
+        const proyek = await LP.fetchJson('/projects');
+        unitProjects = Array.isArray(proyek) ? proyek : [];
+      } catch (e) {
+        unitProjects = [];
+      }
     } catch (error) {
       LP.errorBox('unit-table', error.message || 'Data unit gagal dimuat periksa koneksi atau hak akses Anda.');
       document.getElementById('unit-count').textContent = 'Data gagal dimuat.';
@@ -287,10 +344,12 @@
   }
 
   LP.guard(ROLE_PENGELOLA, async () => {
-    if (!LP.can(['manager'])) {
+    if (!LP.can(['super_admin'])) {
       document.getElementById('btn-add-unit').classList.add('hidden');
     } else {
       document.getElementById('btn-add-unit').addEventListener('click', () => unitOpenForm(null));
+      document.getElementById('btn-add-cluster').addEventListener('click', clusterOpenForm);
+      document.getElementById('btn-add-cluster').classList.remove('hidden');
     }
 
     const renderDebounced = LP.debounce(unitRender);

@@ -223,9 +223,9 @@
                     </button>
                     <div id="lp-user-panel" class="absolute right-0 mt-2 hidden w-60 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
                         <a href="/profil" class="block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Profil Saya</a>
-                        <a href="/sesi" data-menu-role="manager" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Sesi Login</a>
-                        <a href="/pengaturan" data-menu-role="manager" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Pengaturan Sistem</a>
-                        <a href="/pengaturan-publik" data-menu-role="manager" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Pengaturan Halaman Publik</a>
+                        <a href="/sesi" data-menu-role="super_admin" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Sesi Login</a>
+                        <a href="/pengaturan" data-menu-role="super_admin" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Pengaturan Sistem</a>
+                        <a href="/pengaturan-publik" data-menu-role="super_admin" class="hidden block rounded-lg px-3 py-2 text-sm text-[#1e293b] hover:bg-slate-50">Pengaturan Halaman Publik</a>
                         <button id="lp-logout" class="mt-1 block w-full rounded-lg bg-[#1b3225] px-3 py-2 text-left text-sm font-medium text-white hover:bg-[#12241a]">Keluar</button>
                     </div>
                 </div>

@@ -66,8 +66,8 @@
 
             const role = profile.role;
             let endpoint = null;
-            if (role === 'manager' || role === 'superadmin') {
-                endpoint = '/dashboard/manager';
+            if (role === 'super_admin' || role === 'super_admin') {
+                endpoint = '/dashboard/super-admin';
             } else if (role === 'sales') {
                 endpoint = '/dashboard/sales?sales_id=' + encodeURIComponent(profile.id);
             }

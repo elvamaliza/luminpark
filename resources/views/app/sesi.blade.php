@@ -112,6 +112,6 @@
       .then((ok) => { if (ok) LP.logout(); });
   });
 
-  LP.guard(['manager'], load);
+  LP.guard(['super_admin'], load);
 </script>
 @endpush

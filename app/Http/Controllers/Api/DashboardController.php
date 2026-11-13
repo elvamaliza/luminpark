@@ -15,28 +15,6 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     /**
-     * Tampilan Web Dashboard Super Admin
-     */
-    public function superAdminDashboard()
-    {
-        $totalUnit = Unit::count();
-        $unitTersedia = Unit::where('status', Unit::STATUS_AVAILABLE)->count();
-        $totalSales = User::where('role', User::ROLE_SALES)->count();
-        $totalKonsumen = CustomerLead::count();
-        $bookingAktif = Booking::whereIn('status', [Booking::STATUS_DP_LUNAS, Booking::STATUS_CICILAN])->count();
-        $pembayaranPending = Payment::where('verification_status', Payment::VERIFY_PENDING)->count();
-
-        return view('super-admin.dashboard', compact(
-            'totalUnit',
-            'unitTersedia',
-            'totalSales',
-            'totalKonsumen',
-            'bookingAktif',
-            'pembayaranPending'
-        ));
-    }
-
-    /**
      * Deretan penjualan enam bulan terakhir dari pembayaran terverifikasi.
      */
     private function monthlySeries(int $months = 6): array
@@ -98,10 +76,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard Manajer: unit sold out, belum delivery, pendapatan, jumlah sales,
+     * Dashboard Super Admin: unit sold out, belum delivery, pendapatan, jumlah sales,
      * calon konsumen dan konsumen.
      */
-    public function managerDashboard()
+    public function superAdminDashboard()
     {
         $soldOut = Unit::where('status', Unit::STATUS_SOLD_OUT)->count();
         $notDelivered = Booking::where('status', Booking::STATUS_LUNAS)

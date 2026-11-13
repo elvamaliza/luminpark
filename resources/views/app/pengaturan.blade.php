@@ -229,7 +229,7 @@
     LP.withBusy(event.currentTarget, refresh);
   });
 
-  LP.guard(['manager'], async () => {
+  LP.guard(['super_admin'], async () => {
     LP.loading('set-form', 'Memuat pengaturan...');
     try {
       await refresh();

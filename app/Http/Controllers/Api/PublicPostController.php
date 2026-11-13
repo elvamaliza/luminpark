@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Kabar terbaru pada halaman publik. Hanya Manajer yang berhak mengelola isinya.
+ * Kabar terbaru pada halaman publik. Hanya Super Admin yang berhak mengelola isinya.
  */
 class PublicPostController extends Controller
 {

@@ -109,6 +109,6 @@
     LP.withBusy(event.currentTarget, load);
   });
 
-  LP.guard(['manager'], load);
+  LP.guard(['super_admin'], load);
 </script>
 @endpush

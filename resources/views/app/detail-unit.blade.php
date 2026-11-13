@@ -31,7 +31,7 @@
   let detailBookings = [];
 
   function bolehUbah() {
-    return LP.can(['manager']);
+    return LP.can(['super_admin']);
   }
 
   function controlClass() {
@@ -109,7 +109,7 @@
       + '</label>'
       + (bolehUbah()
         ? ''
-        : '<p class="mt-3 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Hanya Manajer yang dapat mengubah data unit.</p>')
+        : '<p class="mt-3 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Hanya Super Admin yang dapat mengubah data unit.</p>')
       + '</section>';
   }
 
@@ -296,7 +296,7 @@
     detailRender(unit);
   }
 
-  LP.guard(['manager', 'admin_sales'], async () => {
+  LP.guard(['super_admin', 'admin_sales'], async () => {
     if (!detailId) {
       LP.errorBox('unit-detail', 'Alamat halaman tidak menyertakan nomor id unit.');
       return;

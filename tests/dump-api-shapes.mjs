@@ -82,7 +82,7 @@ async function main() {
   await get(adminSales, 'sales.performance', `/sales/${firstSales}/performance?start_date=2026-10-01&end_date=2026-10-31`);
 
   // Dashboard
-  await get(manager, 'dashboard.manager', '/dashboard/manager');
+  await get(manager, 'dashboard.manager', '/dashboard/super-admin');
   await get(adminSales, 'dashboard.admin_sales', '/dashboard/admin-sales');
   await get(sales, 'dashboard.sales', '/dashboard/sales');
 

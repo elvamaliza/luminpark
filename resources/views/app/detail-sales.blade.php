@@ -17,7 +17,7 @@
 
 @push('scripts')
 <script>
-  const ROLE_PENGELOLA = ['manager', 'admin_sales'];
+  const ROLE_PENGELOLA = ['super_admin', 'admin_sales'];
   const SALES_STATUS_LIST = [
     { value: 'aktif', label: 'Aktif' },
     { value: 'nonaktif', label: 'Nonaktif' },

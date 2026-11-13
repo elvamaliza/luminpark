@@ -102,8 +102,8 @@
         'pertukaran-gagal': 'Kode Google tidak dapat ditukarkan. Silakan coba lagi.',
         'server-google-tidak-terjangkau': 'Layanan Google tidak dapat dihubungi. Periksa koneksi internet Anda.',
         'email-belum-diverifikasi': 'Email akun Google Anda belum terverifikasi sehingga tidak dapat dipakai masuk.',
-        'bukan-akun-internal': 'Email Google itu tidak terdaftar sebagai akun staf internal. Hubungi Manajer atau Admin Sales.',
-        'akun-nonaktif': 'Akun Anda dinonaktifkan. Hubungi Manajer atau Admin Sales.',
+        'bukan-akun-internal': 'Email Google itu tidak terdaftar sebagai akun staf internal. Hubungi Super Admin atau Admin Sales.',
+        'akun-nonaktif': 'Akun Anda dinonaktifkan. Hubungi Super Admin atau Admin Sales.',
         'google-sudah-tertaut': 'Akun internal ini sudah tertaut dengan akun Google lain.',
     };
 

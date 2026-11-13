@@ -138,7 +138,7 @@ if (receiptRes.json?.data?.id) {
 const samples = [
   ['POST', '/login', { email: 'superadmin@gmail.com', password: 'password123' }],
   ['GET', '/units'],
-  ['GET', '/dashboard/manager'],
+  ['GET', '/dashboard/super-admin'],
   ['GET', '/reports/sales?start_date=2026-10-01&end_date=2026-10-31'],
   ['GET', '/public/units'],
 ];
@@ -154,7 +154,7 @@ record({
   langkah: 'Jalankan 5 proses umum (login, daftar unit, dashboard manajer, laporan penjualan, katalog publik) lalu catat selisih waktu klien',
   dataUji: '5 permintaan berurutan dengan token manajer',
   ekspektasi: 'Seluruh proses selesai di bawah 5000 ms',
-  method: 'MULTI', path: '/login, /units, /dashboard/manager, /reports/sales, /public/units',
+  method: 'MULTI', path: '/login, /units, /dashboard/super-admin, /reports/sales, /public/units',
   actualStatus: '200',
   actualBody: timings.join(', '),
   status: worst < 5000 ? 'Pass' : 'Fail',

@@ -436,7 +436,7 @@
     });
   }
 
-  LP.guard(['manager'], async () => {
+  LP.guard(['super_admin'], async () => {
     try {
       await init();
     } catch (error) {

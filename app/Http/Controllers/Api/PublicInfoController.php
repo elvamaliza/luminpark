@@ -127,7 +127,7 @@ class PublicInfoController extends Controller
     }
 
     /**
-     * Seksi Unit Unggulan di beranda: unit pilihan Manajer lebih dulu, dilengkapi
+     * Seksi Unit Unggulan di beranda: unit pilihan Super Admin lebih dulu, dilengkapi
      * urutan otomatis sampai sejumlah public_featured_count.
      */
     public function featuredUnits()

@@ -136,7 +136,7 @@ class DemoFlowSeeder extends Seeder
             ]
         );
 
-        $manager = User::where('role', User::ROLE_MANAGER)->first();
+        $superAdmin = User::where('role', User::ROLE_SUPER_ADMIN)->first();
 
         $payments = [
             ['type' => $scheme->scheme_type, 'amount' => $breakdown['down_payment_amount'], 'days' => 8],
@@ -157,7 +157,7 @@ class DemoFlowSeeder extends Seeder
                     'account_number'      => '8890122345',
                     'account_holder'      => 'PT Lumin Park Properti',
                     'verification_status' => Payment::VERIFY_VERIFIED,
-                    'verified_by'         => $manager?->id,
+                    'verified_by'         => $superAdmin?->id,
                     'verified_at'         => now()->subDays($p['days'] - 1),
                     'notes'               => 'Terverifikasi saat seed data contoh.',
                 ]

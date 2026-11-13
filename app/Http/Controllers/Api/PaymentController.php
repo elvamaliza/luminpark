@@ -194,7 +194,7 @@ class PaymentController extends Controller
         }
 
         $recipients = User::query()
-            ->whereIn('role', [User::ROLE_MANAGER, User::ROLE_ADMIN_SALES])
+            ->whereIn('role', [User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN_SALES])
             ->where('status', User::STATUS_AKTIF)
             ->pluck('id');
 

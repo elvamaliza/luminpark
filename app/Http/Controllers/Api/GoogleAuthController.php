@@ -149,7 +149,7 @@ class GoogleAuthController extends Controller
         if (! self::enabled()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Masuk dengan Google belum diaktifkan oleh Manajer.',
+                'message' => 'Masuk dengan Google belum diaktifkan oleh Super Admin.',
             ], 422);
         }
 

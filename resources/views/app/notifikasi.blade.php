@@ -153,6 +153,6 @@
     LP.withBusy(event.currentTarget, load);
   });
 
-  LP.guard(['manager', 'admin_sales', 'sales'], load);
+  LP.guard(['super_admin', 'admin_sales', 'sales'], load);
 </script>
 @endpush

@@ -316,6 +316,6 @@
   document.getElementById('lap-start').value = LP.isoDate(Date.now() - 2592000000);
   document.getElementById('lap-end').value = LP.today();
 
-  LP.guard(['manager', 'admin_sales'], loadReport);
+  LP.guard(['super_admin', 'admin_sales'], loadReport);
 </script>
 @endpush

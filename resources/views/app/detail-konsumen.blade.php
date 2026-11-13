@@ -17,7 +17,7 @@
 
 @push('scripts')
 <script>
-  const ROLE_INTERNAL = ['manager', 'admin_sales', 'sales'];
+  const ROLE_INTERNAL = ['super_admin', 'admin_sales', 'sales'];
   const LEAD_STATUS_LIST = [
     { value: 'cold', label: 'Cold' },
     { value: 'warm', label: 'Warm' },
@@ -39,7 +39,7 @@
   let detailUnitOptions = [];
 
   function bolehUbah() {
-    return LP.can(['manager', 'sales']);
+    return LP.can(['super_admin', 'sales']);
   }
 
   function detailProfile(row) {
@@ -149,7 +149,7 @@
       + fieldHtml('address', 'Alamat', lead.address || '', { type: 'textarea', rows: 2, col: 2 })
       + fieldHtml('note', 'Catatan', lead.note || '', { type: 'textarea', rows: 3, col: 2, hint: 'Preferensi, keberatan, atau kesepakatan dengan konsumen.' })
       + '</div>'
-      + (bolehUbah() ? '' : '<p class="mt-4 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Data konsumen dikelola oleh Manajer dan sales yang menanganinya.</p>')
+      + (bolehUbah() ? '' : '<p class="mt-4 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Data konsumen dikelola oleh Super Admin dan sales yang menanganinya.</p>')
       + '</section>';
   }
 

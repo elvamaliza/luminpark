@@ -1,0 +1,14 @@
+mysqld: Can't open shared library 'C:\laragon\bin\mysql\mysql-8.4.3-winx64\lib\plugin\component_reference_cache.dll' (errno: 126 The specified module could not be found.)
+mysqld: Cannot load component from specified URN: 'file://component_reference_cache'.
+2026-11-13T04:51:59.109518Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+2026-11-13T04:51:59.328100Z 0 [Warning] [MY-010097] [Server] Insecure configuration for --secure-file-priv: Current value does not restrict location of generated files. Consider setting it to a valid, non-empty path.
+2026-11-13T04:51:59.328169Z 0 [System] [MY-010116] [Server] C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqld.exe (mysqld 8.4.3) starting as process 1524
+2026-11-13T04:51:59.601024Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2026-11-13T04:52:02.423132Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2026-11-13T04:52:03.809970Z 0 [System] [MY-010229] [Server] Starting XA crash recovery...
+2026-11-13T04:52:03.820059Z 0 [System] [MY-010232] [Server] XA crash recovery finished.
+2026-11-13T04:52:03.904789Z 0 [Warning] [MY-013829] [Server] Missing data directory for ICU regular expressions: C:\laragon\bin\mysql\mysql-8.4.3-winx64\lib\private\.
+2026-11-13T04:52:04.009081Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2026-11-13T04:52:04.009189Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+2026-11-13T04:52:04.153049Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060
+2026-11-13T04:52:04.153248Z 0 [System] [MY-010931] [Server] C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqld.exe: ready for connections. Version: '8.4.3'  socket: ''  port: 3306  MySQL Community Server - GPL.

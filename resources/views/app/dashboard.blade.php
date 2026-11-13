@@ -118,7 +118,7 @@
       { label: 'Jumlah Sales', value: LP.number(data.total_sales), tone: 'sky' },
       { label: 'Jumlah Konsumen', value: LP.number(data.total_customers), hint: 'Calon konsumen ' + LP.number(data.total_prospects) + ' · Total lead ' + LP.number(data.total_leads), tone: 'violet' },
       { label: 'Booking Aktif', value: LP.number(data.active_bookings), hint: 'Total booking ' + LP.number(data.total_bookings), tone: 'amber' },
-      { label: 'Pembayaran Pending', value: LP.number(data.payments_pending), hint: 'Menunggu verifikasi manajer', tone: 'amber' },
+      { label: 'Pembayaran Pending', value: LP.number(data.payments_pending), hint: 'Menunggu verifikasi super admin', tone: 'amber' },
       { label: 'Total Pendapatan', value: LP.shortMoney(data.total_revenue), hint: 'Pembayaran terverifikasi', tone: 'emerald' },
       { label: 'Belum Serah Terima', value: LP.number(data.units_not_delivered), hint: 'Booking lunas menunggu serah terima' },
     ]);
@@ -135,7 +135,7 @@
       { label: 'Jumlah Sales', value: LP.number(t.sales_count), tone: 'sky' },
       { label: 'Jumlah Konsumen', value: LP.number(c.total_customers), tone: 'violet' },
       { label: 'Booking Aktif', value: LP.number(c.active_bookings), tone: 'amber' },
-      { label: 'Pembayaran Pending', value: LP.number(c.payments_pending), hint: 'Perlu diverifikasi manajer', tone: 'amber' },
+      { label: 'Pembayaran Pending', value: LP.number(c.payments_pending), hint: 'Perlu diverifikasi super admin', tone: 'amber' },
       { label: 'Total Pendapatan', value: LP.shortMoney(t.total_revenue), hint: 'Periode ' + periodHint, tone: 'emerald' },
       { label: 'Total Booking', value: LP.number(t.total_bookings), hint: 'Lead seluruh sales ' + LP.number(t.total_leads) },
     ]);
@@ -216,7 +216,7 @@
           start_date: document.getElementById('dash-start').value || firstOfMonth(),
           end_date: document.getElementById('dash-end').value || LP.today(),
         })
-        : '/dashboard/manager';
+        : '/dashboard/super-admin';
 
     LP.loading('dash-stats', 'Memuat ringkasan dashboard...');
     LP.loading('dash-chart', 'Memuat grafik penjualan...');
@@ -276,16 +276,16 @@
 
   document.getElementById('dash-period-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    LP.guard(['manager', 'admin_sales', 'sales'], load);
+    LP.guard(['super_admin', 'admin_sales', 'sales'], load);
   });
 
   document.getElementById('dash-refresh').addEventListener('click', (event) => {
-    LP.withBusy(event.currentTarget, () => LP.guard(['manager', 'admin_sales', 'sales'], load));
+    LP.withBusy(event.currentTarget, () => LP.guard(['super_admin', 'admin_sales', 'sales'], load));
   });
 
   document.getElementById('dash-start').value = firstOfMonth();
   document.getElementById('dash-end').value = LP.today();
 
-  LP.guard(['manager', 'admin_sales', 'sales'], load);
+  LP.guard(['super_admin', 'admin_sales', 'sales'], load);
 </script>
 @endpush

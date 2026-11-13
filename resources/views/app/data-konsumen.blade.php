@@ -51,7 +51,7 @@
 
 @push('scripts')
 <script>
-  const ROLE_INTERNAL = ['manager', 'admin_sales', 'sales'];
+  const ROLE_INTERNAL = ['super_admin', 'admin_sales', 'sales'];
   const LEAD_STATUS_LIST = [
     { value: 'cold', label: 'Cold' },
     { value: 'warm', label: 'Warm' },
@@ -170,7 +170,7 @@
   }
 
   function leadBolehKelola() {
-    return LP.can(['manager', 'sales']);
+    return LP.can(['super_admin', 'sales']);
   }
 
   function leadFields() {

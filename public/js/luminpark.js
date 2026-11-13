@@ -219,7 +219,7 @@ window.LP = (() => {
   /* ---------- vocabulary ---------- */
 
   const ROLE_LABEL = {
-    manager: 'Super Admin (Manajer)', admin_sales: 'Admin Sales', sales: 'Sales', consumer: 'Konsumen',
+    super_admin: 'Super Admin', admin_sales: 'Admin Sales', sales: 'Sales', consumer: 'Konsumen',
   };
 
   const STATUS = {
@@ -532,15 +532,15 @@ window.LP = (() => {
   /* ---------- shell internal ---------- */
 
   const NAV = [
-    { href: '/dashboard', label: 'Dashboard', icon: 'M3 12l9-8 9 8M5 10v10h14V10', roles: ['manager', 'admin_sales', 'sales'] },
-    { href: '/data-unit', label: 'Data Unit Perumahan', icon: 'M4 20h16M6 20V8l6-4 6 4v12M9 20v-6h6v6', roles: ['manager', 'admin_sales'] },
-    { href: '/data-sales', label: 'Data Sales', icon: 'M16 11a4 4 0 10-8 0M4 20a8 8 0 0116 0', roles: ['manager', 'admin_sales'] },
-    { href: '/data-konsumen', label: 'Data Konsumen', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0', roles: ['manager', 'admin_sales', 'sales'] },
-    { href: '/booking', label: 'Booking Unit', icon: 'M8 3v4M16 3v4M3 9h18M5 5h14v16H5z', roles: ['manager', 'admin_sales', 'sales'] },
-    { href: '/pembayaran', label: 'Data Pembayaran', icon: 'M3 10h18M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', roles: ['manager', 'admin_sales', 'sales'] },
-    { href: '/laporan', label: 'Laporan', icon: 'M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm2 6h6M9 13h6M9 17h4', roles: ['manager', 'admin_sales'] },
+    { href: '/dashboard', label: 'Dashboard', icon: 'M3 12l9-8 9 8M5 10v10h14V10', roles: ['super_admin', 'admin_sales', 'sales'] },
+    { href: '/data-unit', label: 'Data Unit Perumahan', icon: 'M4 20h16M6 20V8l6-4 6 4v12M9 20v-6h6v6', roles: ['super_admin', 'admin_sales'] },
+    { href: '/data-sales', label: 'Data Sales', icon: 'M16 11a4 4 0 10-8 0M4 20a8 8 0 0116 0', roles: ['super_admin', 'admin_sales'] },
+    { href: '/data-konsumen', label: 'Data Konsumen', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0', roles: ['super_admin', 'admin_sales', 'sales'] },
+    { href: '/booking', label: 'Booking Unit', icon: 'M8 3v4M16 3v4M3 9h18M5 5h14v16H5z', roles: ['super_admin', 'admin_sales', 'sales'] },
+    { href: '/pembayaran', label: 'Data Pembayaran', icon: 'M3 10h18M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', roles: ['super_admin', 'admin_sales', 'sales'] },
+    { href: '/laporan', label: 'Laporan', icon: 'M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm2 6h6M9 13h6M9 17h4', roles: ['super_admin', 'admin_sales'] },
     { href: '/laporan-sales', label: 'Laporan Sales', icon: 'M9 17V7l4 5 4-5v10M5 21h14V3H5z', roles: ['sales'] },
-    { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'M4 6h16M4 12h16M4 18h10', roles: ['manager'] },
+    { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'M4 6h16M4 12h16M4 18h10', roles: ['super_admin'] },
   ];
 
   function buildShell(user) {
@@ -557,7 +557,7 @@ window.LP = (() => {
       }).join('');
     }
 
-    // Item dropdown profil disaring menurut peran; Pengaturan hanya milik Manajer.
+    // Item dropdown profil disaring menurut peran; Pengaturan hanya milik Super Admin.
     document.querySelectorAll('#lp-user-panel [data-menu-role]').forEach((node) => {
       node.classList.toggle('hidden', !node.dataset.menuRole.split(',').includes(user.role));
     });

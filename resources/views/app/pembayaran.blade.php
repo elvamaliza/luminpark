@@ -47,15 +47,15 @@
     <div id="payment-table"></div>
 
     <p id="payment-note" class="mt-4 text-xs text-slate-500">
-        Verifikasi dan penolakan bukti transfer hanya dapat dilakukan Manajer atau Super Admin.
+        Verifikasi dan penolakan bukti transfer hanya dapat dilakukan Super Admin atau Super Admin.
         Setiap pembayaran yang belum terverifikasi tidak mengubah sisa pembayaran booking.
     </p>
 @endsection
 
 @push('scripts')
 <script>
-  const ROLE_INTERNAL = ['manager', 'admin_sales', 'sales'];
-  const ROLE_VERIFIKATOR = ['manager'];
+  const ROLE_INTERNAL = ['super_admin', 'admin_sales', 'sales'];
+  const ROLE_VERIFIKATOR = ['super_admin'];
 
   const PAYMENT_TYPES = [
     { value: 'KPR', label: 'KPR' },
@@ -120,7 +120,7 @@
 
     const items = [
       { label: 'Total Pembayaran', value: LP.number(paymentAll.length), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
-      { label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan manajer', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      { label: 'Menunggu Verifikasi', value: LP.number(menunggu.length), hint: 'Perlu tindakan super admin', bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
       { label: 'Dana Terverifikasi', value: LP.shortMoney(totalTerverifikasi), hint: terverifikasi.length + ' pembayaran', bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
       { label: 'Ditolak', value: LP.number(ditolak), hint: 'Bukti transfer perlu diunggah ulang', bg: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', border: '#fecaca' },
     ];
@@ -246,7 +246,7 @@
       + '<div><p class="text-xs text-slate-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.installment_amount)) + '</p></div>'
       + '<div><p class="text-xs text-slate-500">Sisa Pembayaran</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.remaining_amount)) + '</p></div>'
       + '</div>'
-      + '<p class="mt-3 text-xs text-slate-500">Status booking: ' + LP.esc(booking.status) + '. Nominal akan tercatat menunggu verifikasi manajer.</p>';
+      + '<p class="mt-3 text-xs text-slate-500">Status booking: ' + LP.esc(booking.status) + '. Nominal akan tercatat menunggu verifikasi super admin.</p>';
   }
 
   async function paymentCreate(values, context) {
@@ -278,7 +278,7 @@
 
     const modal = LP.formModal({
       title: 'Catat Pembayaran Baru',
-      description: 'Unggah bukti transfer agar pembayaran dapat diverifikasi manajer.',
+      description: 'Unggah bukti transfer agar pembayaran dapat diverifikasi super admin.',
       fields: paymentCreateFields(),
       values: { payment_date: LP.today(), payment_type: 'cash bertahap' },
       submitLabel: 'Simpan Pembayaran',
@@ -423,7 +423,7 @@
       LP.toast('Daftar booking gagal dimuat: ' + error.message, 'error');
     }
 
-    if (LP.can(['manager', 'sales'])) {
+    if (LP.can(['super_admin', 'sales'])) {
       document.getElementById('btn-bayar').addEventListener('click', paymentOpenCreate);
     } else {
       document.getElementById('btn-bayar').classList.add('hidden');

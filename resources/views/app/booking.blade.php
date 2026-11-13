@@ -49,13 +49,13 @@
 
     <p class="mt-4 text-xs text-slate-500">
         Uang muka, angsuran, dan sisa pembayaran dihitung oleh sistem dari harga unit dan skema pembayaran terpilih,
-        kemudian diperbarui otomatis setiap pembayaran diverifikasi manajer.
+        kemudian diperbarui otomatis setiap pembayaran diverifikasi super admin.
     </p>
 @endsection
 
 @push('scripts')
 <script>
-  const ROLE_INTERNAL = ['manager', 'admin_sales', 'sales'];
+  const ROLE_INTERNAL = ['super_admin', 'admin_sales', 'sales'];
 
   const DELIVERY_LIST = [
     { value: 'belum proses', label: 'Belum Proses' },
@@ -142,7 +142,7 @@
     document.getElementById('booking-count').textContent =
       bookingView.length + ' booking ditampilkan dari ' + bookingAll.length + ' data booking.';
 
-    const bolehKelola = LP.can(['manager', 'sales']);
+    const bolehKelola = LP.can(['super_admin', 'sales']);
 
     LP.table({
       mount: 'booking-table',
@@ -494,7 +494,7 @@
       LP.toast('Sebagian data pilihan booking gagal dimuat: ' + error.message, 'error');
     }
 
-    if (LP.can(['manager', 'sales'])) {
+    if (LP.can(['super_admin', 'sales'])) {
       document.getElementById('btn-buat-booking').addEventListener('click', bookingOpenCreate);
     } else {
       document.getElementById('btn-buat-booking').classList.add('hidden');

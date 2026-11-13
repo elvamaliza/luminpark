@@ -129,11 +129,15 @@ table(
         ["Acuan analisis", "Kebutuhan fungsional BAB III laporan (butir a sampai h), kebutuhan non-fungsional, "
                            "ERD Gambar 2.24, wireframe halaman, serta keputusan pengguna tanggal 1 November 2026 "
                            "(empat aktor, Admin Sales hanya-lihat, penghapusan lunak, menu pada ikon profil)"],
-        ["Bentuk pengujian", "Black-box API testing (118 test case otomatis) dan uji antarmuka per aktor di browser "
-                             "(37 test case observasi DOM) terhadap server yang sedang berjalan"],
+        ["Bentuk pengujian", f"Black-box API testing ({len(auto)} test case otomatis) dan uji antarmuka per aktor di browser "
+                             f"({len(ui)} test case observasi DOM) terhadap server yang sedang berjalan"],
         ["Lingkungan", "Windows 10 x64, Laragon, PHP 8.3.33, MySQL 8.4.3, Node.js 22, Chromium automation"],
-        ["Base URL", "http://127.0.0.1:8080 (web) dan http://127.0.0.1:8080/api (REST)"],
-        ["Kondisi awal basis data", "php artisan migrate:fresh --seed (22 tabel: 18 tabel domain + 4 tabel kerangka)"],
+        ["Base URL", "http://127.0.0.1:8080 (web) dan http://127.0.0.1:8080/api (REST) untuk uji antarmuka pada "
+                     "basis data kerja; http://127.0.0.1:8081/api (REST) untuk suite backend otomatis"],
+        ["Kondisi awal basis data", "Suite backend dijalankan pada basis data terpisah luminpark_test "
+                                    "(DB_DATABASE=luminpark_test php artisan migrate:fresh --seed, 22 tabel: 18 tabel "
+                                    "domain + 4 tabel kerangka) agar data kerja pengguna tidak ditimpa; uji antarmuka "
+                                    "memakai basis data luminpark dan luminpark_test"],
         ["Tanggal pengujian", hari.strftime("%d %B %Y")],
         ["Total test case", f"{len(auto)} backend + {len(ui)} frontend = {len(auto) + len(ui)} test case"],
         ["Hasil", f"Lulus {n_pass} | Gagal {n_fail} | Tingkat lulus {n_pass / (len(auto) + len(ui)) * 100:.1f}%"],
@@ -148,11 +152,15 @@ doc.add_page_break()
 head("BAB I - Metode pengujian")
 head("1.1 Tahapan pelaksanaan", 2)
 for i, txt in enumerate([
-    "Basis data diatur ulang (php artisan migrate:fresh --seed) supaya setiap angka yang dibaca laporan berasal dari "
-    "data demo yang dikenal, bukan sisa eksekusi sebelumnya.",
-    "Server pengembangan dijalankan pada http://127.0.0.1:8080 (php artisan serve --host=127.0.0.1 --port=8080) dan "
-    "tautan storage diaktifkan agar unggahan gambar dapat dibaca kembali.",
-    "Suite backend tests/run-conformance-tests.mjs mengirim permintaan HTTP nyata, lalu merekam ID, nama, skenario, "
+    "Basis data uji luminpark_test diatur ulang (DB_DATABASE=luminpark_test php artisan migrate:fresh --seed) supaya "
+    "setiap angka yang dibaca laporan berasal dari data demo yang dikenal, bukan sisa eksekusi sebelumnya; basis data "
+    "kerja luminpark tidak disentuh agar cluster dan unit buatan pengguna tetap utuh.",
+    "Server pengembangan dijalankan pada http://127.0.0.1:8081 untuk suite backend (DB_DATABASE=luminpark_test php "
+    "artisan serve --host=127.0.0.1 --port=8081) dan pada http://127.0.0.1:8080 untuk antarmuka "
+    "(php artisan serve --host=127.0.0.1 --port=8080); tautan storage diaktifkan agar unggahan gambar dapat dibaca "
+    "kembali.",
+    "Suite backend tests/run-conformance-tests.mjs mengirim permintaan HTTP nyata "
+    "(LP_API_BASE=http://127.0.0.1:8081/api), lalu merekam ID, nama, skenario, "
     "deskripsi, langkah, data uji, hasil yang diharapkan, hasil aktual, status, dan catatan ke "
     "tests/conformance-results.json.",
     "Suite frontend dilakukan dengan memuat halaman sebenarnya di peramban pada sesi login tiap aktor, kemudian "
@@ -217,7 +225,7 @@ para("Butir kebutuhan fungsional a.1 sampai h.3 pada BAB III laporan (halaman 29
      "laporan (keputusan 1 November 2026). Status: Sesuai = terpenuhi utuh; Sebagian = terpenuhi dengan catatan yang "
      "sudah disepakati.", 9)
 matrix = [
-    ("1", "a.1", "Login memakai nama pengguna dan sandi untuk Super Admin (Manajer), Admin Sales, dan Sales",
+    ("1", "a.1", "Login memakai nama pengguna dan sandi untuk Super Admin, Admin Sales, dan Sales",
      "AuthController::login (app/Http/Controllers/Api/AuthController.php:34) memvalidasi kredensial dengan "
      "Hash::check, menolak akun nonaktif (403), menolak peran non-internal (403), lalu menerbitkan token Sanctum.",
      "TC-A01, TC-A02, TC-A03, TC-A05, TC-A06", "Sebagian",
@@ -244,19 +252,29 @@ matrix = [
      "UserSeeder hanya membuat lima akun uji; akun consumer, admin@luminpark.com, dan manager@luminpark.com "
      "dihapus lunak; AuthController menolak peran di luar ROLE_INTERNAL dengan 403.",
      "TC-A04, TC-A04b, TC-A04c", "Sesuai",
-     "Satu akun super admin aktif: superadmin@gmail.com (role manager). Rute POST /api/register memang tidak ada."),
-    ("6", "b.1", "Admin Sales dan Manajer melihat seluruh data unit beserta statusnya",
-     "UnitController::index dengan filter status, dibatasi role:manager,admin_sales.", "TC-A13, TC-B01", "Sesuai", ""),
+     "Satu akun super admin aktif: superadmin@gmail.com (role super_admin). Rute POST /api/register memang tidak ada."),
+    ("6", "b.1", "Admin Sales dan Super Admin melihat seluruh data unit beserta statusnya",
+     "UnitController::index dengan filter status, dibatasi role:super_admin,admin_sales.", "TC-A13, TC-B01", "Sesuai", ""),
     ("7", "b.2", "Sales melihat informasi unit yang tersedia", "UnitController::availableUnits (GET /units-available).",
      "TC-A14", "Sesuai", ""),
     ("8", "b.3", "Konsumen melihat informasi unit rumah yang tersedia",
      "PublicInfoController::publicUnits tanpa autentikasi, hanya status available.", "TC-H01, TC-H03", "Sesuai", ""),
-    ("9", "b.4", "Manajer melihat, menambah, mengubah, dan menghapus data unit serta statusnya "
+    ("9", "b.4", "Super Admin melihat, menambah, mengubah, dan menghapus data unit serta statusnya "
      "(tersedia, booking, sold out, proses delivery)",
      "apiResource units + Unit::STATUSES; penolakan penghapusan unit yang memiliki riwayat pemesanan.",
-     "TC-B03, TC-B05, TC-B06, TC-B07, TC-B09, TC-B10, TC-J01", "Sesuai", ""),
-    ("10", "b.5", "Manajer memperbarui status unit", "UnitController::update (PUT/PATCH /units/{id}).", "TC-B06",
+     "TC-B03, TC-B05, TC-B06, TC-B07, TC-B09, TC-B10, TC-B16, TC-J01", "Sesuai", ""),
+    ("10", "b.5", "Super Admin memperbarui status unit", "UnitController::update (PUT/PATCH /units/{id}).", "TC-B06",
      "Sesuai", ""),
+    ("10a", "b.1 cluster", "Super Admin dapat menambahkan cluster baru dari halaman Data Unit, sebelum unit-unit di "
+     "dalamnya dibuat; Admin Sales hanya dapat membacanya",
+     "ClusterController::store (POST /clusters) memvalidasi project_id (exists:projects) dan nama dengan "
+     "Rule::unique('clusters','name')->where('project_id', ...) karena indeks unik pada tabel clusters bersifat "
+     "komposit (project_id, name); GET /clusters dan GET /projects tersedia untuk super_admin dan admin_sales, "
+     "sedangkan POST dikunci role:super_admin (routes/api.php). Antarmukanya berupa tombol Tambah Cluster di "
+     "resources/views/app/data-unit.blade.php yang memakai LP.formModal.",
+     "TC-B11, TC-B12, TC-B13, TC-B14, TC-B15, TC-B16, TC-B17, TC-B18, FF-A18, FF-A19, FF-B08", "Sesuai",
+     "Baris ini merupakan permintaan pengguna di luar teks laporan (tambah cluster disandingkan dengan tambah unit); "
+     "cluster hasil uji langsung dapat dipakai sebagai cluster induk unit baru (TC-B16)."),
     ("11", "Keputusan hapus lunak", "Data yang dihapus hilang dari antarmuka tetapi tetap tersimpan di basis data",
      "SoftDeletes pada users, units, sales_profiles, customer_leads, bookings, payments, payment_schemes, dan "
      "public_posts (migration 2026_11_01_110000_add_soft_deletes.php); seluruh query memakai scope tanpa deleted_at.",
@@ -278,8 +296,8 @@ matrix = [
     ("16", "d.1", "Sales mencatat pembayaran (DP, cicilan, pelunasan) dan mengunggah bukti transfer",
      "PaymentController::store menerima multipart transfer_receipt (jpg/jpeg/png/pdf, maksimum 5 MB) pada disk public.",
      "TC-E01, TC-E02, TC-E08, TC-J02", "Sesuai", ""),
-    ("17", "d.2", "Manajer memverifikasi bukti pembayaran (terverifikasi/ditolak)",
-     "PUT /payments/{id}/verify khusus role:manager; kolom verified_by dan verified_at terisi; penolakan tidak "
+    ("17", "d.2", "Super Admin memverifikasi bukti pembayaran (terverifikasi/ditolak)",
+     "PUT /payments/{id}/verify khusus role:super_admin; kolom verified_by dan verified_at terisi; penolakan tidak "
      "mengubah sisa pembayaran.", "TC-E03, TC-E04, TC-E06", "Sesuai", ""),
     ("18", "d.3", "Status pelunasan dan sisa pembayaran diperbarui otomatis",
      "PaymentController::recalculateBooking + Booking::settlementStatus() menurunkan status (menunggu DP, dp lunas, "
@@ -301,19 +319,19 @@ matrix = [
     ("24", "e.4", "Sales mencatat riwayat follow-up setiap kali berinteraksi",
      "apiResource follow-ups menyimpan status_before/status_after, metode komunikasi, dan menyinkronkan "
      "last_follow_up pada lead.", "TC-C05, TC-C06, TC-C07", "Sesuai", ""),
-    ("25", "e.5", "Admin Sales dan Manajer melihat seluruh calon konsumen dari semua sales dengan filter status",
-     "Indeks tidak dipangkas untuk role manager/admin_sales.", "TC-C08", "Sesuai", ""),
-    ("26", "e.6", "Admin Sales dan Manajer memantau perkembangan follow-up setiap sales",
+    ("25", "e.5", "Admin Sales dan Super Admin melihat seluruh calon konsumen dari semua sales dengan filter status",
+     "Indeks tidak dipangkas untuk role super_admin/admin_sales.", "TC-C08", "Sesuai", ""),
+    ("26", "e.6", "Admin Sales dan Super Admin memantau perkembangan follow-up setiap sales",
      "Daftar follow-up gabungan (lead + sales) serta laporan konsumen dan kinerja sales.", "TC-C07, TC-G07, TC-G08",
      "Sesuai", ""),
-    ("27", "f.1", "Manajer melihat dashboard rekapitulasi unit sold out dan belum delivery, pendapatan, jumlah sales, "
-     "calon konsumen, dan konsumen", "DashboardController::managerDashboard memakai konstanta status Unit/Booking "
+    ("27", "f.1", "Super Admin melihat dashboard rekapitulasi unit sold out dan belum delivery, pendapatan, jumlah sales, "
+     "calon konsumen, dan konsumen", "DashboardController::superAdminDashboard memakai konstanta status Unit/Booking "
      "ditambah widget grafik dan booking terbaru.", "TC-G01, TC-K11", "Sesuai", ""),
     ("28", "f.2", "Admin Sales melihat dashboard rekapitulasi penjualan seluruh sales",
      "DashboardController::adminSalesDashboard.", "TC-G02, TC-K12", "Sesuai", ""),
     ("29", "f.3", "Sales melihat dashboard jumlah calon konsumen yang ditangani berdasarkan status",
      "DashboardController::salesDashboard (dibatasi role:sales).", "TC-G03, TC-G04, TC-K13", "Sesuai", ""),
-    ("30", "f.4", "Manajer dan Admin Sales melihat serta mencetak laporan penjualan unit, pelunasan, kinerja sales, "
+    ("30", "f.4", "Super Admin dan Admin Sales melihat serta mencetak laporan penjualan unit, pelunasan, kinerja sales, "
      "dan laporan konsumen beserta calon konsumen",
      "ReportController::salesReport/settlementReport/salesPerformanceReport/consumerReport dan exportReport.",
      "TC-G05, TC-G06, TC-G07, TC-G08, TC-G09, TC-G10", "Sebagian",
@@ -337,14 +355,14 @@ matrix = [
      "PublicInfoController::publicSettings + tabel settings (public_hero_*, public_show_*, public_featured_*) dan "
      "tabel public_posts untuk kabar terbaru.", "TC-K01, TC-K03, TC-H08", "Sesuai",
      "Saklar yang sama dipatuhi oleh halaman beranda dan halaman Tentang Kami."),
-    ("37", "h.1", "Manajer mengelola data sales (tambah, ubah, hapus, reset password)",
+    ("37", "h.1", "Super Admin mengelola data sales (tambah, ubah, hapus, reset password)",
      "SalesController::store (termasuk target penjualan), update (termasuk status nonaktif), destroy dengan penjaga "
      "riwayat, dan resetPassword yang mencabut token lama.", "TC-F01, TC-F04, TC-F05, TC-F07, TC-F08", "Sesuai", ""),
-    ("38", "h.2", "Manajer dan Admin Sales melihat daftar seluruh sales beserta kinerjanya",
+    ("38", "h.2", "Super Admin dan Admin Sales melihat daftar seluruh sales beserta kinerjanya",
      "SalesController::index + performance (pencapaian unit dan nominal dibanding target pada periode).",
      "TC-F06, TC-G07", "Sesuai", ""),
     ("39", "h.3", "Admin Sales mengelola data sales dengan hak yang sama",
-     "Group role:manager,admin_sales pada apiResource sales.", "TC-F03", "Sesuai", ""),
+     "Group role:super_admin,admin_sales pada apiResource sales.", "TC-F03", "Sesuai", ""),
     ("40", "Keputusan sandi sales", "Sandi awal sales adalah tanggal lahir (ddmmyyyy) dan wajib diganti saat masuk "
      "pertama kali", "SalesController::store mengeset must_change_password=1; kolom birth_date pada sales_profiles; "
      "halaman /ganti-sandi memaksa penggantian.", "TC-F01, FF-D06", "Sesuai", ""),
@@ -360,7 +378,8 @@ matrix = [
 ]
 table(["No", "Butir", "Kebutuhan pada laporan / keputusan pengguna", "Implementasi pada backend",
        "Bukti pengujian", "Status", "Catatan"],
-      [Cm(0.9), Cm(2.0), Cm(6.2), Cm(7.4), Cm(4.0), Cm(1.7), Cm(5.1)], matrix,
+      [Cm(0.9), Cm(2.0), Cm(6.2), Cm(7.4), Cm(4.0), Cm(1.7), Cm(5.1)],
+      [[str(i)] + list(m)[1:] for i, m in enumerate(matrix, 1)],
       sizes=[8, 8, 8, 8, 7, 8, 7], bold_cols=(0, 1), center_cols=(0,), status_col=5)
 n_sesuai = sum(1 for m in matrix if m[5] == "Sesuai")
 n_sebagian = sum(1 for m in matrix if m[5] == "Sebagian")
@@ -370,7 +389,7 @@ para(f"Ringkasan matriks backend: {n_sesuai} butir Sesuai, {n_sebagian} butir Se
 head("2.1 Kebutuhan non-fungsional", 2)
 nfr = [
     ("NF-1", "Waktu respons maksimum 5 detik untuk proses umum",
-     "Diukur dari sisi klien atas login, daftar unit, dashboard manajer, laporan penjualan, dan katalog publik.",
+     "Diukur dari sisi klien atas login, daftar unit, dashboard super admin, laporan penjualan, dan katalog publik.",
      "TC-J04", "Sesuai", "Seluruh proses di bawah 5 detik pada lingkungan lokal."),
     ("NF-2", "Setiap pengguna masuk memakai akun terverifikasi",
      "Hash::check terhadap sandi ber-hash; akun nonaktif ditolak 403; peran non-internal ditolak 403.",
@@ -441,12 +460,15 @@ fmatrix = [
      "Publik dibuka dari ikon profil; notifikasi berada di ikon lonceng header", "FF-A01, FF-A02, FF-A03", "Sesuai"),
     ("Empat aktor", "Konsumen tidak memiliki jalur masuk; antarmuka hanya menyediakan login bagi tiga aktor internal",
      "FF-D03 + TC-A04, TC-A04b", "Sesuai"),
-    ("Hak Super Admin", "Delapan modul kerja tampil dan seluruh aksi manajemen tersedia (tambah, edit, hapus, "
-     "verifikasi pembayaran, serah terima, laporan, log aktivitas, sesi login)",
-     "FF-A01, FF-A04..FF-A17", "Sesuai"),
+    ("Hak Super Admin", "Delapan modul kerja tampil dan seluruh aksi manajemen tersedia (tambah cluster, tambah unit, "
+     "edit, hapus, verifikasi pembayaran, serah terima, laporan, log aktivitas, sesi login)",
+     "FF-A01, FF-A04..FF-A19", "Sesuai"),
+    ("Tambah cluster di Data Unit", "Tombol Tambah Cluster hanya terlihat untuk super admin; modal berisi proyek "
+     "induk, nama cluster, dan deskripsi. Cluster hasil simpan langsung muncul pada penapis cluster dan pada opsi "
+     "cluster di form Tambah Unit", "FF-A18, FF-A19", "Sesuai"),
     ("Hak Admin Sales (hanya-lihat)", "Data Unit, Data Konsumen, Booking, dan Data Pembayaran hanya menyediakan "
      "tombol Detail; tanpa Log Aktivitas dan tanpa Sesi Login; Data Sales tetap dapat dikelola",
-     "FF-B01, FF-B02, FF-B03, FF-B04, FF-B05, FF-B06, FF-B07", "Sesuai"),
+     "FF-B01, FF-B02, FF-B03, FF-B04, FF-B05, FF-B06, FF-B07, FF-B08", "Sesuai"),
     ("Hak Sales", "Tanpa menu Sesi Login dan tanpa field Sesi Aktif pada profil; hanya menangani data konsumennya "
      "sendiri; memakai laporan khusus sales", "FF-C01, FF-C02, FF-C03, FF-C04, FF-C05, FF-C06", "Sesuai"),
     ("Detail + hapus pada setiap tabel", "Baris Data Unit, Data Sales, dan Data Konsumen hanya menyediakan aksi "
@@ -492,8 +514,8 @@ table(["Temuan", "Sebab", "Perbaikan", "Verifikasi ulang"],
            "Tanggal awal dihitung hari ini dikurangi 29 hari lalu tabel dimuat saat halaman dibuka",
            "FF-A13: empat tab langsung terisi (lima baris laporan penjualan)"],
           ["Profil sales menunjukkan tulisan \"belum memiliki profil sales\"",
-           "Halaman profil mengharapkan relasi sales_profiles yang tidak selalu terisi untuk peran manager",
-           "Panel profil dirender sesuai peran; baris Sesi Aktif hanya disisipkan untuk manager",
+           "Halaman profil mengharapkan relasi sales_profiles yang tidak selalu terisi untuk peran super_admin",
+           "Panel profil dirender sesuai peran; baris Sesi Aktif hanya disisipkan untuk super_admin",
            "FF-C03 dan FF-A14: kedua profil menampilkan data yang benar"],
       ], sizes=[8, 8, 8, 8])
 
@@ -562,9 +584,9 @@ def uji_table(rows, judul, pengantar):
 uji_table(
     auto,
     "BAB IV - Tabel hasil pengujian backend (format sepuluh kolom)",
-    f"Sebanyak {len(auto)} test case dieksekusi dengan node tests/run-conformance-tests.mjs terhadap server yang "
-    f"sedang berjalan pada http://127.0.0.1:8080/api, setelah basis data diisi ulang dengan "
-    f"php artisan migrate:fresh --seed pada {hari.strftime('%d %B %Y')}. Kolom Hasil Aktual memuat kode status HTTP "
+    f"Sebanyak {len(auto)} test case dieksekusi dengan node tests/run-conformance-tests.mjs terhadap server "
+    f"http://127.0.0.1:8081/api (LP_API_BASE), setelah basis data uji luminpark_test diisi ulang dengan "
+    f"DB_DATABASE=luminpark_test php artisan migrate:fresh --seed pada {hari.strftime('%d %B %Y')}. Kolom Hasil Aktual memuat kode status HTTP "
     f"dan potongan isi respons yang benar-benar dikembalikan aplikasi; kolom Catatan memuat tafsir hasil serta "
     f"rujukan butir kebutuhan.")
 
@@ -581,12 +603,15 @@ uji_table(
 # ============================== BAB VI ==============================
 head("BAB VI - Kesimpulan dan rekomendasi")
 head("6.1 Kesimpulan", 2)
-para(f"Backend: {len(auto)} test case black-box seluruhnya PASS. Empat puluh satu butir kebutuhan (a.1 sampai h.3, "
+para(f"Backend: {len(auto)} test case black-box seluruhnya PASS. {len(matrix)} butir kebutuhan (a.1 sampai h.3, "
      f"ERD, dan keputusan pengguna) terpenuhi; {n_sebagian} butir berstatus Sebagian dan seluruhnya merupakan "
      f"penyimpangan yang telah diketahui dan disepakati: identitas login berupa email, reset sandi memerlukan sandi "
-     f"lama, indeks pembayaran belum dipangkas per sales, serta ekspor laporan berbentuk CSV bukan PDF.", 9)
+     f"lama, indeks pembayaran belum dipangkas per sales, serta ekspor laporan berbentuk CSV bukan PDF. "
+     f"Delapan test case baru (TC-B11 sampai TC-B18) membuktikan modul Tambah Cluster beserta penjagaan nama unik "
+     f"per proyek dan hak aksesnya.", 9)
 para(f"Frontend: {len(ui)} test case observasi DOM seluruhnya PASS dan sesuai dengan keputusan pengguna, yaitu "
-     f"navigasi modul di sidebar, menu akun pada ikon profil, notifikasi pada lonceng, hak hanya-lihat Admin Sales "
+     f"navigasi modul di sidebar, menu akun pada ikon profil, notifikasi pada lonceng, tombol Tambah Cluster yang "
+     f"hanya tampil untuk super admin, hak hanya-lihat Admin Sales "
      f"pada empat modul, pembatasan data sales, serta bahasa penghapusan lunak pada dialog hapus. Dua ketidaksuaian "
      f"yang ditemukan selama analisis (teks hapus permanen pada kabar terbaru dan saklar galeri pada halaman Tentang "
      f"Kami) telah diperbaiki dan diverifikasi ulang.", 9)
@@ -641,9 +666,9 @@ head("A.1 Akun hasil seeder (seluruhnya memakai password123)", 2)
 table(["Email", "Peran", "Fungsi dalam pengujian"],
       [Cm(6.0), Cm(4.2), Cm(17.1)],
       [
-          ["superadmin@gmail.com", "manager (Super Admin)",
-           "aktor utama CRUD unit dan sales, verifikasi pembayaran, laporan, log aktivitas, sesi login, pengaturan "
-           "sistem, dan pengaturan halaman publik"],
+          ["superadmin@gmail.com", "super_admin (Super Admin)",
+           "aktor utama CRUD cluster, unit, dan sales, verifikasi pembayaran, laporan, log aktivitas, sesi login, "
+           "pengaturan sistem, dan pengaturan halaman publik"],
           ["admin.sales@luminpark.com", "admin_sales",
            "uji kesetaraan hak baca dengan super admin dan hak kelola data sales (FF-B01..FF-B07, TC-F03, TC-L01..L03)"],
           ["sales@luminpark.com", "sales",
@@ -661,11 +686,18 @@ bullet("Akun admin@luminpark.com dan manager@luminpark.com telah dihapus karena 
 head("A.2 Perintah pelaksanaan", 2)
 table(["Tahap", "Perintah"], [Cm(5.0), Cm(22.3)],
       [
-          ["Isi ulang basis data", "C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe artisan migrate:fresh --seed"],
+          ["Isi ulang basis data uji", "C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root -e "
+                                       "\"create database if not exists luminpark_test\""],
+          ["Migrasi dan seeder uji", "DB_DATABASE=luminpark_test "
+                                     "C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe artisan "
+                                     "migrate:fresh --seed"],
           ["Tautan storage", "C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe artisan storage:link"],
-          ["Jalankan server", "C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe artisan serve "
-                              "--host=127.0.0.1 --port=8080"],
-          ["Uji backend", "C:/laragon/bin/nodejs/node-v22/node.exe tests/run-conformance-tests.mjs"],
+          ["Server uji (backend)", "DB_DATABASE=luminpark_test C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe "
+                                   "artisan serve --host=127.0.0.1 --port=8081"],
+          ["Server antarmuka", "C:/laragon/bin/php/php-8.3.33-Win32-vs16-x64/php.exe artisan serve "
+                               "--host=127.0.0.1 --port=8080"],
+          ["Uji backend", "LP_API_BASE=http://127.0.0.1:8081/api "
+                          "C:/laragon/bin/nodejs/node-v22/node.exe tests/run-conformance-tests.mjs"],
           ["Uji frontend", "Muat halaman nyata pada peramban otomatis lalu baca contentDocument tiap aktor; "
                            "hasil direkam pada tests/frontend-results.json"],
           ["Susun laporan ini", "C:/laragon/bin/python/python-3.13/python.exe tests/build_laporan_uji_sistem.py"],

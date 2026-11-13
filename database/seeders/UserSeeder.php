@@ -10,14 +10,15 @@ use Illuminate\Database\Seeder;
 class UserSeeder extends Seeder
 {
     /**
-     * Empat aktor laporan: Super Admin (role manager), Admin Sales, Sales, dan Konsumen.
+     * Empat aktor laporan: Super Admin (role super_admin), Admin Sales, Sales, dan Konsumen.
      * Konsumen tidak memiliki akun login karena seluruh interaksinya lewat halaman publik.
-     * Aktor Manajer dan Admin lama adalah orang yang sama, jadi cukup satu akun super admin.
+     * Aktor manajer dan admin lama adalah orang yang sama dengan super admin, sehingga perannya
+     * sudah dilebur dan tidak ada lagi role manajer pada akun pengguna.
      */
     public function run(): void
     {
         $users = [
-            ['name' => 'Super Admin', 'email' => 'superadmin@gmail.com', 'role' => User::ROLE_MANAGER, 'phone' => '0811000000002'],
+            ['name' => 'Super Admin', 'email' => 'superadmin@gmail.com', 'role' => User::ROLE_SUPER_ADMIN, 'phone' => '0811000000002'],
             ['name' => 'Admin Sales', 'email' => 'admin.sales@luminpark.com', 'role' => User::ROLE_ADMIN_SALES, 'phone' => '0811000000003'],
             ['name' => 'Budi Sales Utama', 'email' => 'sales@luminpark.com', 'role' => User::ROLE_SALES, 'phone' => '0812345678101', 'sales_code' => 'SL-001', 'whatsapp' => '62812345678101', 'birth_date' => '1995-03-14'],
             ['name' => 'Sari Sales Timur', 'email' => 'sales2@luminpark.com', 'role' => User::ROLE_SALES, 'phone' => '0812345678102', 'sales_code' => 'SL-002', 'whatsapp' => '62812345678102', 'birth_date' => '1997-11-02'],
