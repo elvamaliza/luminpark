@@ -21,9 +21,12 @@ class UnitSeeder extends Seeder
         );
 
         $clusters = [
-            ['name' => 'Cluster Asena', 'description' => 'Cluster depan dengan akses langsung ke fasilitas utama.'],
-            ['name' => 'Cluster Bruna', 'description' => 'Cluster tengah dengan konsep taman hijau.'],
-            ['name' => 'Cluster Cendana', 'description' => 'Cluster tahap dua, dekat area komersial.'],
+            ['name' => 'Proyek Asena', 'description' => 'Proyek depan dengan akses langsung ke fasilitas utama.',
+                'address' => 'Jl. Lubuk Minturun No. 8, Koto Tangah, Kota Padang', 'latitude' => -0.8565000, 'longitude' => 100.3512000],
+            ['name' => 'Proyek Bruna', 'description' => 'Proyek tengah dengan konsep taman hijau.',
+                'address' => 'Jl. Lubuk Minturun No. 21, Koto Tangah, Kota Padang', 'latitude' => -0.8612000, 'longitude' => 100.3568000],
+            ['name' => 'Proyek Cendana', 'description' => 'Proyek tahap dua, dekat area komersial.',
+                'address' => 'Jl. Padang Panorama, Koto Tangah, Kota Padang', 'latitude' => -0.8497000, 'longitude' => 100.3634000],
         ];
 
         $types = [
@@ -37,7 +40,12 @@ class UnitSeeder extends Seeder
         foreach ($clusters as $clusterData) {
             $cluster = Cluster::updateOrCreate(
                 ['project_id' => $project->id, 'name' => $clusterData['name']],
-                ['description' => $clusterData['description']]
+                [
+                    'description' => $clusterData['description'],
+                    'address'     => $clusterData['address'],
+                    'latitude'    => $clusterData['latitude'],
+                    'longitude'   => $clusterData['longitude'],
+                ]
             );
 
             foreach ($types as $t) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ScopesSalesData;
 use App\Models\FollowUpHistory;
 use App\Models\CustomerLead;
 use Illuminate\Http\Request;
@@ -10,10 +11,21 @@ use Illuminate\Validation\Rule;
 
 class FollowUpHistoryController extends Controller
 {
+    use ScopesSalesData;
+
     // 1. Tampilkan semua riwayat follow-up (bisa filter per lead_id)
     public function index(Request $request)
     {
         $query = FollowUpHistory::with(['lead', 'salesProfile']);
+
+        // Butir d.4: catatan tindak lanjut sales lain tidak ikut terbaca.
+        $milik = $this->salesIdTerbatas($request);
+
+        if ($milik !== null) {
+            $query->where('sales_id', $milik);
+        } elseif ($request->filled('sales_id')) {
+            $query->where('sales_id', $request->sales_id);
+        }
 
         if ($request->has('lead_id') && $request->lead_id != '') {
             $query->where('lead_id', $request->lead_id);
@@ -40,8 +52,15 @@ class FollowUpHistoryController extends Controller
 
         $validated['sales_id'] = $validated['sales_id'] ?? $request->user()->salesProfile?->id;
 
+        // Catatan tindak lanjut selalu atas nama sales yang sedang masuk.
+        $milik = $this->salesIdTerbatas($request);
+
+        if ($milik !== null) {
+            $validated['sales_id'] = $milik;
+        }
+
         if (!$validated['sales_id']) {
-            return response()->json(['success' => false, 'message' => 'sales_id wajib diisi.'], 422);
+            return response()->json(['success' => false, 'message' => 'Bidang sales wajib dipilih.'], 422);
         }
 
         $history = FollowUpHistory::create($validated);
@@ -63,7 +82,7 @@ class FollowUpHistoryController extends Controller
     }
 
     // 3. Detail satu riwayat follow-up
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $history = FollowUpHistory::with(['lead', 'salesProfile'])->find($id);
 
@@ -71,16 +90,24 @@ class FollowUpHistoryController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
+        if ($tolak = $this->tolakDataSalesLain($request, (int) $history->sales_id)) {
+            return $tolak;
+        }
+
         return response()->json(['success' => true, 'data' => $history], 200);
     }
 
     // 4. Hapus catatan follow-up
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $history = FollowUpHistory::find($id);
 
         if (!$history) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+
+        if ($tolak = $this->tolakDataSalesLain($request, (int) $history->sales_id)) {
+            return $tolak;
         }
 
         $history->delete();

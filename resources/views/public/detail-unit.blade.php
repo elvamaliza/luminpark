@@ -15,11 +15,11 @@
     <div id="unit-detail"></div>
 
     <section class="mt-10 rounded-2xl border border-brand-100 bg-brand-50 p-6 sm:p-8">
-        <h2 class="text-lg font-bold text-brand-900">Ajukan penawaran / Hubungi sales</h2>
-        <p class="mt-1 text-sm text-brand-900/70">Terhubung langsung dengan tim sales kami melalui WhatsApp, atau kirimkan pertanyaan lewat formulir kontak.</p>
+        <h2 class="text-lg font-bold text-brand-900">Hubungi sales untuk penawaran unit ini</h2>
+        <p class="mt-1 text-sm text-brand-900/70">Terhubung langsung dengan tim sales kami melalui WhatsApp.</p>
         <div id="detail-sales" class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
         <div class="mt-6">
-            <a id="detail-kontak" href="/kontak" class="inline-flex rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white hover:bg-zinc-800">Isi Formulir Kontak</a>
+            <a href="/kontak" class="inline-flex rounded-xl border border-brand-500 px-5 py-3 text-sm font-semibold text-brand-700 transition hover:bg-white">Lihat Semua Narahubung</a>
         </div>
     </section>
 </main>
@@ -58,8 +58,8 @@
             + specRow('Tipe', LP.esc(u.unit_type))
             + specRow('Luas Tanah', LP.number(u.land_size) + ' m&sup2;')
             + specRow('Luas Bangunan', LP.number(u.building_size) + ' m&sup2;')
-            + specRow('Cluster', LP.esc(u.cluster))
-            + specRow('Project', LP.esc(u.project))
+            + specRow('Proyek', LP.esc(u.cluster))
+            + specRow('Perumahan', LP.esc(u.project))
             + specRow('Harga', LP.money(u.price))
             + '</dl>';
 
@@ -142,7 +142,9 @@
                 ? rows.map(function (s) {
                     const link = (s.whatsapp_link || '') + '?text=' + pesan;
                     return '<a href="' + LP.esc(link) + '" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-xl border border-brand-100 bg-white p-3 text-sm shadow-sm transition hover:border-brand-500">'
-                        + '<span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .2-3.2-.7-2.7-1.1-4.4-3.8-4.6-4-.1-.2-1-1.4-1-2.6s.6-1.8.8-2c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.8 2c.1.2 0 .3-.1.5l-.4.6c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.4 0 .6-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.7-.1 1z"/></svg></span>'
+                        + (s.avatar_url
+                            ? LP.fotoSales(s.avatar_url, s.name, 'h-9 w-9')
+                            : '<span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .2-3.2-.7-2.7-1.1-4.4-3.8-4.6-4-.1-.2-1-1.4-1-2.6s.6-1.8.8-2c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.8 2c.1.2 0 .3-.1.5l-.4.6c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.4 0 .6-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.7-.1 1z"/></svg></span>')
                         + '<span class="min-w-0"><span class="block truncate font-semibold text-zinc-900">' + LP.esc(s.name) + '</span><span class="block text-xs text-zinc-500">' + LP.esc(s.sales_code) + '</span></span>'
                         + '</a>';
                 }).join('')
@@ -160,7 +162,6 @@
             return;
         }
         const id = cocok[1];
-        document.getElementById('detail-kontak').href = '/kontak?unit_id=' + id;
 
         LP.loading(detailMount, 'Memuat detail unit...');
         try {

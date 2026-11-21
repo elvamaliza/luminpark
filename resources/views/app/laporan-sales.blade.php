@@ -9,7 +9,7 @@
 @section('page_actions')
 <div class="lp-no-print flex flex-wrap items-center gap-2">
     <button id="ls-export" type="button" class="rounded-xl border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Ekspor Excel (CSV)</button>
-    <button id="ls-print" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Cetak / Simpan PDF</button>
+    <button id="ls-print" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Ekspor PDF / Cetak</button>
 </div>
 @endsection
 
@@ -50,8 +50,6 @@
 
 @push('scripts')
 <script>
-  const hiddenForPrint = [];
-
   function buildQuery() {
     return new URLSearchParams({
       start_date: document.getElementById('ls-start').value,
@@ -127,18 +125,22 @@
     });
   });
 
-  document.getElementById('ls-print').addEventListener('click', () => window.print());
-
-  window.addEventListener('beforeprint', () => {
-    document.querySelectorAll('.lp-no-print, header, #lp-aside').forEach((node) => {
-      if (node.classList.contains('hidden')) return;
-      node.classList.add('hidden');
-      hiddenForPrint.push(node);
-    });
-  });
-  window.addEventListener('afterprint', () => {
-    hiddenForPrint.forEach((node) => node.classList.remove('hidden'));
-    hiddenForPrint.length = 0;
+  document.getElementById('ls-print').addEventListener('click', async (event) => {
+    const tombol = event.currentTarget;
+    tombol.disabled = true;
+    tombol.textContent = 'Menyiapkan...';
+    try {
+      await LP.cetakLaporan({
+        judul: 'Laporan Penjualan Sales',
+        periode: LP.date(document.getElementById('ls-start').value) + ' s/d ' + LP.date(document.getElementById('ls-end').value),
+        catatan: 'Laporan ini hanya memuat konsumen yang berada di bawah penanganan sales yang mencetak.',
+      });
+    } catch (error) {
+      LP.toast(error.message || 'Lembar cetak gagal disiapkan.', 'error');
+    } finally {
+      tombol.disabled = false;
+      tombol.textContent = 'Ekspor PDF / Cetak';
+    }
   });
 
   document.getElementById('ls-start').value = LP.isoDate(Date.now() - 29 * 86400000);

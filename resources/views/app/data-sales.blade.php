@@ -159,8 +159,8 @@
       { name: 'name', label: 'Nama Lengkap', type: 'text', required: true, placeholder: 'Nama sales' },
       { name: 'sales_code', label: 'Kode Sales', type: 'text', required: true, placeholder: 'SL-004', hint: 'Kode unik, maksimal 30 karakter.' },
       { name: 'email', label: 'Email Login', type: 'email', required: true, placeholder: 'Gunakan email perusahaan yang unik', hint: 'Email ini dipakai sales untuk masuk ke sistem.' },
-      { name: 'birth_date', label: 'Tanggal Lahir', type: 'date', hint: 'Bila kata sandi dikosongkan, sistem memakai tanggal lahir sebagai kata sandi awal (ddmmyyyy).' },
-      { name: 'password', label: 'Kata Sandi (opsional)', type: 'password', hint: 'Kosongkan agar kata sandi awal otomatis memakai tanggal lahir. Sales wajib menggantinya saat pertama masuk.' },
+      { name: 'birth_date', label: 'Tanggal Lahir', type: 'date', hint: 'Bila kata sandi dikosongkan, sistem memakai tanggal lahir sebagai kata sandi awal (yyyymmdd).' },
+      { name: 'password', label: 'Kata Sandi (opsional)', type: 'password', hint: 'Kosongkan agar kata sandi awal otomatis memakai tanggal lahir. Pada login pertama sales wajib menggantinya dengan kata sandi kuat: minimal 8 karakter, huruf besar, huruf kecil, dan angka.' },
       { name: 'phone', label: 'Nomor Telepon', type: 'text', placeholder: '08123456789' },
       { name: 'whatsapp_number', label: 'Nomor WhatsApp', type: 'text', placeholder: '6281234567890' },
       { name: 'join_date', label: 'Tanggal Bergabung', type: 'date' },
@@ -175,7 +175,7 @@
 
   function tampilkanSandiAwal(nama, kataSandi) {
     LP.confirm(
-      'Kata sandi awal ' + nama + ' adalah ' + kataSandi + ' (tanggal lahir, format ddmmyyyy). Sales wajib menggantinya pada login pertama. Simpan baik-baik sebelum menutup kotak ini.',
+      'Kata sandi awal ' + nama + ' adalah ' + kataSandi + ' (tanggal lahir, format yyyymmdd). Sales wajib menggantinya pada login pertama dengan kata sandi kuat (minimal 8 karakter, huruf besar, huruf kecil, dan angka). Simpan baik-baik sebelum menutup kotak ini.',
       { title: 'Kata Sandi Awal Sales', okLabel: 'Sudah Saya Catat' }
     );
   }

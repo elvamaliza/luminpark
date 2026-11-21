@@ -63,6 +63,24 @@
     { value: 'cash bertahap', label: 'Cash Bertahap' },
   ];
 
+  // Revisi 3: cara uang berpindah tercatat terpisah dari skema pembiayaan,
+  // sehingga pembayaran tunai/QRIS di luar uang piutang tetap dapat dicatat.
+  const PAYMENT_METHODS = [
+    { value: 'transfer bank', label: 'Transfer Bank' },
+    { value: 'tunai', label: 'Tunai' },
+    { value: 'qris', label: 'QRIS' },
+    { value: 'virtual account', label: 'Virtual Account' },
+    { value: 'cek/giro', label: 'Cek / Giro' },
+  ];
+
+  // Revisi 43: kategori menjawab uang ini dibayarkan untuk apa. Hanya DP dan cicilan
+  // yang mengurangi harga utama unit; biaya tambahan berdiri sendiri di luarnya.
+  const PAYMENT_CATEGORIES = [
+    { value: 'dp', label: 'DP' },
+    { value: 'cicilan', label: 'Cicilan' },
+    { value: 'biaya tambahan', label: 'Biaya Tambahan' },
+  ];
+
   const paymentSearch = document.getElementById('payment-search');
   const paymentVerificationFilter = document.getElementById('payment-verification');
   const paymentTypeFilter = document.getElementById('payment-type');
@@ -87,9 +105,52 @@
     return lead && lead.name ? lead.name : '-';
   }
 
+  // Revisi 41: biaya tambahan konstruksi melekat pada booking, bukan pada pembayaran.
+  function paymentPesananTambahan(row) {
+    const booking = paymentBooking(row);
+    return booking && booking.addition_description ? booking.addition_description : 'Tidak ada';
+  }
+
+  function paymentBiayaTambahan(row) {
+    const booking = paymentBooking(row);
+    return booking ? Number(booking.addition_cost || 0) : 0;
+  }
+
   function paymentTypeLabel(nilai) {
     const ditemukan = PAYMENT_TYPES.find((item) => item.value === nilai);
     return ditemukan ? ditemukan.label : (nilai || '-');
+  }
+
+  function paymentMethodLabel(nilai) {
+    const ditemukan = PAYMENT_METHODS.find((item) => item.value === nilai);
+    return ditemukan ? ditemukan.label : (nilai || '-');
+  }
+
+  // Baris lama sebelum revisi 43 tidak berkategori; tetap dibaca sebagai pembayaran unit.
+  function paymentCategoryLabel(nilai) {
+    const ditemukan = PAYMENT_CATEGORIES.find((item) => item.value === nilai);
+    return ditemukan ? ditemukan.label : 'Pembayaran unit';
+  }
+
+  // Panduan nominal per kategori: DP dan cicilan mengikuti rincian booking, biaya
+  // tambahan mengikuti request tambahan bangunannya.
+  function paymentSaranNominal(booking, kategori) {
+    if (!booking || !kategori) return 0;
+    if (kategori === 'dp') return Number(booking.down_payment_amount || 0);
+    if (kategori === 'cicilan') return Number(booking.installment_amount || 0);
+    return Number(booking.addition_cost || 0);
+  }
+
+  // Sisa biaya tambahan yang belum terlunasi, dipakai supaya booking yang sudah lunas
+  // harga unitnya masih dapat membayar pekerjaannya.
+  function paymentSisaTambahan(booking) {
+    const terbayar = paymentAll
+      .filter((row) => String(row.booking_id) === String(booking.id)
+        && row.payment_category === 'biaya tambahan'
+        && row.verification_status === 'verified')
+      .reduce((akumulasi, row) => akumulasi + Number(row.amount || 0), 0);
+
+    return Number(booking.addition_cost || 0) - terbayar;
   }
 
   function paymentCanVerify() {
@@ -102,7 +163,7 @@
     const jenis = paymentTypeFilter.value;
 
     return paymentAll.filter((row) => {
-      const haystack = [paymentBookingCode(row), paymentCustomer(row), row.bank_name, row.account_holder].join(' ').toLowerCase();
+      const haystack = [paymentBookingCode(row), paymentCustomer(row), row.bank_name, row.account_holder, row.payment_category].join(' ').toLowerCase();
       if (kata && haystack.indexOf(kata) === -1) return false;
       if (verifikasi && row.verification_status !== verifikasi) return false;
       if (jenis && row.payment_type !== jenis) return false;
@@ -151,7 +212,13 @@
         { label: 'Tanggal', render: (row) => LP.date(row.payment_date) },
         { label: 'Kode Booking', render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(paymentBookingCode(row)) + '</span>' },
         { label: 'Konsumen', render: (row) => LP.esc(paymentCustomer(row)) },
+        // Revisi 41: permintaan tambahan konstruksi ikut terlihat saat memverifikasi.
+        { label: 'Pesanan Tambahan', render: paymentPesananTambahan },
+        { label: 'Biaya Tambahan', align: 'right', render: (row) => LP.money(paymentBiayaTambahan(row)) },
         { label: 'Jenis', render: (row) => LP.esc(paymentTypeLabel(row.payment_type)) },
+        // Revisi 43: kategori membedakan pembayaran harga unit dari pembayaran biaya tambahan.
+        { label: 'Kategori', render: (row) => LP.esc(paymentCategoryLabel(row.payment_category)) },
+        { label: 'Metode', render: (row) => LP.esc(paymentMethodLabel(row.payment_method)) },
         { label: 'Nominal', align: 'right', render: (row) => LP.money(row.amount) },
         { label: 'Bank', render: (row) => LP.esc(row.bank_name || '-') },
         { label: 'Verifikasi', render: (row) => LP.badge(row.verification_status) },
@@ -187,14 +254,19 @@
   }
 
   function paymentBookingOptions() {
-    const terbuka = paymentBookings.filter((row) => row.status !== 'lunas');
+    // Revisi 43: booking berstatus lunas tetap ditawarkan selama biaya tambahannya
+    // belum terlunasi, karena pembayaran itu berada di luar harga utama unit.
+    const terbuka = paymentBookings.filter((row) => row.status !== 'lunas' || paymentSisaTambahan(row) > 0);
     const daftar = terbuka.length ? terbuka : paymentBookings;
 
     return daftar.map((row) => {
       const lead = row.customer_lead || row.customerLead || {};
+      const sisaTambahan = paymentSisaTambahan(row);
+
       return {
         value: row.id,
-        label: row.booking_code + ' — ' + (lead.name || 'tanpa nama') + ' — sisa ' + LP.shortMoney(row.remaining_amount),
+        label: row.booking_code + ' — ' + (lead.name || 'tanpa nama') + ' — sisa ' + LP.shortMoney(row.remaining_amount)
+          + (sisaTambahan > 0 ? ' · biaya tambahan ' + LP.shortMoney(sisaTambahan) : ''),
       };
     });
   }
@@ -203,7 +275,10 @@
     return [
       { name: 'booking_id', label: 'Booking', type: 'select', required: true, options: paymentBookingOptions(), placeholder: 'Pilih booking' },
       { name: 'payment_type', label: 'Jenis Pembayaran', type: 'select', required: true, options: PAYMENT_TYPES.map((item) => ({ value: item.value, label: item.label })) },
-      { name: 'amount', label: 'Nominal Pembayaran (Rp)', type: 'number', required: true, min: 0.01, step: 'any', hint: 'Gunakan nominal uang muka atau angsuran sesuai booking.' },
+      // Revisi 43: kategori menentukan apakah pembayaran ini mengurangi harga unit.
+      { name: 'payment_category', label: 'Kategori Pembayaran', type: 'select', required: true, options: PAYMENT_CATEGORIES, placeholder: 'Pilih kategori', hint: 'DP dan cicilan mengurangi harga unit; biaya tambahan berada di luar harga unit.' },
+      { name: 'payment_method', label: 'Metode Pembayaran', type: 'select', required: true, options: PAYMENT_METHODS, hint: 'Cara pembayaran aktual, termasuk di luar skema uang piutang.' },
+      { name: 'amount', label: 'Nominal Pembayaran (Rp)', type: 'number', required: true, min: 0.01, step: 'any', hint: 'Terisi otomatis sesuai kategori, boleh diubah.' },
       { name: 'payment_date', label: 'Tanggal Pembayaran', type: 'date', required: true },
       { name: 'bank_name', label: 'Nama Bank', type: 'text', placeholder: 'Bank Central Asia' },
       { name: 'account_number', label: 'Nomor Rekening', type: 'text', placeholder: '8890122345' },
@@ -224,10 +299,27 @@
     return box;
   }
 
+  function paymentPilihBooking(form) {
+    const bookingId = form.querySelector('[name=booking_id]').value;
+    return paymentBookings.find((row) => String(row.id) === String(bookingId)) || null;
+  }
+
+  // Nominal diisi otomatis mengikuti kategori terpilih, lalu tetap boleh diubah.
+  function paymentSuggestAmount(form) {
+    const booking = paymentPilihBooking(form);
+    if (!booking) return;
+
+    const kategori = form.querySelector('[name=payment_category]').value;
+    const saran = paymentSaranNominal(booking, kategori);
+
+    // Kategori tanpa saran nominal (misalnya biaya tambahan yang belum diisi)
+    // mengosongkan isian supaya nominal lama dari kategori lain tidak ikut tercatat.
+    form.querySelector('[name=amount]').value = saran > 0 ? saran : '';
+  }
+
   function paymentUpdatePreview(form) {
     const box = paymentPreviewBox(form);
-    const bookingId = form.querySelector('[name=booking_id]').value;
-    const booking = paymentBookings.find((row) => String(row.id) === String(bookingId));
+    const booking = paymentPilihBooking(form);
 
     if (!booking) {
       box.innerHTML = 'Pilih booking untuk melihat panduan nominal uang muka, angsuran, dan sisa pembayaran.';
@@ -238,6 +330,8 @@
     const jenis = booking.payment_scheme ? booking.payment_scheme.scheme_type : '';
     if (jenis && PAYMENT_TYPES.some((item) => item.value === jenis)) selectType.value = jenis;
 
+    paymentSuggestAmount(form);
+
     box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Panduan Nominal Booking '
       + LP.esc(booking.booking_code) + '</p>'
       + '<div class="mt-3 grid gap-3 sm:grid-cols-4">'
@@ -246,6 +340,11 @@
       + '<div><p class="text-xs text-slate-500">Angsuran per Bulan</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.installment_amount)) + '</p></div>'
       + '<div><p class="text-xs text-slate-500">Sisa Pembayaran</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(booking.remaining_amount)) + '</p></div>'
       + '</div>'
+      + (Number(booking.addition_cost || 0) > 0
+        ? '<p class="mt-3 text-xs text-slate-500">Biaya tambahan ' + LP.esc(LP.money(booking.addition_cost))
+          + (booking.addition_description ? ' (' + LP.esc(booking.addition_description) + ')' : '')
+          + ' berada di luar harga unit — sisa ' + LP.esc(LP.money(paymentSisaTambahan(booking))) + ' yang masih dapat dibayar dengan kategori Biaya Tambahan.</p>'
+        : '')
       + '<p class="mt-3 text-xs text-slate-500">Status booking: ' + LP.esc(booking.status) + '. Nominal akan tercatat menunggu verifikasi super admin.</p>';
   }
 
@@ -253,6 +352,8 @@
     const body = new FormData();
     body.append('booking_id', Number(values.booking_id));
     body.append('payment_type', values.payment_type);
+    body.append('payment_category', values.payment_category);
+    body.append('payment_method', values.payment_method);
     body.append('amount', Number(values.amount));
     body.append('payment_date', values.payment_date);
     if (values.bank_name) body.append('bank_name', values.bank_name);
@@ -280,7 +381,7 @@
       title: 'Catat Pembayaran Baru',
       description: 'Unggah bukti transfer agar pembayaran dapat diverifikasi super admin.',
       fields: paymentCreateFields(),
-      values: { payment_date: LP.today(), payment_type: 'cash bertahap' },
+      values: { payment_date: LP.today(), payment_type: 'cash bertahap', payment_category: 'dp', payment_method: 'transfer bank' },
       submitLabel: 'Simpan Pembayaran',
       width: 'max-w-4xl',
       onSubmit: paymentCreate,
@@ -289,6 +390,8 @@
     const form = modal.wrap.querySelector('form');
     paymentUpdatePreview(form);
     form.querySelector('[name=booking_id]').addEventListener('change', () => paymentUpdatePreview(form));
+    // Revisi 43: kategori DP, cicilan, atau biaya tambahan mengubah saran nominal.
+    form.querySelector('[name=payment_category]').addEventListener('change', () => paymentSuggestAmount(form));
   }
 
   function paymentDialog(options) {
@@ -341,6 +444,8 @@
     dialog.body.innerHTML = '<div class="rounded-xl border border-slate-200 p-4">'
       + paymentDetailRow('Tanggal Pembayaran', LP.esc(LP.date(row.payment_date)))
       + paymentDetailRow('Jenis Pembayaran', LP.esc(paymentTypeLabel(row.payment_type)))
+      + paymentDetailRow('Kategori Pembayaran', LP.esc(paymentCategoryLabel(row.payment_category)))
+      + paymentDetailRow('Metode Pembayaran', LP.esc(paymentMethodLabel(row.payment_method)))
       + paymentDetailRow('Nominal', '<span class="font-semibold">' + LP.esc(LP.money(row.amount)) + '</span>')
       + paymentDetailRow('Konsumen', LP.esc(lead.name || '-'))
       + paymentDetailRow('Unit', LP.esc(booking.unit ? booking.unit.unit_code : '-'))
@@ -356,7 +461,8 @@
 
     LP.formModal({
       title: menolak ? 'Tolak Pembayaran — ' + paymentBookingCode(row) : 'Verifikasi Pembayaran — ' + paymentBookingCode(row),
-      description: 'Nominal ' + LP.money(row.amount) + ' atas nama ' + paymentCustomer(row) + '. '
+      description: 'Nominal ' + LP.money(row.amount) + ' atas nama ' + paymentCustomer(row)
+        + ' kategori ' + paymentCategoryLabel(row.payment_category) + '. '
         + (menolak
           ? 'Pembayaran yang ditolak tidak diperhitungkan sebagai pelunasan.'
           : 'Setelah diverifikasi, sisa pembayaran dan status booking akan dihitung ulang oleh sistem.'),

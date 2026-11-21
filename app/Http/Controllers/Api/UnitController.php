@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Cluster;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -151,6 +152,9 @@ class UnitController extends Controller
     {
         $units = Unit::with('cluster.project')
             ->where('status', Unit::STATUS_AVAILABLE)
+            // Revisi 42: unit yang sudah memegang pemesanan aktif dikeluarkan dari
+            // pilihan booking, walaupun statusnya masih tersedia.
+            ->whereDoesntHave('bookings', fn ($booking) => $booking->where('status', '!=', Booking::STATUS_DIBATALKAN))
             ->orderBy('unit_code')
             ->get();
 

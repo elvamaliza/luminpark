@@ -76,7 +76,7 @@
                 <li><a href="/unit" class="hover:text-white">Daftar unit rumah</a></li>
                 <li><a href="/skema-pembayaran" class="hover:text-white">Skema pembayaran</a></li>
                 <li><a href="/tentang" class="hover:text-white">Tentang kami</a></li>
-                <li><a href="/kontak" class="hover:text-white">Formulir kontak</a></li>
+                <li><a href="/kontak" class="hover:text-white">Kontak &amp; narahubung sales</a></li>
             </ul>
         </div>
         <div>
@@ -89,7 +89,7 @@
     </div>
 </footer>
 
-<script src="/js/luminpark.js"></script>
+<script src="/js/luminpark.js?v={{ filemtime(public_path('js/luminpark.js')) }}"></script>
 <script>
     document.getElementById('lp-public-menu')?.addEventListener('click', () => {
         document.getElementById('lp-public-nav')?.classList.toggle('hidden');

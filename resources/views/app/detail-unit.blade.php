@@ -72,7 +72,7 @@
     return '<div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">'
       + '<div class="flex flex-wrap items-start justify-between gap-3">'
       + '<div><h2 class="text-xl font-semibold text-zinc-900">' + LP.esc(row.unit_code) + '</h2>'
-      + '<p class="mt-0.5 text-sm text-zinc-500">' + LP.esc(row.unit_type) + ' &middot; ' + LP.esc(cluster.name || 'Tanpa cluster') + '</p></div>'
+      + '<p class="mt-0.5 text-sm text-zinc-500">' + LP.esc(row.unit_type) + ' &middot; ' + LP.esc(cluster.name || 'Tanpa proyek') + '</p></div>'
       + '<div>' + LP.badge(row.status) + '</div></div>'
       + '<p class="mt-4 text-2xl font-semibold text-zinc-900">' + LP.money(row.price) + '</p>'
       + '<dl class="mt-4 grid gap-3 sm:grid-cols-2">'
@@ -80,9 +80,9 @@
       + '<dd class="mt-1 text-sm font-medium text-zinc-800">' + LP.number(row.land_size) + ' m2</dd></div>'
       + '<div class="rounded-xl bg-zinc-50 p-3"><dt class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Luas Bangunan</dt>'
       + '<dd class="mt-1 text-sm font-medium text-zinc-800">' + LP.number(row.building_size) + ' m2</dd></div>'
-      + '<div class="rounded-xl bg-zinc-50 p-3"><dt class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Cluster</dt>'
-      + '<dd class="mt-1 text-sm font-medium text-zinc-800">' + LP.esc(cluster.name || '-') + '</dd></div>'
       + '<div class="rounded-xl bg-zinc-50 p-3"><dt class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Proyek</dt>'
+      + '<dd class="mt-1 text-sm font-medium text-zinc-800">' + LP.esc(cluster.name || '-') + '</dd></div>'
+      + '<div class="rounded-xl bg-zinc-50 p-3"><dt class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Perumahan</dt>'
       + '<dd class="mt-1 text-sm font-medium text-zinc-800">' + LP.esc(proyek.name || '-') + '</dd></div>'
       + '</dl>'
       + '<p class="mt-4 text-sm text-zinc-700">' + (row.description
@@ -97,19 +97,20 @@
       ? '<img src="' + LP.esc(row.image_url) + '" alt="Foto unit ' + LP.esc(row.unit_code) + '" class="h-56 w-full rounded-xl object-cover">'
       : '<div class="flex h-56 w-full items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50 text-sm text-zinc-500">Unit ini belum punya foto.</div>';
 
+    const kelasUnggah = 'w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-zinc-700';
+
+    const unggah = bolehUbah()
+      ? '<label class="mt-4 block">'
+        + '<span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Ganti Foto</span>'
+        + '<input id="du-image" type="file" accept="image/jpeg,image/png" class="' + kelasUnggah + '">'
+        + '<span class="mt-1 block text-xs text-zinc-500">Format JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.</span>'
+        + '</label>'
+      : '<p class="mt-3 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Hanya Super Admin yang dapat mengubah data dan foto unit.</p>';
+
     return '<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">'
       + '<h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Foto Unit</h2>'
       + '<div class="mt-3">' + gambar + '</div>'
-      + '<label class="mt-4 block">'
-      + '<span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Ganti Foto</span>'
-      + '<input id="du-image" type="file" accept="image/jpeg,image/png"'
-      + (bolehUbah() ? '' : ' disabled')
-      + ' class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-zinc-700 disabled:bg-zinc-100 disabled:text-zinc-500">'
-      + '<span class="mt-1 block text-xs text-zinc-500">Format JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.</span>'
-      + '</label>'
-      + (bolehUbah()
-        ? ''
-        : '<p class="mt-3 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">Halaman ini hanya dibaca. Hanya Super Admin yang dapat mengubah data unit.</p>')
+      + unggah
       + '</section>';
   }
 
@@ -118,16 +119,20 @@
     const meta = (extra) => Object.assign({ locked: locked }, extra || {});
     const clusterOptions = detailClusters.length
       ? detailClusters.map((item) => ({ value: item.id, label: item.name }))
-      : [{ value: row.cluster_id, label: (row.cluster && row.cluster.name) || 'Cluster unit ini' }];
+      : [{ value: row.cluster_id, label: (row.cluster && row.cluster.name) || 'Proyek unit ini' }];
 
     return '<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">'
       + '<div class="flex flex-wrap items-center justify-between gap-3">'
-      + '<div><h2 class="text-base font-semibold text-zinc-900">Ubah Data Unit</h2>'
-      + '<p class="mt-1 text-sm text-zinc-500">Perubahan langsung tersimpan ke data master dan tampil pada halaman publik daftar unit.</p></div>'
+      + '<div><h2 class="text-base font-semibold text-zinc-900">' + (locked ? 'Data Unit' : 'Ubah Data Unit') + '</h2>'
+      + '<p class="mt-1 text-sm text-zinc-500">'
+      + (locked
+        ? 'Seluruh isian dibaca dari data master dan tidak dapat diubah dari akun Anda.'
+        : 'Perubahan langsung tersimpan ke data master dan tampil pada halaman publik daftar unit.')
+      + '</p></div>'
       + (locked ? '' : '<button id="du-save" type="button" class="rounded-xl bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60">Simpan Perubahan</button>')
       + '</div>'
       + '<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">'
-      + fieldHtml('cluster_id', 'Cluster', row.cluster_id, meta({ type: 'select', options: clusterOptions, col: 2 }))
+      + fieldHtml('cluster_id', 'Proyek', row.cluster_id, meta({ type: 'select', options: clusterOptions, col: 2 }))
       + fieldHtml('unit_code', 'Kode Unit / Blok', row.unit_code, meta({ type: 'text' }))
       + fieldHtml('unit_type', 'Tipe Unit', row.unit_type, meta({ type: 'text' }))
       + fieldHtml('land_size', 'Luas Tanah (m2)', row.land_size, meta({ type: 'number', min: 1, step: '1' }))
@@ -307,7 +312,7 @@
         const clusters = await LP.fetchJson('/units/clusters');
         detailClusters = Array.isArray(clusters) ? clusters : [];
       } catch (error) {
-        LP.toast('Daftar cluster gagal dimuat: ' + (error.message || 'periksa koneksi Anda.'), 'error');
+        LP.toast('Daftar proyek gagal dimuat: ' + (error.message || 'periksa koneksi Anda.'), 'error');
       }
     }
 

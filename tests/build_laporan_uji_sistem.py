@@ -2,6 +2,7 @@
 """Laporan analisis kesesuaian backend + frontend terhadap kebutuhan pengguna dan laporan,
 lengkap dengan tabel hasil pengujian berformat sepuluh kolom."""
 import json
+import os
 import datetime
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
@@ -14,8 +15,30 @@ from docx.oxml import OxmlElement
 BASE = "C:/laragon/www/luminpark-main"
 auto = json.load(open(f"{BASE}/tests/conformance-results.json", encoding="utf-8"))
 ui = json.load(open(f"{BASE}/tests/frontend-results.json", encoding="utf-8"))
-n_pass = sum(1 for r in auto + ui if r["status"] == "Pass")
-n_fail = len(auto) + len(ui) - n_pass
+nf = json.load(open(f"{BASE}/tests/nf-results.json", encoding="utf-8")) if os.path.exists(
+    f"{BASE}/tests/nf-results.json") else []
+nf_cari = {r["id"]: r for r in nf}
+
+# Suite penguatan memakai kolom "catatan" sebagai rekaman hasil; disamakan dengan skema sepuluh kolom.
+hard = json.load(open(f"{BASE}/tests/hardening-results.json", encoding="utf-8")) if os.path.exists(
+    f"{BASE}/tests/hardening-results.json") else []
+for r in hard:
+    r["actualBody"] = r.get("catatan") or f"HTTP {r.get('actualStatus')}"
+    r["catatan"] = ""
+
+
+def nf_ukur(kode, panjang=150):
+    """Nilai terukur dari tests/run-nf-tests.mjs agar laporan tidak mengutip angka karangan."""
+    r = nf_cari.get(kode)
+    if not r:
+        return f"{kode} belum dijalankan"
+    t = r["actualBody"].strip()
+    return t if len(t) <= panjang else t[:panjang].rstrip() + "…"
+
+
+n_pass = sum(1 for r in auto + hard + ui if r["status"] == "Pass")
+n_total = len(auto) + len(hard) + len(ui)
+n_fail = n_total - n_pass
 hari = datetime.date.today()
 
 GREEN = RGBColor(0x1B, 0x7F, 0x3B)
@@ -127,9 +150,10 @@ table(
         ["Objek uji", "Lapisan backend (Laravel 10 API + MySQL) dan lapisan frontend (Blade + JavaScript klien "
                      "public/js/luminpark.js) pada repositori luminpark-main"],
         ["Acuan analisis", "Kebutuhan fungsional BAB III laporan (butir a sampai h), kebutuhan non-fungsional, "
-                           "ERD Gambar 2.24, wireframe halaman, serta keputusan pengguna tanggal 1 November 2026 "
-                           "(empat aktor, Admin Sales hanya-lihat, penghapusan lunak, menu pada ikon profil)"],
-        ["Bentuk pengujian", f"Black-box API testing ({len(auto)} test case otomatis) dan uji antarmuka per aktor di browser "
+                           "ERD Gambar 2.24, wireframe halaman, serta keputusan pengguna 1 November 2026 "
+                           "(tiga aktor login, Admin Sales hanya-lihat, penghapusan lunak, menu pada ikon profil)"],
+        ["Bentuk pengujian", f"Black-box API testing ({len(auto)} test case otomatis), uji penguatan atas temuan "
+                             f"batasan ({len(hard)} test case), dan uji antarmuka per aktor di browser "
                              f"({len(ui)} test case observasi DOM) terhadap server yang sedang berjalan"],
         ["Lingkungan", "Windows 10 x64, Laragon, PHP 8.3.33, MySQL 8.4.3, Node.js 22, Chromium automation"],
         ["Base URL", "http://127.0.0.1:8080 (web) dan http://127.0.0.1:8080/api (REST) untuk uji antarmuka pada "
@@ -139,10 +163,14 @@ table(
                                     "domain + 4 tabel kerangka) agar data kerja pengguna tidak ditimpa; uji antarmuka "
                                     "memakai basis data luminpark dan luminpark_test"],
         ["Tanggal pengujian", hari.strftime("%d %B %Y")],
-        ["Total test case", f"{len(auto)} backend + {len(ui)} frontend = {len(auto) + len(ui)} test case"],
-        ["Hasil", f"Lulus {n_pass} | Gagal {n_fail} | Tingkat lulus {n_pass / (len(auto) + len(ui)) * 100:.1f}%"],
-        ["Kesimpulan", "Backend dan frontend SESUAI dengan kebutuhan pengguna dan laporan. Empat butir kebutuhan "
-                       "berstatus Sebagian dan seluruhnya sudah disepakati sebagai penyimpangan yang didokumentasikan."],
+        ["Total test case", f"{len(auto)} backend + {len(hard)} penguatan + {len(ui)} frontend = {n_total} test case"],
+        ["Hasil", f"Lulus {n_pass} | Gagal {n_fail} | Tingkat lulus {n_pass / n_total * 100:.1f}%"],
+        ["Kesimpulan", "Backend dan frontend SESUAI dengan kebutuhan pengguna dan laporan. Dua butir kebutuhan "
+                       "fungsional dan tiga butir non-fungsional berstatus Sebagian (satu butir lain, ketersediaan "
+                       "layanan, belum terukur di lingkungan lokal); seluruhnya sudah disepakati sebagai "
+                       "penyimpangan yang didokumentasikan. Lima batasan yang dilaporkan pada pengujian sebelumnya "
+                       "(D-3 sampai D-7) sudah ditutup dan dibuktikan ulang dengan test case baru, sedangkan D-1 "
+                       "baru tertutup sebagian (APP_DEBUG lingkungan pengembang)."],
     ],
     sizes=[9, 9], bold_cols=(0,),
 )
@@ -154,7 +182,7 @@ head("1.1 Tahapan pelaksanaan", 2)
 for i, txt in enumerate([
     "Basis data uji luminpark_test diatur ulang (DB_DATABASE=luminpark_test php artisan migrate:fresh --seed) supaya "
     "setiap angka yang dibaca laporan berasal dari data demo yang dikenal, bukan sisa eksekusi sebelumnya; basis data "
-    "kerja luminpark tidak disentuh agar cluster dan unit buatan pengguna tetap utuh.",
+    "kerja luminpark tidak disentuh agar data proyek dan unit buatan pengguna tetap utuh.",
     "Server pengembangan dijalankan pada http://127.0.0.1:8081 untuk suite backend (DB_DATABASE=luminpark_test php "
     "artisan serve --host=127.0.0.1 --port=8081) dan pada http://127.0.0.1:8080 untuk antarmuka "
     "(php artisan serve --host=127.0.0.1 --port=8080); tautan storage diaktifkan agar unggahan gambar dapat dibaca "
@@ -163,18 +191,25 @@ for i, txt in enumerate([
     "(LP_API_BASE=http://127.0.0.1:8081/api), lalu merekam ID, nama, skenario, "
     "deskripsi, langkah, data uji, hasil yang diharapkan, hasil aktual, status, dan catatan ke "
     "tests/conformance-results.json.",
+    "Suite penguatan tests/run-hardening-tests.mjs menjalankan ulang butir yang sebelumnya berstatus batasan "
+    "(LP_API_BASE=http://127.0.0.1:8081/api): daur hidup proyek TC-M, pemisahan data per sales TC-N, jejak audit "
+    "TC-O, batas waktu sesi TC-P, dan keamanan serta lokalisasi TC-Q; hasilnya ditulis ke "
+    "tests/hardening-results.json dengan skema kolom yang sama.",
     "Suite frontend dilakukan dengan memuat halaman sebenarnya di peramban pada sesi login tiap aktor, kemudian "
     "membaca dokumen DOM yang telah dirender (daftar menu, jumlah baris tabel, tombol aksi, isi dialog, nilai form) "
-    "dan merekamnya dengan skema kolom yang sama ke tests/frontend-results.json.",
+    "dan merekamnya dengan skema kolom yang sama ke tests/frontend-results.json. Baris hasil observasi disatukan "
+    "kembali oleh tests/patch-frontend-results.mjs agar tanggal jendela uji dan temuan baru (FF-A20 sampai FF-A23, "
+    "FF-B09, FF-C07, FF-D08) ikut terbaca.",
     "Seluruh hasil dibaca kembali dan dibandingkan dengan butir kebutuhan pada laporan; butiran yang belum terpenuhi "
     "utuh diberi status Sebagian beserta alasannya, bukan ditutupi.",
 ], 1):
     bullet(f"Langkah {i}. {txt}", style="List Number")
 
 head("1.2 Format tabel hasil pengujian", 2)
-para("Tabel hasil pada BAB IV (backend) dan BAB V (frontend) memakai sepuluh kolom tepat seperti format yang diminta:",
-     9)
-bullet("ID — penanda test case; TC-* untuk backend, FF-* untuk frontend.")
+para("Tabel hasil pada BAB IV (backend), BAB V (penguatan), dan BAB VI (frontend) memakai sepuluh kolom tepat seperti "
+     "format yang diminta:", 9)
+bullet("ID — penanda test case; TC-A sampai TC-L untuk suite konformansi backend, TC-M sampai TC-Q untuk suite "
+       "penguatan, FF-A sampai FF-D untuk frontend.")
 bullet("Nama — judul singkat uji.")
 bullet("Skenario — kelompok alur (misalnya Autentikasi, RBAC negatif, Data Unit, Halaman publik konsumen).")
 bullet("Deskripsi — apa yang dibuktikan dan mengapa dibutuhkan.")
@@ -188,7 +223,7 @@ bullet("Catatan — penafsiran hasil, rujukan kebutuhan, dan tindakan perbaikan 
 
 head("1.3 Rekapitulasi hasil", 2)
 kel = {}
-for r in auto:
+for r in auto + hard:
     key = r["skenario"]
     kel.setdefault(key, [0, 0])
     kel[key][0] += 1
@@ -205,7 +240,7 @@ for nama, prefix in ui_groups:
     grp = [r for r in ui if r["id"].startswith(prefix)]
     recap.append([nama, str(len(grp)), str(sum(1 for r in grp if r["status"] == "Pass")),
                   str(sum(1 for r in grp if r["status"] != "Pass"))])
-recap.append(["TOTAL", str(len(auto) + len(ui)), str(n_pass), str(n_fail)])
+recap.append(["TOTAL", str(n_total), str(n_pass), str(n_fail)])
 t = table(["Kelompok pengujian", "Jumlah uji", "Lulus", "Gagal"],
           [Cm(17.0), Cm(3.4), Cm(3.4), Cm(3.4)], recap, sizes=[8, 8, 8, 8], center_cols=(1, 2, 3))
 baris_total = t.rows[len(recap)].cells
@@ -213,8 +248,8 @@ for c in baris_total:
     shade(c, SUB)
     for r in c.paragraphs[0].runs:
         r.bold = True
-para(f"Seluruh {len(auto) + len(ui)} test case berstatus PASS (tingkat lulus "
-     f"{n_pass / (len(auto) + len(ui)) * 100:.1f}%). Tidak ada kegagalan fungsional pada saat pengujian dilakukan.",
+para(f"Seluruh {n_total} test case berstatus PASS (tingkat lulus "
+     f"{n_pass / n_total * 100:.1f}%). Tidak ada kegagalan fungsional pada saat pengujian dilakukan.",
      10, True, color=GREEN)
 doc.add_page_break()
 
@@ -236,17 +271,24 @@ matrix = [
      "TC-A07, TC-A08, TC-A10, TC-A11, TC-A12, TC-E03, TC-G04, TC-I04, TC-I06, TC-K06, TC-K15, TC-L01..L04", "Sesuai", ""),
     ("3", "a.3", "Fitur reset password untuk setiap pengguna",
      "AuthController::resetPassword (mencabut seluruh token lama) dan SalesController::resetPassword untuk "
-     "super admin/admin sales (TC-F04).", "TC-F04", "Sebagian",
-     "Reset dilakukan dari dalam akun sehingga wajib menyertakan sandi lama; tidak ada pengiriman tautan reset "
-     "lewat email (Laravel Password Broker tidak dipakai). Solusi lupa sandi bagi sales adalah reset oleh super admin."),
+     "super admin; POST /api/forgot-password menyimpan token 64 karakter sebagai hash SHA-256 yang berlaku 10 menit "
+     "lalu mengirim Mailable LinkAturUlangSandi, dan POST /api/reset-password/token menetapkan sandi baru cukup "
+     "dengan token tersebut (TC-R10, TC-R11).", "TC-F04, TC-R10, TC-R11, FF-R14, FF-D06", "Sesuai",
+     "Pemulihan mandiri tidak lagi meminta sandi lama sejak revisi 14 karena bukti kepemilikan dipindahkan ke tautan "
+     "verifikasi yang dikirim ke email akun; akun konsumen memang diblokir dari login sehingga tidak memerlukan "
+     "jalur ini."),
     ("4", "a.4", "Logout dengan batas waktu tertentu untuk setiap aktor",
      "AuthController::logout menghapus CurrentAccessToken; masa berlaku token dibaca dari pengaturan "
      "session_timeout_minutes melalui SettingController::sessionTimeoutMinutes() (app/Http/Controllers/Api/"
-     "SettingController.php:204, minimum 15 menit, baku 1.440 menit) dan dipakai sebagai expiresAt saat createToken; "
-     "tabel login_sessions mencatat masuk, keluar, IP, dan perangkat.",
-     "TC-A01, TC-A15, TC-A16, TC-L07", "Sesuai",
-     "Koreksi dari laporan sebelumnya: batas waktu tidak lagi diambil dari config/sanctum.php, melainkan dari "
-     "halaman Pengaturan Sistem sehingga dapat diubah super admin tanpa mengubah kode."),
+     "SettingController.php, minimum 15 menit, baku 1.440 menit) dan dipakai sebagai expiresAt saat createToken; "
+     "GET /session/status mengembalikan sisa detik beserta batasnya dan POST /session/refresh menerbitkan token baru "
+     "sambil mencabut token lama; tabel login_sessions mencatat masuk, keluar, IP, dan perangkat. Sejak revisi 35 "
+     "penghitung pada header diperlakukan sebagai batas waktu tanpa aktivitas (public/js/luminpark.js), sehingga "
+     "layar yang ditinggalkan keluar otomatis dan layar yang masih dipakai diperpanjang senyap.",
+     "TC-A01, TC-A15, TC-A16, TC-L07, TC-P01, TC-P02, TC-P03, TC-R26, FF-A21, FF-R34", "Sesuai",
+     "Batas waktu diambil dari halaman Pengaturan Sistem, bukan config/sanctum.php, dan label isian kini berbunyi "
+     "'Batas Waktu Tanpa Aktivitas (menit)'. Antarmuka menampilkan chip hitung mundur beserta tombol Perpanjang, "
+     "peringatan pada sisa 300 detik, serta keluar otomatis tanpa aktivitas (FF-A21, FF-R34, TC-P02, TC-P03, TC-R26)."),
     ("5", "Keputusan akun", "Hanya ada tiga jenis akun login (super admin, admin sales, sales); akun admin dan "
      "manajer digabung menjadi satu super admin; konsumen tidak punya akun login",
      "UserSeeder hanya membuat lima akun uji; akun consumer, admin@luminpark.com, dan manager@luminpark.com "
@@ -262,25 +304,71 @@ matrix = [
     ("9", "b.4", "Super Admin melihat, menambah, mengubah, dan menghapus data unit serta statusnya "
      "(tersedia, booking, sold out, proses delivery)",
      "apiResource units + Unit::STATUSES; penolakan penghapusan unit yang memiliki riwayat pemesanan.",
-     "TC-B03, TC-B05, TC-B06, TC-B07, TC-B09, TC-B10, TC-B16, TC-J01", "Sesuai", ""),
+     "TC-B01, TC-B03, TC-B05, TC-B06, TC-B07, TC-B09, TC-B10, TC-B16", "Sesuai", ""),
     ("10", "b.5", "Super Admin memperbarui status unit", "UnitController::update (PUT/PATCH /units/{id}).", "TC-B06",
      "Sesuai", ""),
-    ("10a", "b.1 cluster", "Super Admin dapat menambahkan cluster baru dari halaman Data Unit, sebelum unit-unit di "
-     "dalamnya dibuat; Admin Sales hanya dapat membacanya",
-     "ClusterController::store (POST /clusters) memvalidasi project_id (exists:projects) dan nama dengan "
-     "Rule::unique('clusters','name')->where('project_id', ...) karena indeks unik pada tabel clusters bersifat "
-     "komposit (project_id, name); GET /clusters dan GET /projects tersedia untuk super_admin dan admin_sales, "
-     "sedangkan POST dikunci role:super_admin (routes/api.php). Antarmukanya berupa tombol Tambah Cluster di "
-     "resources/views/app/data-unit.blade.php yang memakai LP.formModal.",
-     "TC-B11, TC-B12, TC-B13, TC-B14, TC-B15, TC-B16, TC-B17, TC-B18, FF-A18, FF-A19, FF-B08", "Sesuai",
-     "Baris ini merupakan permintaan pengguna di luar teks laporan (tambah cluster disandingkan dengan tambah unit); "
-     "cluster hasil uji langsung dapat dipakai sebagai cluster induk unit baru (TC-B16)."),
+    ("10a", "b.1 cluster", "Super Admin melihat, menambah, mengubah, mengarsipkan, dan melepas proyek dari daftar "
+     "melalui halaman Data Proyek; Admin Sales hanya dapat membacanya; Sales tidak punya akses",
+     "ClusterController::index menghasilkan status, units_count, dan relasi project; store (POST /clusters) "
+     "memvalidasi project_id (exists:projects) dan nama dengan Rule::unique('clusters','name')->where('project_id', "
+     "...) karena indeks unik pada tabel clusters bersifat komposit (project_id, name); update (PUT /clusters/{id}); "
+     "PATCH /clusters/{id}/arsipkan memindahkan status aktif/diarsipkan dengan validasi whitelist; destroy "
+     "menolak 409 bila proyek masih dipakai unit dan bersifat lunak. Rute tulis dikunci role:super_admin "
+     "(routes/api.php). Antarmukanya halaman /data-proyek berjudul 'Pengelolaan Proyek' berisi kartu ringkasan, "
+     "tabel, form modal, serta aksi Ubah/Arsipkan/Aktifkan kembali; proyek arsip tidak muncul lagi pada formulir "
+     "unit. Sejak revisi 4 seluruh label ini memakai istilah Proyek, hanya nama tabel dan rute yang tetap clusters.",
+     "TC-B11..TC-B18, TC-M01..TC-M11, FF-A18, FF-A19, FF-A20, FF-B08, FF-B09, FF-C07, FF-R04", "Sesuai",
+     "Baris ini merupakan permintaan pengguna di luar teks laporan. Pada pengujian sebelumnya pengelolaan proyek "
+     "baru sampai tahap tambah (batasan D-6); ubah, arsipkan, pelepasan lunak, dan halaman daftarnya sudah ditutup dan "
+     "dibuktikan TC-M01 sampai TC-M11."),
+    ("10b", "Keputusan pemisahan data", "Sales hanya dapat membaca pemesanan, pembayaran, dan tindak lanjut "
+     "miliknya sendiri, sedangkan Super Admin dan Admin Sales melihat seluruhnya (butir d.4)",
+     "Trait App\\Http\\Controllers\\Concerns\\ScopesSalesData dipakai BookingController::index/show, "
+     "PaymentController::index/show, dan FollowUpController::index/show: peran sales disaring pada daftar dan "
+     "diberi 403 'Data ini berada di bawah penanganan sales lain' pada akses langsung; role super_admin dan "
+     "admin_sales tidak dipangkas.",
+     "TC-N01..TC-N06, FF-C04", "Sesuai",
+     "Menutup batasan D-4; pada laporan sebelumnya butir d.4 berstatus Sebagian karena indeks pembayaran belum "
+     "dipangkas per sales."),
+    ("10c", "Keputusan jejak audit", "Perubahan data penting dapat ditelusuri pada tabel activity_logs sesuai ERD",
+     "App\\Observers\\AuditObserver yang didaftarkan pada AppServiceProvider::AUDITABLE menulis baris "
+     "created_/updated_/deleted_ per entitas (proyek, unit, lead, booking, payment, sales, user, scheme, setting) "
+     "beserta user_id, deskripsi, IP, dan user agent; GET /api/activity-logs (khusus super_admin) menggabungkannya "
+     "dengan sumber sistem dan mendukung penyaringan ?action=.",
+     "TC-O01, TC-O02, TC-O03, FF-A23, NF-05", "Sesuai",
+     "Menutup batasan D-5. Pada laporan sebelumnya tabel activity_logs terbentuk dari migration tetapi tidak pernah "
+     "ditulisi aplikasi."),
+    ("10d", "Keputusan keluaran laporan", "Laporan dapat dicetak/diekspor PDF beserta blok pengesahan "
+     "(kelanjutan butir f.4)",
+     "LP.cetakLaporan() (public/js/luminpark.js) menyisipkan kop berisi identitas perumahan dari Pengaturan Sistem "
+     "(estate_name, estate_address, telepon, email) serta blok pengesahan dua kolom 'Dibuat oleh' dan 'Mengetahui: "
+     "Pimpinan / Atasan langsung' pada DOM dengan kelas .lp-print-only, lalu memanggil window.print() sehingga "
+     "keluaran PDF dari dialog cetak peramban memakai kop, judul, periode, dan kolom tanda tangan yang sama; tombol "
+     "Ekspor PDF / Cetak menemani unduhan CSV yang sudah ada.",
+     "FF-A22, FF-A13, TC-G05..TC-G10", "Sesuai",
+     "Menutup batasan D-3. Tanda tangan masih dibubuh setelah cetak (manual); tanda tangan digital tersertifikasi "
+     "belum dipakai dan dicatat pada butir pengembangan lanjutan."),
+    ("10e", "Keputusan keamanan & lokalisasi", "Percobaan login berulang dibatasi dan seluruh pesan kesalahan "
+     "berbahasa Indonesia",
+     "LoginThrottle pada AuthController::login membatasi tiga percobaan gagal per kombinasi email+IP; setelah itu "
+     "akun dikunci selama login_lockout_minutes yang dipilih super admin pada Pengaturan Sistem (429 beserta "
+     "retry_after dan locked_until, pesan 'Akun dikunci <menit> menit karena 3 kali percobaan login gagal. Coba lagi "
+     "dalam <menit> menit.') dan RateLimiter auth-password pada "
+     "AppServiceProvider untuk reset/refresh/sesi; berkas lang/id.php plus renderable pada app/Exceptions/"
+     "Handler.php mengganti pesan bawaan Laravel, 'Unauthenticated.', dan bocoran 'No query results for model' "
+     "menjadi kalimat Indonesia tanpa nama kelas maupun path berkas.",
+     "TC-Q01..TC-Q05, TC-Q04, TC-R24, NF-08, FF-R33", "Sebagian",
+     "Pembatasan laju dan lokalisasi sudah dibuktikan; jumlah percobaan diturunkan menjadi tiga dan lama kuncinya "
+     "menjadi pengaturan sejak revisi 34. Batasan D-1 baru berstatus Sebagian karena .env pengembang "
+     "masih memakai APP_DEBUG=true, yang wajib dimatikan saat dipasang di server umum."),
     ("11", "Keputusan hapus lunak", "Data yang dihapus hilang dari antarmuka tetapi tetap tersimpan di basis data",
-     "SoftDeletes pada users, units, sales_profiles, customer_leads, bookings, payments, payment_schemes, dan "
-     "public_posts (migration 2026_11_01_110000_add_soft_deletes.php); seluruh query memakai scope tanpa deleted_at.",
-     "TC-L05, TC-L06", "Sesuai",
+     "SoftDeletes pada users, units, sales_profiles, customer_leads, bookings, payments, payment_schemes, "
+     "public_posts, dan clusters (migration 2026_11_14_090000_add_status_and_soft_deletes_to_clusters.php menambah "
+     "deleted_at serta status pada clusters); seluruh query memakai scope tanpa deleted_at.",
+     "TC-L05, TC-L06, TC-M09, TC-M10", "Sesuai",
      "Indeks unik pada email, kode unit, kode sales, dan nama skema diturunkan menjadi indeks biasa agar kode yang "
-     "pernah dipakai dapat digunakan lagi; keunikan dijaga di lapisan validasi dengan aturan whereNull('deleted_at')."),
+     "pernah dipakai dapat digunakan lagi; keunikan dijaga di lapisan validasi dengan aturan whereNull('deleted_at'). "
+     "Hanya tabel projects yang masih dihapus permanen karena tidak punya endpoint penghapus."),
     ("12", "c.1", "Sales membuat pemesanan unit untuk konsumen berstatus hot",
      "BookingController::store menolak lead yang statusnya bukan hot (422).", "TC-D03", "Sesuai", ""),
     ("13", "c.2", "Sales memilih skema pelunasan (KPR, cash keras, cash bertahap)",
@@ -295,7 +383,7 @@ matrix = [
      "TC-D04, TC-D06, TC-D07", "Sesuai", ""),
     ("16", "d.1", "Sales mencatat pembayaran (DP, cicilan, pelunasan) dan mengunggah bukti transfer",
      "PaymentController::store menerima multipart transfer_receipt (jpg/jpeg/png/pdf, maksimum 5 MB) pada disk public.",
-     "TC-E01, TC-E02, TC-E08, TC-J02", "Sesuai", ""),
+     "TC-E01, TC-E02, TC-E08, TC-E09, FF-A17", "Sesuai", ""),
     ("17", "d.2", "Super Admin memverifikasi bukti pembayaran (terverifikasi/ditolak)",
      "PUT /payments/{id}/verify khusus role:super_admin; kolom verified_by dan verified_at terisi; penolakan tidak "
      "mengubah sisa pembayaran.", "TC-E03, TC-E04, TC-E06", "Sesuai", ""),
@@ -303,9 +391,11 @@ matrix = [
      "PaymentController::recalculateBooking + Booking::settlementStatus() menurunkan status (menunggu DP, dp lunas, "
      "cicilan, lunas) dari ledger pembayaran yang terverifikasi.", "TC-D09, TC-E05, TC-E07, TC-E10, TC-D10", "Sesuai", ""),
     ("19", "d.4", "Sales memantau status pembayaran konsumennya",
-     "GET /payments dengan filter booking_id, payment_type, dan verification_status.", "TC-E09", "Sebagian",
-     "Indeks pembayaran belum dipangkas per sales, sehingga sales masih dapat membaca pembayaran milik booking "
-     "sales lain bila mengetahui id booking-nya. Filter per-booking sudah tersedia sehingga dampak praktis terbatas."),
+     "GET /payments dengan filter booking_id, payment_type, dan verification_status, sekaligus dipangkas pada "
+     "booking milik sales yang login lewat trait ScopesSalesData (lihat baris 10b).",
+     "TC-E09, TC-N01, TC-N03, TC-N04, TC-N05", "Sesuai",
+     "Status dinaikkan dari Sebagian menjadi Sesuai setelah batasan D-4 ditutup: akses langsung ke booking atau "
+     "pembayaran sales lain kini dijawab 403 (TC-N02, TC-N04)."),
     ("20", "d.5", "Rekap pelunasan per konsumen, unit, dan skema", "ReportController::settlementReport (TC-G06).",
      "TC-G06", "Sesuai", ""),
     ("21", "e.1", "Sales menambah, mengubah, dan menghapus data calon konsumen",
@@ -333,10 +423,12 @@ matrix = [
      "DashboardController::salesDashboard (dibatasi role:sales).", "TC-G03, TC-G04, TC-K13", "Sesuai", ""),
     ("30", "f.4", "Super Admin dan Admin Sales melihat serta mencetak laporan penjualan unit, pelunasan, kinerja sales, "
      "dan laporan konsumen beserta calon konsumen",
-     "ReportController::salesReport/settlementReport/salesPerformanceReport/consumerReport dan exportReport.",
-     "TC-G05, TC-G06, TC-G07, TC-G08, TC-G09, TC-G10", "Sebagian",
-     "Ekspor nyata berupa berkas CSV berkepala bahasa Indonesia yang dapat dibuka dan dicetak lewat spreadsheet; "
-     "unduhan PDF belum dibuat. Keputusan pengguna menerima bentuk CSV."),
+     "ReportController::salesReport/settlementReport/salesPerformanceReport/consumerReport dan exportReport (CSV), "
+     "ditambah lembar cetak berpengesahan lewat LP.cetakLaporan() pada halaman /laporan.",
+     "TC-G05, TC-G06, TC-G07, TC-G08, TC-G09, TC-G10, FF-A22", "Sesuai",
+     "Status dinaikkan dari Sebagian menjadi Sesuai setelah batasan D-3 ditutup: selain unduhan CSV berkepala bahasa "
+     "Indonesia, tombol Ekspor PDF / Cetak menghasilkan lembar dengan kop, periode, dan dua kolom tanda tangan "
+     "(dibuat oleh / mengetahui) yang terverifikasi pada FF-A22."),
     ("31", "f.5 (tambahan)", "Laporan penjualan khusus sales yang sedang login (Wireframe 2.46)",
      "ReportController::mySales + mySalesExport pada GET /reports/my-sales dan /reports/my-sales/export "
      "(routes/api.php:138-142); ditolak untuk peran lain.", "TC-K14, TC-K15, TC-K16", "Sesuai",
@@ -349,8 +441,12 @@ matrix = [
     ("34", "g.3", "Konsumen melihat skema pembayaran yang tersedia", "PublicInfoController::paymentSchemes.", "TC-H04",
      "Sesuai", ""),
     ("35", "g.4", "Konsumen diarahkan ke narahubung sales melalui tombol Hubungi Sales",
-     "PublicInfoController::salesContacts menghasilkan nomor telepon dan tautan wa.me; formulir publik "
-     "menyimpan lead baru.", "TC-H05, TC-H06, TC-H07", "Sesuai", ""),
+     "PublicInfoController::salesContacts menghasilkan nomor telepon dan tautan wa.me pada beranda, detail unit, dan "
+     "halaman /kontak. Formulir pengisian calon konsumen di halaman publik sudah dihapus beserta rute "
+     "POST /api/public/contact, sehingga data lead hanya dibuat sales dari halaman Data Konsumen.",
+     "TC-H05, TC-H06, FF-D02", "Sesuai",
+     "Permintaan pengguna 16 November 2026: halaman publik tidak lagi menampung form pengisian calon konsumen; "
+     "TC-H06 menjaga agar rute tulis publik tersebut tidak muncul kembali."),
     ("36", "g.5 (tambahan)", "Konten halaman publik dikendalikan super admin dari Pengaturan Halaman Publik",
      "PublicInfoController::publicSettings + tabel settings (public_hero_*, public_show_*, public_featured_*) dan "
      "tabel public_posts untuk kabar terbaru.", "TC-K01, TC-K03, TC-H08", "Sesuai",
@@ -371,10 +467,12 @@ matrix = [
      "18 tabel domain terbentuk lengkap dengan foreign key dan kolom sesuai narasi: users, sales_profiles, projects, "
      "clusters, units, customer_leads, follow_up_histories, bookings, payment_schemes, payments, sales_targets, "
      "sales_reports, notifications, system_logs, login_sessions, activity_logs, settings, public_posts.",
-     "TC-A15, TC-B01, TC-B02, TC-D08, TC-F01, TC-G11, TC-I01, TC-I05", "Sesuai",
+     "TC-A15, TC-B01, TC-B02, TC-D08, TC-F01, TC-G11, TC-I01, TC-I05, TC-O01, NF-05", "Sesuai",
      "Ditambah 4 tabel kerangka (migrations, failed_jobs, password_reset_tokens, personal_access_tokens) sehingga "
      "total 22 tabel. Nama tabel dipertahankan dalam bahasa Inggris; pemetaan ke nama Indonesia tersedia pada "
-     "LAMPIRAN A laporan pembanding sebelumnya. Angka 14 pada narasi laporan perlu dikoreksi menjadi 18."),
+     "LAMPIRAN A laporan pembanding sebelumnya. Angka 14 pada narasi laporan perlu dikoreksi menjadi 18. Kolom "
+     "clusters.status dan clusters.deleted_at ditambahkan karena kebutuhan pengelolaan cluster; activity_logs kini "
+     "benar-benar ditulisi AuditObserver (NF-05: 146 baris, 22 jenis aksi)."),
 ]
 table(["No", "Butir", "Kebutuhan pada laporan / keputusan pengguna", "Implementasi pada backend",
        "Bukti pengujian", "Status", "Catatan"],
@@ -389,20 +487,25 @@ para(f"Ringkasan matriks backend: {n_sesuai} butir Sesuai, {n_sebagian} butir Se
 head("2.1 Kebutuhan non-fungsional", 2)
 nfr = [
     ("NF-1", "Waktu respons maksimum 5 detik untuk proses umum",
-     "Diukur dari sisi klien atas login, daftar unit, dashboard super admin, laporan penjualan, dan katalog publik.",
-     "TC-J04", "Sesuai", "Seluruh proses di bawah 5 detik pada lingkungan lokal."),
+     "Diukur dari sisi klien atas login, daftar unit, dashboard super admin, laporan penjualan, dan katalog publik "
+     "oleh tests/run-nf-tests.mjs.",
+     "NF-01", "Sesuai", f"Terukur: {nf_ukur('NF-01', 120)}"),
     ("NF-2", "Setiap pengguna masuk memakai akun terverifikasi",
      "Hash::check terhadap sandi ber-hash; akun nonaktif ditolak 403; peran non-internal ditolak 403.",
      "TC-A05, TC-A03, TC-A04, TC-F05", "Sesuai", ""),
     ("NF-3", "Role-based access control",
-     "RoleMiddleware pada seluruh rute internal; guard ganda (middleware API + penapisan peran di Blade).",
-     "TC-A10, TC-A11, TC-A12, TC-E03, TC-G04, TC-I06, TC-L01..L04", "Sesuai", ""),
+     "RoleMiddleware pada seluruh rute internal; guard ganda (middleware API + penapisan peran di Blade); "
+     "pemisahan data antar baris (row-level) untuk peran sales.",
+     "TC-A10, TC-A11, TC-A12, TC-E03, TC-G04, TC-I06, TC-L01..L04, TC-M11, TC-N02, TC-N04, TC-O03, "
+     "NF-11 (skrip NF)", "Sesuai", ""),
     ("NF-4", "Password disimpan sebagai hash",
      "Cast password => hashed pada App\\Models\\User; nilai tersimpan berawalan $2y$ (bcrypt).",
-     "Inspeksi basis data", "Sesuai", ""),
+     "NF-02 (skrip NF)", "Sesuai", f"Terukur: {nf_ukur('NF-02', 60)}"),
     ("NF-5", "Antarmuka sederhana dan konsisten",
      "Diuji pada BAB III (verifikasi DOM per aktor), bukan lagi di luar cakupan.",
-     "FF-A01..FF-A17, FF-B01..FF-B07", "Sesuai", "Layout, tabel, dialog, dan formulir memakai komponen yang sama."),
+     "FF-A01..FF-A23, FF-B01..FF-B09, NF-09 (skrip NF)", "Sesuai",
+     "Layout, tabel, dialog, dan formulir memakai komponen yang sama; halaman baru Data Proyek dan Log Aktivitas "
+     "dua sumber mengikuti kerangka yang sama."),
     ("NF-6", "Responsif di berbagai perangkat",
      "Kerangka Tailwind dengan grid adaptif pada seluruh halaman; pemeriksaan visual penuh memerlukan viewport "
      "tersedia.", "Observasi DOM (lebar konten adaptif)", "Sebagian",
@@ -415,34 +518,61 @@ nfr = [
      "pemantauan produksi.", "Observasi pelaksanaan uji", "Belum terukur",
      "Bukan kegagalan, melainkan belum dapat diukur pada lingkungan lokal."),
     ("NF-9", "Setiap kesalahan memberi pesan jelas tanpa crash",
-     "Respons JSON berpesan bahasa Indonesia untuk 401/403/404/422; findOrFail menghasilkan 404 terkendali.",
-     "TC-A05, TC-A06, TC-B08, TC-B10, TC-E08, TC-H07", "Sesuai",
-     "Dengan APP_DEBUG=true respons 500 masih menampilkan jejak teknis; wajib dimatikan bila aplikasi dipasang di "
-     "luar mesin pengembang."),
+     "Respons JSON berpesan bahasa Indonesia untuk 401/403/404/409/422/429; renderable pada app/Exceptions/"
+     "Handler.php menutup 'Unauthenticated.', 'The given data was invalid.', dan bocoran 'No query results for model "
+     "[App\\Models\\Unit]' yang selama ini menampilkan nama kelas serta path berkas.",
+     "TC-A05, TC-A06, TC-B08, TC-B10, TC-E08, TC-H06, TC-Q04, TC-Q05, NF-07 dan NF-08 (skrip NF)", "Sesuai",
+     f"Terukur: {nf_ukur('NF-08', 110)}. Dengan APP_DEBUG=true respons 500 masih menampilkan jejak teknis; "
+     "wajib dimatikan bila aplikasi dipasang di luar mesin pengembang."),
+    ("NF-9a (tambahan)", "Percobaan login berulang dibatasi",
+     "App\\Support\\LoginThrottle menolak 429 beserta retry_after dan locked_until setelah tiga percobaan gagal pada "
+     "kombinasi email + alamat IP, lalu menahan akun selama login_lockout_minutes hasil pengaturan dan membersihkannya "
+     "begitu login berhasil; RateLimiter auth-password (10/menit) "
+     "mengawal reset sandi, refresh sesi, dan pergantian sandi.",
+     "TC-Q01, TC-Q02, TC-Q03, TC-R24, FF-R33", "Sesuai",
+     "Menutup separuh batasan D-1; laporan sebelumnya hanya memakai throttle:api 60 permintaan/menit per IP sehingga "
+     "brute-force satu akun masih mungkin. Sejak revisi 34 ambang percobaan menjadi tiga dan lama penguncian dapat "
+     "diatur super admin pada Pengaturan Sistem."),
     ("NF-10", "Setiap data divalidasi sebelum disimpan",
      "Validasi form request pada seluruh controller; nilai turunan finansial dihitung server, tidak diterima dari klien.",
-     "TC-B05, TC-C02, TC-C03, TC-D03, TC-D04, TC-D05, TC-E02, TC-F02, TC-H07, TC-K04, TC-K05", "Sesuai", ""),
+     "TC-B05, TC-C02, TC-C03, TC-D03, TC-D04, TC-D05, TC-E02, TC-F02, TC-M03, TC-K04, TC-K05, NF-10 (skrip NF)",
+     "Sesuai", ""),
     ("NF-11", "Sistem mencegah duplikasi data",
      "Keunikan dijaga lapisan validasi memakai Rule::unique(...)->whereNull('deleted_at') untuk users.email, "
-     "units.unit_code, sales_profiles.sales_code, dan payment_schemes.scheme_name; indeks unik tingkat basis data "
+     "units.unit_code, sales_profiles.sales_code, payment_schemes.scheme_name, dan customer_leads.phone "
+     "(CustomerLeadController::aturanTelepon dengan ignore(id)); indeks unik tingkat basis data "
      "masih berlaku pada clusters(project_id,name), sales_targets(sales_id,periode), sales_reports(periode), "
      "settings(key), sales_profiles(user_id), dan bookings.booking_code.",
-     "TC-B04, TC-F02, TC-D04", "Sebagian",
+     "TC-B04, TC-F02, TC-D04, TC-C03, TC-R15, TC-R19, NF-10 (skrip NF)", "Sebagian",
      "Indeks unik email/kode unit/kode sales/nama skema sengaja diturunkan menjadi indeks biasa oleh migration "
-     "2026_11_01_110000_add_soft_deletes.php agar kode dari baris yang dihapus lunak dapat dipakai lagi. Belum ada "
-     "aturan unik untuk email atau telepon customer_leads sehingga lead ganda dari formulir publik masih mungkin."),
+     "2026_11_01_110000_add_soft_deletes.php agar kode dari baris yang dihapus lunak dapat dipakai lagi, dan "
+     "clusters(project_id,name) diturunkan oleh migration pengelolaan cluster (TC-M03 menjaga keunikannya di lapisan "
+     "validasi). Nomor handphone lead tidak dapat dipakai dua konsumen dalam keadaan mana pun — cold, warm, hot, "
+     "maupun sesudah dibatalkan (revisi 19 dan 24, dibuktikan TC-R19)— karena pembatalan tidak menghapus baris "
+     "lead; hanya hapus lunak yang membebaskan nomornya. Form lead pada halaman "
+     "publik sudah dihapus sehingga lead hanya dibuat sales."),
     ("NF-12", "Dapat diakses melalui Chrome, Firefox, dan Edge",
      "API REST berbasis HTTP/JSON standar; frontend memakai JavaScript dan fetch tanpa pustaka khusus browser.",
-     "Seluruh test case", "Sesuai", "Uji fungsional dijalankan pada Chromium; Firefox dan Edge belum dijalankan."),
+     "Seluruh test case, NF-12 (skrip NF)", "Sebagian",
+     f"Uji fungsional dijalankan pada Chromium ({len(ui)}/{len(ui)} skenario Pass); Firefox dan Edge belum "
+     "dijalankan, demikian pula uji visual pada tiga ukuran layar."),
     ("NF-13 (tambahan)", "Setiap aktivitas penting tercatat",
-     "activity_logs untuk login, logout, login gagal, dan aksi CRUD; system_logs dan notifications untuk peristiwa "
-     "bisnis; tabel login_sessions menyimpan IP, perangkat, serta waktu masuk dan keluar.",
-     "TC-A15, TC-I01, TC-I02, TC-I03, TC-I05, TC-I06", "Sesuai",
-     "Log hanya dapat dibaca super admin; sales dan admin sales ditolak (TC-I06, TC-L04)."),
+     "login_sessions mencatat IP, perangkat, serta waktu masuk dan keluar; system_logs dan notifications mencatat "
+     "peristiwa bisnis; AuditObserver kini menulisi tabel activity_logs pada peristiwa created/updated/deleted "
+     "sembilan entitas dan halaman Log Aktivitas membacanya pada tab 'Jejak audit data'.",
+     "TC-A15, TC-I01, TC-I02, TC-I03, TC-I05, TC-I06, TC-O01, TC-O02, TC-O03, FF-A23, NF-05 (skrip NF)", "Sesuai",
+     f"Terukur: {nf_ukur('NF-05', 110)}. Log hanya dapat dibaca super admin; sales dan admin sales ditolak "
+     "(TC-I06, TC-O03, TC-L04). Butir yang pada laporan sebelumnya berstatus Sebagian ini ditutup sebagai "
+     "tindak lanjut D-5."),
 ]
 table(["No", "Kebutuhan non-fungsional", "Perlakuan pada sistem", "Bukti", "Status", "Catatan"],
       [Cm(1.7), Cm(5.2), Cm(8.6), Cm(4.4), Cm(2.2), Cm(5.2)], nfr,
       sizes=[8, 8, 8, 7, 8, 7], bold_cols=(0,), center_cols=(0,), status_col=4)
+nf_sesuai = sum(1 for r in nfr if r[4] == "Sesuai")
+nf_sebagian = sum(1 for r in nfr if r[4] == "Sebagian")
+para(f"Ringkasan kebutuhan non-fungsional: {nf_sesuai} butir Sesuai dan {nf_sebagian} butir Sebagian dari "
+     f"{len(nfr)} butir; tidak ada butir yang Belum terpenuhi. Butir Sebagian disertai ukuran nyata dan "
+     f"tindak lanjut pada subbab 7.2.", 9, True)
 doc.add_page_break()
 
 # ============================== BAB III ==============================
@@ -458,26 +588,44 @@ fmatrix = [
      "FF-A01, FF-A02, FF-D03 + TC-A04c", "Sesuai"),
     ("Navigasi", "Sidebar hanya berisi modul kerja; Profil, Sesi Login, Pengaturan Sistem, dan Pengaturan Halaman "
      "Publik dibuka dari ikon profil; notifikasi berada di ikon lonceng header", "FF-A01, FF-A02, FF-A03", "Sesuai"),
-    ("Empat aktor", "Konsumen tidak memiliki jalur masuk; antarmuka hanya menyediakan login bagi tiga aktor internal",
+    ("Tiga aktor login", "Konsumen tidak memiliki jalur masuk; antarmuka hanya menyediakan login bagi tiga aktor "
+     "internal (super admin, admin sales, sales)",
      "FF-D03 + TC-A04, TC-A04b", "Sesuai"),
-    ("Hak Super Admin", "Delapan modul kerja tampil dan seluruh aksi manajemen tersedia (tambah cluster, tambah unit, "
+    ("Hak Super Admin", "Delapan modul kerja tampil dan seluruh aksi manajemen tersedia (kelola proyek, tambah unit, "
      "edit, hapus, verifikasi pembayaran, serah terima, laporan, log aktivitas, sesi login)",
-     "FF-A01, FF-A04..FF-A19", "Sesuai"),
-    ("Tambah cluster di Data Unit", "Tombol Tambah Cluster hanya terlihat untuk super admin; modal berisi proyek "
-     "induk, nama cluster, dan deskripsi. Cluster hasil simpan langsung muncul pada penapis cluster dan pada opsi "
-     "cluster di form Tambah Unit", "FF-A18, FF-A19", "Sesuai"),
+     "FF-A01, FF-A04..FF-A23", "Sesuai"),
+    ("Tambah proyek di Data Unit", "Tombol Tambah Proyek hanya terlihat untuk super admin; modal berisi perumahan "
+     "induk, nama proyek, dan deskripsi. Proyek hasil simpan langsung muncul pada penapis proyek dan pada opsi "
+     "Proyek di form Tambah Unit", "FF-A18, FF-A19", "Sesuai"),
+    ("Pengelolaan proyek menyeluruh", "Halaman /data-proyek berjudul 'Pengelolaan Proyek' dengan kartu ringkasan "
+     "Total Proyek / Proyek Aktif / Proyek Arsip / Unit Terdaftar, penapis nama, perumahan, dan status, kolom Peta "
+     "untuk koordinat, serta tombol aksi per baris 'Detail', 'Ubah', 'Arsipkan' atau 'Aktifkan', dan 'Hapus'",
+     "FF-A20, FF-B09, FF-C07, FF-R04", "Sesuai"),
+    ("Penghitung waktu sesi", "Chip 'Sesi hh:mm:ss' pada header berubah menjadi kuning dan memunculkan tombol "
+     "Perpanjang saat sisa waktu turun di bawah lima menit; perpanjangan mengganti token dan token lama langsung "
+     "berhenti berlaku", "FF-A21", "Sesuai"),
+    ("Laporan berpengesahan", "Lembar cetak memuat kop perumahan, judul, periode, waktu cetak, serta blok 'Dibuat "
+     "oleh' dan 'Mengetahui: Pimpinan / Atasan langsung'; blok hanya tampil pada media print", "FF-A22", "Sesuai"),
+    ("Jejak audit pada antarmuka", "Halaman /log-aktivitas memiliki dua tab ('Jejak audit data' dan 'Aktivitas "
+     "sistem & login'); tab audit menampilkan waktu, pengguna, aksi, keterangan, dan IP", "FF-A23", "Sesuai"),
     ("Hak Admin Sales (hanya-lihat)", "Data Unit, Data Konsumen, Booking, dan Data Pembayaran hanya menyediakan "
-     "tombol Detail; tanpa Log Aktivitas dan tanpa Sesi Login; Data Sales tetap dapat dikelola",
-     "FF-B01, FF-B02, FF-B03, FF-B04, FF-B05, FF-B06, FF-B07, FF-B08", "Sesuai"),
+     "tombol Detail; tanpa Log Aktivitas dan tanpa Sesi Login; Data Sales tetap dapat dikelola; pada Data Unit tombol "
+     "Kelola Proyek/Tambah Unit/Tambah Proyek tidak tampil; pada halaman detail unit judulnya \"Data Unit\" tanpa "
+     "kata Ubah dengan seluruh isian terkunci dan tanpa pemilih foto; pada Data Proyek kolom Aksi tidak dirender "
+     "sama sekali",
+     "FF-B01, FF-B02, FF-B03, FF-B04, FF-B05, FF-B06, FF-B07, FF-B08, FF-B09, FF-B10, FF-B11", "Sesuai"),
     ("Hak Sales", "Tanpa menu Sesi Login dan tanpa field Sesi Aktif pada profil; hanya menangani data konsumennya "
-     "sendiri; memakai laporan khusus sales", "FF-C01, FF-C02, FF-C03, FF-C04, FF-C05, FF-C06", "Sesuai"),
+     "sendiri; memakai laporan khusus sales; membuka /data-proyek dijawab halaman penolakan peran",
+     "FF-C01, FF-C02, FF-C03, FF-C04, FF-C05, FF-C06, FF-C07", "Sesuai"),
     ("Detail + hapus pada setiap tabel", "Baris Data Unit, Data Sales, dan Data Konsumen hanya menyediakan aksi "
      "Detail dan Hapus; proses edit berpindah ke halaman detail masing-masing entitas",
      "FF-A04, FF-A05, FF-A06, FF-A07, FF-A08, FF-A09", "Sesuai"),
     ("Penghapusan lunak", "Dialog hapus menyatakan data dikeluarkan dari daftar dan riwayatnya tetap tersimpan, bukan "
      "hilang permanen", "FF-A10, FF-D05", "Sesuai"),
-    ("Pengaturan Sistem", "Memuat seksi identitas, penjualan dan pembayaran, sesi (session_timeout_minutes), serta "
-     "integrasi Google", "FF-A11", "Sesuai"),
+    ("Pengaturan Sistem", "Memuat seksi identitas, penjualan dan pembayaran, serta kebijakan login pada seksi Sistem & "
+     "Sesi Login (session_timeout_minutes sebagai batas waktu tanpa aktivitas dan login_lockout_minutes sebagai lama "
+     "penguncian setelah tiga kali gagal); seksi dan isian integrasi Google sudah dilepas dari antarmuka",
+     "FF-A11, FF-R32, FF-R33", "Sesuai"),
     ("Pengelolaan halaman publik", "Super Admin dapat mengatur hero, saklar seksi beranda, unit unggulan, pengumuman, "
      "footer, dan kabar terbaru; nilai yang sama dipatuhi halaman publik", "FF-A12, FF-D01, FF-D04", "Sesuai"),
     ("Profil per peran", "Profil super admin tidak lagi menampilkan Bergabung Sebagai Sales dan Kode Sales; profil "
@@ -485,7 +633,8 @@ fmatrix = [
     ("Laporan dapat dibaca", "Empat tab laporan terisi data pada jendela 30 hari dan menyediakan ekspor; sales "
      "memperoleh halaman Laporan Sales sendiri", "FF-A13, FF-C05", "Sesuai"),
     ("Halaman publik konsumen", "Beranda, detail unit, skema pembayaran, tentang kami, kontak, dan booking berjalan "
-     "tanpa login dengan harga serta narahubung WhatsApp", "FF-D01, FF-D02, FF-D04 + TC-H01..TC-H08", "Sesuai"),
+     "tanpa login dengan harga serta narahubung WhatsApp; tidak ada lagi form pengisian calon konsumen",
+     "FF-D01, FF-D02, FF-D04 + TC-H01, TC-H02, TC-H03, TC-H04, TC-H05, TC-H06, TC-H08", "Sesuai"),
     ("Reset dan ganti sandi", "Tersedia halaman ganti sandi wajib (/ganti-sandi) dan reset sandi dua langkah "
      "(/reset-password)", "FF-D06, FF-D07", "Sesuai"),
 ]
@@ -520,17 +669,196 @@ table(["Temuan", "Sebab", "Perbaikan", "Verifikasi ulang"],
       ], sizes=[8, 8, 8, 8])
 
 head("3.3 Limitasi frontend yang masih terbuka", 2)
-bullet("Batas waktu sesi ditegakkan di sisi server (token kedaluwarsa, permintaan berikutnya 401 lalu client "
-       "membersihkan token dan mengirim pengguna ke /login). Frontend belum memiliki penghitung waktu idle yang "
-       "memperingatkan pengguna sebelum sesi berakhir.")
-bullet("Tombol Masuk dengan Google pada /login sengaja dinonaktifkan dan muncul catatan \"Menunggu konfigurasi Super "
-       "Admin pada halaman Pengaturan.\" karena google_client_id dan google_client_secret masih kosong serta "
-       "google_login_enabled = 0. Alur kodenya sudah ada (rute auth/google/redirect dan auth/google/callback) "
-       "menunggu kredensial asli dari pemilik proyek.")
+bullet("Batas waktu tanpa aktivitas sudah tampil sebagai hitung mundur beserta peringatan lima menit, perpanjangan "
+       "senyap saat layar masih dipakai, dan tombol Perpanjang (FF-A21, FF-R34). Yang belum ada adalah saluran kedua "
+       "berupa notifikasi e-mail atau pengingat di luar aplikasi saat sesi akan berakhir.")
+bullet("Tombol Masuk dengan Google pada /login masih bergantung pada nilai google_client_id, google_client_secret, "
+       "dan google_login_enabled pada tabel settings. Sejak revisi 33 kolom pengisiannya tidak lagi ditampilkan pada "
+       "halaman Pengaturan, sehingga kredensial OAuth diisi langsung pada tabel settings oleh pemilik proyek; alur "
+       "kodenya sudah ada (rute auth/google/redirect dan auth/google/callback) dan kontrak API tidak berubah "
+       "(TC-R25).")
 bullet("Label kolom identitas pada /login berbunyi \"Nama Pengguna\" sementara yang dimasukkan adalah email. Ini "
        "disengaja mengikuti wireframe, tetapi dapat diubah menjadi \"Email\" bila laporan disesuaikan.")
 bullet("Tampilan logo belum dapat diverifikasi secara visual karena lingkungan pengujian tidak menyediakan viewport "
        "browser; yang diverifikasi adalah struktur DOM, bukan kenampakan piksel.")
+
+head("3.4 Penanganan daftar revisi pengguna", 2)
+para("Daftar revisi berikut lahir dari elisitasi ulang setelah aplikasi dapat dibuka, sehingga tidak tercantum pada "
+     "butir a-h BAB III laporan tugas proyek. Setiap butir dikerjakan pada backend dan frontend, lalu diuji ulang "
+     "dengan kode test case TC-R (permintaan API) dan FF-R (observasi DOM pada peramban) terhadap basis data uji "
+     "luminpark_test.", 9)
+table(["No.", "Permintaan revisi", "Perlakuan pada sistem", "Bukti uji", "Status"],
+      [Cm(1.0), Cm(7.0), Cm(10.2), Cm(6.6), Cm(1.9)],
+      [
+          ["1", "Foto sales pada daftar kontak halaman publik yang menangani konsumen",
+           "PublicInfoController::salesContacts mengirim avatar_url; LP.fotoSales() merender <img> atau inisial bila "
+           "foto belum ada (public/js/luminpark.js, /kontak, detail unit, /tentang)",
+           "TC-R07, FF-R01", "Sesuai"],
+          ["2", "Kolom tanggal chat awal pada form tambah konsumen peran Sales",
+           "Kolom customer_leads.first_chat_date (migration 2026_11_19_090000_add_revisi_proyek_columns), validasi "
+           "nullable|date, isian pada modal dan kolom 'Chat Awal' pada daftar serta ekspor laporan",
+           "TC-R01, FF-R02", "Sesuai"],
+          ["3", "Pilihan metode pembayaran termasuk di luar uang piutang pada peran Sales",
+           "payments.payment_method dipisah dari payment_type; Payment::METHODS = transfer bank, tunai, qris, virtual "
+           "account, cek/giro; pemilih wajib pada form catat pembayaran",
+           "TC-R03, FF-R03", "Sesuai"],
+          ["4", "Seluruh penyebutan Cluster menjadi Proyek",
+           "Judul halaman, tombol, pesan ClusterController, dan label AuditObserver memakai 'proyek'; nama tabel "
+           "clusters, rute /clusters, dan parameter cluster_id dipertahankan",
+           "TC-M01…M11, TC-O02, FF-R04", "Sesuai"],
+          ["5", "Status pembatalan pada data konsumen dengan riwayat pembelian tetap tersimpan",
+           "PATCH /bookings/{id}/cancel menyimpan waktu dan alasan; CustomerLead::category() menghasilkan 'dibatalkan'; "
+           "blok pembatalan tampil pada detail booking dan detail konsumen; laporan menyaring category=dibatalkan",
+           "TC-R04, FF-R05", "Sesuai"],
+          ["6", "Peran super admin tetap memakai nama halaman Data Konsumen",
+           "NAV super_admin/admin_sales menunjuk /data-konsumen berlabel 'Data Konsumen'; judul dirender span "
+           "#lead-judul agar dapat diganti menurut peran",
+           "FF-R06", "Sesuai"],
+          ["7", "Konsumen hanya yang sudah booking; calon konsumen menjadi Database Konsumen dengan status Cold, "
+                "Warm, Hot",
+           "Dua menu khusus Sales (?kategori=konsumen dan ?kategori=prospek); scope prospects/customers/cancelled; "
+           "status lead dibatasi cold|warm|hot sehingga nilai booking ditolak",
+           "TC-R02, FF-R07", "Sesuai"],
+          ["8", "Sandi awal sales memakai tanggal lahir yyyymmdd dan wajib diganti dengan sandi kuat",
+           "SalesController::passwordFromBirthDate() + must_change_password; AuthController::updatePassword menolak "
+           "sandi tanpa huruf besar, huruf kecil, angka, dan minimal delapan karakter",
+           "TC-R08, FF-R08, FF-D06", "Sesuai"],
+          ["9", "Log Aktivitas hanya untuk peran Monitoring Manajemen",
+           "Rute /activity-logs dan /system-logs role:admin_sales; guard halaman diganti menjadi ['admin_sales'] "
+           "(resources/views/app/log-aktivitas.blade.php)",
+           "TC-O01, TC-O03, TC-L04, FF-R09", "Sesuai"],
+          ["10", "Filter per proyek pada statistik super admin",
+           "Trait FiltersProjects dipakai DashboardController::superAdmin lewat parameter cluster_id; tabel 'Statistik "
+           "per Proyek' merangkum seluruh proyek bila filter dikosongkan",
+           "TC-R05, FF-R10", "Sesuai"],
+          ["11", "Pencarian Data Unit berdasarkan Blok, Status, dan Proyek",
+           "Tiga penapis pada resources/views/app/data-unit.blade.php (#unit-search, #unit-status, #unit-cluster); API "
+           "mendukung parameter cluster_id dan status",
+           "TC-R09, FF-R11", "Sesuai"],
+          ["12", "Peta lokasi setiap proyek pada halaman beranda",
+           "clusters.address/latitude/longitude dikelola pada Data Proyek; GET /api/public/project-locations menyuplai "
+           "proyek aktif berkoordinat ke peta Leaflet di resources/views/public/beranda.blade.php",
+           "TC-R06, FF-R12", "Sesuai"],
+          ["13", "Informasi skema pembayaran dihapus dari halaman Tentang Kami",
+           "Seksi skema dihapus dari resources/views/public/tentang.blade.php, nilai about_text pada seeder dan basis "
+           "data diperbarui, judul 'Identitas Project' menjadi 'Identitas Proyek'",
+           "FF-R13", "Sesuai"],
+          ["14", "Atur ulang sandi tidak lagi meminta kata sandi lama; verifikasi lewat email akun",
+           "Rute tamu POST /api/forgot-password menyimpan token 64 karakter sebagai hash SHA-256 pada "
+           "password_reset_tokens (berlaku 10 menit) dan mengirim Mailable LinkAturUlangSandi berisi tautan "
+           "/reset-password?token=...&email=...; POST /api/reset-password/token menyimpan sandi baru cukup dengan "
+           "token tersebut lalu mencabut token dan sesi lama; halaman auth/reset-password.blade.php menjadi tiga "
+           "langkah. Jalur email + password_lama pada POST /api/reset-password tetap dipakai halaman Profil, "
+           "/ganti-sandi, dan paksaan ganti sandi",
+           "TC-R10, TC-R11, FF-R14", "Sesuai"],
+          ["15", "Calon konsumen otomatis pindah ke data konsumen setelah pembayaran diverifikasi, dan datanya masuk "
+                 "ke riwayat",
+           "CustomerLead::sudahBayarTerverifikasi() menjadi satu-satunya penentu kategori 'konsumen' (dipakai "
+           "CustomerLeadController, DashboardController, dan ReportController dengan bookings.payments dimuat lebih "
+           "dahulu); scope riwayat() (customers OR cancelled) sempat ditawarkan sebagai filter category=riwayat dan "
+           "menu History pada revisi 18, lalu sejak revisi 25 riwayat cukup dibaca dari penapis Kategori Dibatalkan "
+           "sehingga tidak ada lagi pilihan riwayat pada Data Konsumen",
+           "TC-R12, TC-D07, FF-R15", "Sesuai"],
+          ["16", "Konsumen yang sudah membayar dan menempati rumah lalu membatalkan keluar dari menu konsumen dan "
+                 "pindah ke data riwayat",
+           "BookingController::cancel tidak lagi menolak booking lunas/selesai, mengembalikan unit menjadi available, "
+           "dan menyimpan riwayat pembayaran; CustomerLead::pembatalanTerakhir() mengisi kolom pembatalan pada "
+           "category=dibatalkan; halaman khusus yang semula /pembatalan-konsumen sempat berpindah menjadi /history "
+           "pada revisi 18 lalu dihapus total pada revisi 25 sehingga kedua alamat menghasilkan HTTP 404 dan riwayat "
+           "dibuka lewat penapis Kategori Dibatalkan",
+           "TC-R13, TC-R04, FF-R16", "Sesuai"],
+          ["17", "Biaya tambahan konstruksi di luar biaya utama perumahan beserta request tambahan bangunan saat "
+                 "booking",
+           "Kolom bookings.addition_cost (decimal 15,2 default 0) dan addition_description (string 255) pada migration "
+           "2026_11_20_090000_add_booking_addition_cost; BookingController::store/::update memvalidasi nullable|numeric|"
+           "min:0 dan nullable|string|max:255 tanpa menyentuh calculateBreakdown sehingga uang muka, angsuran, dan sisa "
+           "tetap dihitung dari harga unit; isian, catatan, kolom tabel, detail, riwayat konsumen, dan dua kolom ekspor "
+           "CSV ditambahkan",
+           "TC-R14, FF-R17", "Sesuai"],
+          ["18", "Susunan menu peran Sales tanpa Pembatalan Konsumen dan tanpa History",
+           "NAV public/js/luminpark.js menghasilkan enam menu untuk Sales (Dashboard, Konsumen, Database Konsumen, "
+           "Booking Unit, Data Pembayaran, Laporan Sales); routes/web.php sudah menghapus Route::view "
+           "'/pembatalan-konsumen' (HTTP 404) dan pada revisi 25 ikut menghapus '/history' sehingga kedua alamat "
+           "lawas menolak dan riwayat pembatalan dibaca dari penapis Kategori pada menu Konsumen; berkas "
+           "resources/views/app/history.blade.php tidak lagi dirujuk rute mana pun",
+           "TC-R17, FF-R16, FF-R18", "Sesuai"],
+          ["19", "Nomor handphone hanya dapat dipakai satu konsumen",
+           "CustomerLeadController::aturanTelepon() membangun Rule::unique('customer_leads','phone') berfilter "
+           "whereNull('deleted_at') dan ignore(id) saat pembaruan, dipakai store() (required) dan update() (sometimes) "
+           "dengan pesan seragam PESAN_TELEPON_DIPAKAI; petunjuk isian Nomor Telepon pada form menjelaskan aturannya",
+           "TC-R15, FF-R19", "Sesuai"],
+          ["20", "Pilihan konsumen pada booking hanya yang berstatus Hot",
+           "bookingLeadsHot() menyaring opsi pemilih Konsumen pada resources/views/app/booking.blade.php dan "
+           "bookingOpenCreate() menolak membuka modal bila belum ada lead Hot; BookingController::store tetap "
+           "menegakkan status hot (HTTP 422) untuk permintaan langsung",
+           "TC-R16, FF-R20", "Sesuai"],
+          ["21", "Sales memilih ada/tidaknya permintaan tambahan bangunan saat booking",
+           "Select wajib addition_requested (tidak/ya, default tidak) dengan bookingToggleTambahan() yang "
+           "menyembunyikan serta mengosongkan label addition_description dan addition_cost; bookingCreate() mengirim "
+           "biaya 0 dan keterangan null saat 'tidak' dan menolak 'ya' tanpa keterangan, sedangkan "
+           "BookingController::tolakTambahanTanpaKeterangan() menegakkan aturan yang sama pada store() dan update()",
+           "TC-R18, TC-R14, FF-R21", "Sesuai"],
+          ["22", "Tombol tambah data konsumen pada menu Data Konsumen dihilangkan",
+           "leadPaintActions() pada resources/views/app/data-konsumen.blade.php menyembunyikan #btn-add-lead untuk "
+           "peran Sales kecuali pada penapis kosong/prospek; pilihan 'riwayat' dihapus dari #lead-category — yang sejak "
+           "revisi 25 hanya menawarkan Semua Kategori, Konsumen, Calon Konsumen, dan Dibatalkan — dan catatan halaman "
+           "menjelaskan daftar Konsumen terisi otomatis setelah pembayaran disetujui (CustomerLead::category)",
+           "TC-R12, FF-R22, FF-R15", "Sesuai"],
+          ["23", "Tombol Batal pada kolom Aksi Data Konsumen berisi alasan dan tanggal pembatalan, datanya pindah ke "
+                 "kategori Dibatalkan",
+           "Rute POST /api/customer-leads/{id}/batalkan (role:sales,super_admin) memvalidasi reason dan cancelled_at "
+           "lalu memanggil Booking::batalkan() — dipakai juga oleh PATCH /bookings/{id}/cancel — yang mengunci status "
+           "dibatalkan, mengembalikan unit menjadi available, dan menyimpan pembayaran terverifikasi sebagai riwayat; "
+           "trait Concerns/NotifiesOperationalUsers mengirim notifikasi bertaut /data-konsumen?kategori=dibatalkan "
+           "dan balasan API menyebut pemindahan ke kategori Dibatalkan. Tombol Batal dirender hanya "
+           "bila baris punya_booking_aktif dan modal leadOpenBatal() memuat dua isian tersebut",
+           "TC-R17, TC-R13, FF-R23", "Sesuai"],
+          ["24", "Nomor handphone tetap tidak dapat dipakai ulang walau konsumennya masih cold atau sudah dibatalkan",
+           "Aturan pada revisi 19 dipertahankan tanpa perubahan logika karena pembatalan hanya mengunci status booking "
+           "dan tidak menghapus lead: baris customer_leads tetap hidup (deleted_at null) sehingga Rule::unique tetap "
+           "menolak nomor yang sama pada konsumen cold, warm, hot, maupun dibatalkan — satu-satunya jalan membebaskan "
+           "nomor adalah hapus lunak (revisi 15). Petunjuk isian dan pesan PESAN_TELEPON_DIPAKAI menjelaskan keadaan "
+           "tersebut dan TC-R19 membuktikan kedua ujungnya",
+           "TC-R15, TC-R19, FF-R19", "Sesuai"],
+          ["25", "Menu History dihapus; riwayat pembatalan dicari lewat penapis Kategori pada menu Konsumen",
+           "Entri { href: '/history' } dihapus dari array NAV public/js/luminpark.js dan Route::view('/history', "
+           "'app.history') dihapus dari routes/web.php, sehingga peran mana pun hanya menampilkan tautan aslinya dan "
+           "GET /history menghasilkan HTTP 404; tautan page-action, catatan halaman, deskripsi modal Batal, dan "
+           "notifikasi operasional dialihkan ke /data-konsumen?kategori=dibatalkan. Penapis Kategori tetap memuat "
+           "opsi Dibatalkan dan halaman detail konsumen mempertahankan kolom Pembatalan berisi alasan serta tanggal, "
+           "sehingga tidak ada informasi yang hilang",
+           "TC-R17, TC-R19, FF-R16, FF-R18", "Sesuai"],
+          ["26", "Penapis Status dihilangkan dari menu Konsumen karena status hanya dimiliki calon konsumen",
+           "leadPaintFilterVisibility() pada resources/views/app/data-konsumen.blade.php memberi label penapis id "
+           "#lead-label-status lalu menyembunyikannya (kelas hidden) bagi peran Sales pada kategori konsumen dan "
+           "dibatalkan, serta mengosongkan nilai #lead-status agar baris tidak tersembunyi di balik penapis yang tidak "
+           "tampak; fungsi dipanggil saat guard halaman dan setiap penapis Kategori berubah. Cold/warm/hot tetap "
+           "tersedia pada Database Konsumen dan pada super admin kedua penapis tetap tampil",
+           "TC-R01, TC-R16, FF-R24", "Sesuai"],
+          ["27", "Penapis Kategori dihilangkan dari menu Database Konsumen",
+           "Blok yang sama pada leadPaintFilterVisibility() menyembunyikan #lead-label-category ketika peran Sales "
+           "berada pada kategori prospek dan mengunci nilai #lead-category pada 'prospek' agar leadKategoriAktif(), "
+           "leadJudul(), dan leadPaintActions() tetap bekerja; judul 'Database Konsumen', jumlah baris calon, serta "
+           "tombol Tambah Konsumen tidak berubah sehingga revisi 22 tetap terpenuhi",
+           "TC-R12, FF-R20, FF-R24", "Sesuai"],
+      ], sizes=[8, 8, 8, 8, 8], center_cols=(0, 4), status_col=4)
+
+para("Verifikasi per peran atas keempat belas butir pertama tersebut menemukan lima galat yang lolos dari suite API karena "
+     "hanya dapat diamati pada antarmuka, dan semuanya ditutup pada sesi revisi yang sama: guard halaman Log Aktivitas "
+     "masih menuntut super admin (FF-R09); jejak audit masih menulis aksi berakhiran cluster sehingga istilah Proyek "
+     "tidak konsisten (FF-R04); halaman Tentang Kami masih memuat narasi skema dari kolom pengaturan about_text dan "
+     "berjudul bahasa Inggris (FF-R13); penapis kategori pada halaman Laporan konsumen masih memakai nilai lama "
+     "sehingga selalu kosong (FF-R05); serta penyaringan dashboard menimbulkan galat relasi 'Call to undefined method "
+     "Booking::booking()' pada deret bulanan (FF-R10).", 9)
+para("Pengulangan verifikasi yang sama untuk sepuluh butir terakhir (revisi 18-27) tidak menemukan galat antarmuka baru: "
+     "sidebar peran Sales berisi enam tautan tanpa History maupun Pembatalan Konsumen, alamat /history dan "
+     "/pembatalan-konsumen keduanya menghasilkan HTTP 404, nomor handphone ganda ditolak dengan pesan yang sama pada "
+     "isian dan toast termasuk ketika nomor pertama masih berstatus cold atau konsumennya sudah dibatalkan, pilihan "
+     "konsumen pada form booking hanya memuat lead Hot, isian tambahan bangunan tersembunyi pada keadaan awal, tombol "
+     "Tambah Konsumen tidak lagi terender pada menu Konsumen, satu pembatalan lewat tombol Batal memindahkan barisnya "
+     "ke kategori Dibatalkan dengan tanggal, alasan, serta nominal terverifikasi yang tetap terbaca pada halaman "
+     "detail, dan pada menu Konsumen label Status hilang (nilainya ikut dikosongkan) sementara pada Database Konsumen "
+     "label Kategori hilang dengan judul serta jumlah baris yang tetap benar.", 9)
 doc.add_page_break()
 
 
@@ -559,7 +887,8 @@ def uji_table(rows, judul, pengantar):
         ok = x["status"] == "Pass"
         texts = [x["id"], x["nama"], x["skenario"], x["deskripsi"], x["langkah"], x["dataUji"], x["ekspektasi"],
                  x["actualBody"], "PASS" if ok else "FAIL",
-                 (x["catatan"] + (" [" + x["kebutuhan"] + "]" if x.get("kebutuhan") else ""))]
+                 " ".join(filter(None, [x.get("catatan", "").strip(),
+                                        "[" + x["kebutuhan"] + "]" if x.get("kebutuhan") else ""])).strip()]
         cells = t.add_row().cells
         for i, v in enumerate(texts):
             c = cells[i]
@@ -581,6 +910,10 @@ def uji_table(rows, judul, pengantar):
     doc.add_page_break()
 
 
+def hard_group_count(huruf):
+    return sum(1 for r in hard if r["id"].startswith(f"TC-{huruf}"))
+
+
 uji_table(
     auto,
     "BAB IV - Tabel hasil pengujian backend (format sepuluh kolom)",
@@ -591,34 +924,58 @@ uji_table(
     f"rujukan butir kebutuhan.")
 
 uji_table(
+    hard,
+    "BAB V - Tabel hasil pengujian penguatan sistem (format sepuluh kolom)",
+    f"Sebanyak {len(hard)} test case dieksekusi dengan node tests/run-hardening-tests.mjs terhadap server yang sama "
+    f"({hard_group_count('M')} uji pengelolaan proyek TC-M, {hard_group_count('N')} uji pemisahan data per sales "
+    f"TC-N, {hard_group_count('O')} uji jejak audit TC-O, {hard_group_count('P')} uji batas waktu sesi TC-P, dan "
+    f"{hard_group_count('Q')} uji pembatasan laju login serta lokalisasi pesan TC-Q). Suite ini khusus membuktikan "
+    f"butir yang pada laporan sebelumnya berstatus batasan (D-1 sampai D-7) sudah benar-benar ditutup, dijalankan "
+    f"setelah basis data uji luminpark_test diisi ulang.")
+
+uji_table(
     ui,
-    "BAB V - Tabel hasil pengujian frontend (format sepuluh kolom)",
+    "BAB VI - Tabel hasil pengujian frontend (format sepuluh kolom)",
     f"Sebanyak {len(ui)} test case diamati pada peramban dengan memuat halaman nyata dari aplikasi. Prefix FF-A untuk "
     f"aktor Super Admin ({sum(1 for r in ui if r['id'].startswith('FF-A'))} uji), FF-B untuk Admin Sales "
     f"({sum(1 for r in ui if r['id'].startswith('FF-B'))} uji), FF-C untuk Sales "
-    f"({sum(1 for r in ui if r['id'].startswith('FF-C'))} uji), dan FF-D untuk halaman publik serta autentikasi "
-    f"({sum(1 for r in ui if r['id'].startswith('FF-D'))} uji). Kolom Hasil Aktual berisi fakta DOM yang terbaca dari "
+    f"({sum(1 for r in ui if r['id'].startswith('FF-C'))} uji), FF-D untuk halaman publik serta autentikasi "
+    f"({sum(1 for r in ui if r['id'].startswith('FF-D'))} uji), dan FF-R khusus bukti antarmuka daftar revisi pengguna "
+    f"({sum(1 for r in ui if r['id'].startswith('FF-R'))} uji). Kolom Hasil Aktual berisi fakta DOM yang terbaca dari "
     f"dokumen yang sudah dirender (tautan menu, jumlah baris tabel, label tombol, isi dialog, nilai field).")
 
 # ============================== BAB VI ==============================
-head("BAB VI - Kesimpulan dan rekomendasi")
-head("6.1 Kesimpulan", 2)
-para(f"Backend: {len(auto)} test case black-box seluruhnya PASS. {len(matrix)} butir kebutuhan (a.1 sampai h.3, "
-     f"ERD, dan keputusan pengguna) terpenuhi; {n_sebagian} butir berstatus Sebagian dan seluruhnya merupakan "
-     f"penyimpangan yang telah diketahui dan disepakati: identitas login berupa email, reset sandi memerlukan sandi "
-     f"lama, indeks pembayaran belum dipangkas per sales, serta ekspor laporan berbentuk CSV bukan PDF. "
-     f"Delapan test case baru (TC-B11 sampai TC-B18) membuktikan modul Tambah Cluster beserta penjagaan nama unik "
-     f"per proyek dan hak aksesnya.", 9)
+head("BAB VII - Kesimpulan dan rekomendasi")
+head("7.1 Kesimpulan", 2)
+para(f"Backend: {len(auto)} test case konformansi dan {len(hard)} test case penguatan seluruhnya PASS. "
+     f"{len(matrix)} butir kebutuhan (a.1 sampai h.3, ERD, dan keputusan pengguna) terpenuhi; {n_sebagian} butir "
+     f"berstatus Sebagian dan seluruhnya merupakan penyimpangan yang telah diketahui serta disepakati: identitas "
+     f"login berupa email (butir a.1) dan APP_DEBUG lingkungan "
+     f"pengembang yang baru aman bila dimatikan saat pemasangan (separuh butir keamanan pada 10e).", 9)
+para(f"Suite penguatan ({len(hard)} test case, BAB V) sengaja ditulis untuk menutup batasan yang dilaporkan pada "
+     f"analisis sebelumnya: daur hidup proyek lengkap beserta halaman daftarnya (TC-M01 sampai TC-M11), pemisahan "
+     f"data booking-pembayaran-tindak lanjut per sales (TC-N01 sampai TC-N06), penulisan tabel activity_logs "
+     f"sesuai ERD (TC-O01 sampai TC-O03), penegakan dan perpanjangan batas waktu sesi (TC-P01 sampai TC-P03), "
+     f"serta pembatasan laju login tiga percobaan dengan masa penguncian yang diatur super admin dan lokalisasi menyeluruh pesan kesalahan "
+     f"(TC-Q01 sampai TC-Q05, TC-R24). Butir d.4 dan f.4 yang semula Sebagian kini menjadi Sesuai.", 9)
 para(f"Frontend: {len(ui)} test case observasi DOM seluruhnya PASS dan sesuai dengan keputusan pengguna, yaitu "
-     f"navigasi modul di sidebar, menu akun pada ikon profil, notifikasi pada lonceng, tombol Tambah Cluster yang "
-     f"hanya tampil untuk super admin, hak hanya-lihat Admin Sales "
-     f"pada empat modul, pembatasan data sales, serta bahasa penghapusan lunak pada dialog hapus. Dua ketidaksuaian "
+     f"navigasi modul di sidebar, menu akun pada ikon profil, notifikasi pada lonceng, halaman Data Proyek dengan "
+     f"aksi Ubah/Arsipkan/Hapus khusus super admin sedangkan kolom Aksi tidak dirender bagi Admin Sales (FF-A20, "
+     f"FF-B09), penolakan halaman bagi Sales (FF-C07), hak hanya-lihat Admin Sales pada empat modul yang dipertebal "
+     f"dengan judul detail unit tanpa kata \"Ubah\" plus isian terkunci dan hilangnya tombol Kelola Proyek "
+     f"(FF-B10, FF-B11), pembatasan data sales, lembar cetak laporan berpengesahan (FF-A22), chip hitung mundur sesi "
+     f"beserta tombol Perpanjang (FF-A21), serta dua tab jejak audit pada Log Aktivitas (FF-A23). Dua ketidaksuaian "
      f"yang ditemukan selama analisis (teks hapus permanen pada kabar terbaru dan saklar galeri pada halaman Tentang "
      f"Kami) telah diperbaiki dan diverifikasi ulang.", 9)
 para("Secara keseluruhan sistem dapat dinyatakan SESUAI dengan kebutuhan pengguna dan isi laporan untuk keperluan "
-     "demonstrasi dan pengujian skripsi; status produksi masih memerlukan penutupan butir rekomendasi di bawah.", 9)
+     "demonstrasi dan pengujian skripsi; untuk status produksi masih diperlukan butir rekomendasi di bawah.", 9)
 
-head("6.2 Rekomendasi sebelum aplikasi dipasang di server umum", 2)
+head("7.2 Rekomendasi sebelum aplikasi dipasang di server umum", 2)
+para("Empat rekomendasi yang muncul pada analisis sebelumnya sudah dikerjakan dan tidak lagi diminta di sini: "
+     "pembatasan laju login (kini App\\Support\\LoginThrottle, dibuktikan TC-Q01 sampai TC-Q03), penulisan tabel "
+     "activity_logs sesuai ERD (AuditObserver, TC-O01 sampai TC-O03 dan FF-A23), pemangkasan daftar pembayaran "
+     "per sales (trait ScopesSalesData, TC-N01 sampai TC-N06), dan ekspor laporan PDF berpengesahan "
+     "(LP.cetakLaporan, FF-A22). Sisa rekomendasi:", 9)
 table(["Prioritas", "Butir", "Alasan", "Tindakan yang disarankan"],
       [Cm(2.0), Cm(6.5), Cm(9.5), Cm(9.3)],
       [
@@ -626,36 +983,56 @@ table(["Prioritas", "Butir", "Alasan", "Tindakan yang disarankan"],
            "Respons 500 menampilkan jejak stack, nama tabel, kolom, dan path berkas sehingga menguntungkan pihak yang "
            "mencoba mendeteksi celah.",
            "Setel APP_DEBUG=false dan APP_ENV=production; hasil uji NF-9 tetap berlaku karena pesan error JSON tidak "
-           "berubah."],
-          ["Tinggi", "Perlambatan khusus login belum ada",
-           "Rute POST /api/login hanya dibatasi throttle:api 60 permintaan per menit per IP (RouteServiceProvider.php:27 "
-           "dan Kernel.php:41), sehingga percobaan sandi brute-force pada satu akun masih dapat berjalan puluhan kali "
-           "per menit.",
-           "Tambahkan RateLimiter khusus (misal lima percobaan per menit per email) pada rute login dan catat "
-           "percobaan gagal yang sudah direkam activity_logs."],
-          ["Sedang", "Indeks pembayaran belum dipangkas per sales",
-           "Butir d.4 berstatus Sebagian; sales masih dapat membaca pembayaran booking sales lain bila id booking "
-           "diketahui.",
-           "Saring PaymentController::index memakai relasi booking.sales_id untuk peran sales."],
-          ["Sedang", "Belum ada aturan unik pada customer_leads",
-           "Formulir publik dapat menghasilkan lead ganda dengan email atau telepon yang sama (butir NF-11).",
-           "Tambah validasi unik dengan whereNull('deleted_at') pada phone/email serta pesan \"sudah terdaftar\"."],
+           "berubah (renderable pada app/Exceptions/Handler.php sudah menutup 401/403/404/422/429)."],
+          ["Tinggi", "Skema basis data kerja perlu dijaga tetap sinkron",
+           "Galat SQLSTATE[42S22] 1054 Unknown column 'clusters.deleted_at' sempat muncul pada halaman Booking di "
+           "http://127.0.0.1:8000 (16 November 2026) karena migration pengelolaan proyek baru terpasang pada "
+           "luminpark_test, belum pada basis data kerja luminpark. Sudah dipulihkan dengan php artisan migrate "
+           "(non-destruktif, 1,859 ms) dan seluruh halaman terkait kembali 200.",
+           "Setiap kali menambah migration, jalankan php artisan migrate --force pada basis data kerja "
+           "(tanpa migrate:fresh) lalu uji halaman terdampak; tambahkan catatan versi skema pada dokumen serah terima "
+           "agar penguji lain dapat memastikan kedua basis data memakai skema yang sama."],
+          ["Sedang", "Duplikasi lead lewat nomor handphone sudah tertutup; email masih boleh sama",
+           "Sejak revisi 19 entri manual pada Database Konsumen ditolak bila nomor handphonenya sudah dipakai "
+           "konsumen lain (HTTP 422 dengan pesan \"sudah dipakai konsumen lain dan hanya dapat digunakan satu "
+           "kali\"), dibuktikan TC-R15 dan FF-R19. Revisi 24 menegaskan kunci itu tetap berlaku walau pemilik nomor "
+           "masih berstatus cold maupun sudah dibatalkan (TC-R19), karena pembatalan tidak menghapus baris lead; "
+           "hanya hapus lunak yang membebaskan nomornya. Email "
+           "customer_leads sengaja tidak dibuat unik karena kolomnya opsional dan banyak lead hanya memiliki nomor "
+           "telepon.",
+           "Bila di kemudian hari email dipakai untuk mengirim tautan informasi kepada konsumen, tambahkan aturan "
+           "unik whereNull('deleted_at') yang sama seperti pada phone dan siapkan prosedur klaim email ganda."],
+          ["Tinggi", "UAT belum melibatkan pengguna sebenarnya",
+           "Seluruh baris UAT pada laporan BAB IV diisi penguji tunggal (pengembang), sehingga aspek kemudahan "
+           "pemakaian belum diukur dari sudut pandang admin, sales, maupun konsumen nyata (batasan D-2).",
+           "Isi lembar UAT (bagian User Acceptance Test laporan BAB IV) bersama minimal tiga pengguna nyata per "
+           "peran, lalu rekap rata-rata penilaian dan catat umpan baliknya pada lampiran."],
+          ["Sedang", "Uji lintas peramban dan lebar layar",
+           "Suite frontend berjalan pada Chromium; Firefox, Edge, serta tampilan pada 375/768/1440 piksel belum "
+           "diperiksa manusia (batasan D-10 dan butir NF-12).",
+           "Jalankan ulang sepuluh alur utama pada Firefox dan Edge serta tiga lebar layar memakai DevTools, lalu "
+           "tandai tiap kombinasi lulus/tidak pada lembar checklist."],
           ["Sedang", "Kredensial login Google belum diisi",
            "google_client_id, google_client_secret, dan google_login_enabled masih kosong/false sehingga tombol Google "
-           "nonaktif (FF-D03).",
-           "Isi kredensial pada halaman Pengaturan Sistem, lalu aktifkan saklar dan uji alur callback."],
+           "nonaktif (FF-D03). Sejak revisi 33 isian tersebut tidak lagi ditampilkan pada halaman Pengaturan.",
+           "Isi ketiga kunci pada tabel settings (lewat migrasi/seeder atau SQL terkelola), lalu uji alur callback; "
+           "GET /api/settings tetap mengembalikan kunci google_* sehingga frontend tidak perlu diubah lagi (TC-R25)."],
           ["Rendah", "Ranah Blade warisan masih ada",
-           "resources/views/dashboard/index.blade.php, sales/index.blade.php, activity-log/index.blade.php, "
-           "super-admin/dashboard.blade.php, super-admin/dataunit_perumahan.blade.php, dan layouts/dashboard.blade.php "
-           "tidak dipakai antarmuka baru tetapi masih dapat dijangkau ActivityLogController.php:13 dan "
-           "Api/DashboardController.php:29.",
-           "Hapus berkas dan pemanggilnya agar tidak membingungkan pembaca kode."],
+           "Sensus berkas 21 Nov 2026: resources/views/welcome.blade.php, dashboard/index.blade.php, "
+           "sales/index.blade.php, super-admin/dashboard.blade.php, super-admin/dataunit_perumahan.blade.php, "
+           "activity-log/index.blade.php, dan layouts/dashboard.blade.php tidak dirujuk satu rute pun. "
+           "Rujukan activity-log/index.blade.php pada app/Http/Controllers/ActivityLogController.php:13 ikut mati "
+           "karena hanya varian Api\\ActivityLogController yang didaftarkan di routes/api.php:146, sedangkan "
+           "halaman /log-aktivitas kini memakai app/log-aktivitas.blade.php lewat Route::view (revisi 30). "
+           "Tiga puluh berkas lain dari total 37 Blade terpetakan rute; app/history.blade.php sudah dihapus (revisi 28).",
+           "Hapus berkas yang tidak dirujuk rute beserta pemanggil lamanya agar tidak membingungkan pembaca kode."],
           ["Rendah", "Daftar log sistem belum berpaginasi",
            "GET /api/system-logs mengembalikan seluruh baris; volumenya akan besar setelah pemakaian lama.",
            "Terapkan paginasi baku (perPage 15) sebagaimana modul lain."],
           ["Rendah", "Teks laporan menyebut 14 tabel dan 6 rute publik",
-           "Fakta implementasi adalah 18 tabel domain (22 tabel termasuk kerangka) dan 10 halaman publik non-login "
-           "ditambah halaman login, ganti sandi, dan reset sandi; total rute terdaftar 114 (83 API + 31 web).",
+           "Fakta implementasi adalah 18 tabel domain (22 tabel termasuk kerangka) dan 6 halaman publik non-login "
+           "ditambah tiga halaman autentikasi (login, reset sandi, ganti sandi); total rute terdaftar 130 "
+           "(97 API + 33 web) termasuk dua pengalihan Google.",
            "Perbarui bilangan tersebut pada BAB II dan BAB III laporan agar sesuai perangkat yang diuji."],
       ], sizes=[8, 8, 8, 8], center_cols=(0,))
 doc.add_page_break()
@@ -667,7 +1044,7 @@ table(["Email", "Peran", "Fungsi dalam pengujian"],
       [Cm(6.0), Cm(4.2), Cm(17.1)],
       [
           ["superadmin@gmail.com", "super_admin (Super Admin)",
-           "aktor utama CRUD cluster, unit, dan sales, verifikasi pembayaran, laporan, log aktivitas, sesi login, "
+           "aktor utama CRUD proyek, unit, dan sales, verifikasi pembayaran, laporan, log aktivitas, sesi login, "
            "pengaturan sistem, dan pengaturan halaman publik"],
           ["admin.sales@luminpark.com", "admin_sales",
            "uji kesetaraan hak baca dengan super admin dan hak kelola data sales (FF-B01..FF-B07, TC-F03, TC-L01..L03)"],
@@ -698,22 +1075,45 @@ table(["Tahap", "Perintah"], [Cm(5.0), Cm(22.3)],
                                "--host=127.0.0.1 --port=8080"],
           ["Uji backend", "LP_API_BASE=http://127.0.0.1:8081/api "
                           "C:/laragon/bin/nodejs/node-v22/node.exe tests/run-conformance-tests.mjs"],
+          ["Uji penguatan", "LP_API_BASE=http://127.0.0.1:8081/api "
+                            "C:/laragon/bin/nodejs/node-v22/node.exe tests/run-hardening-tests.mjs"],
           ["Uji frontend", "Muat halaman nyata pada peramban otomatis lalu baca contentDocument tiap aktor; "
-                           "hasil direkam pada tests/frontend-results.json"],
-          ["Susun laporan ini", "C:/laragon/bin/python/python-3.13/python.exe tests/build_laporan_uji_sistem.py"],
+                           "baris hasil observasi disatukan dengan "
+                           "C:/laragon/bin/nodejs/node-v22/node.exe tests/patch-frontend-results.mjs ke "
+                           "tests/frontend-results.json"],
+          ["Matriks kebutuhan", "C:/laragon/bin/python/python-3.13/python.exe -Xutf8 tests/patch_kf_matrix.py "
+                                "(memperbarui rujukan pada tests/kf-matrix.json)"],
+          ["Uji non-fungsional", "LP_API_BASE=http://127.0.0.1:8081/api "
+                                 "C:/laragon/bin/nodejs/node-v22/node.exe tests/run-nf-tests.mjs"],
+          ["Susun laporan ini", "C:/laragon/bin/python/python-3.13/python.exe -Xutf8 "
+                                "tests/build_laporan_uji_sistem.py"],
       ], sizes=[9, 9])
 
 head("A.3 Artefak yang dihasilkan", 2)
 table(["Berkas", "Isi"], [Cm(9.0), Cm(18.3)],
       [
           ["tests/conformance-results.json", f"{len(auto)} baris hasil uji backend dalam skema sepuluh kolom"],
+          ["tests/hardening-results.json", f"{len(hard)} baris hasil uji penguatan atas butir batasan"],
           ["tests/frontend-results.json", f"{len(ui)} baris hasil uji frontend dalam skema kolom yang sama"],
+          ["tests/nf-results.json", f"{len(nf)} baris hasil uji non-fungsional dalam skema kolom yang sama"],
+          ["tests/kf-matrix.json", f"{len(json.load(open(f'{BASE}/tests/kf-matrix.json', encoding='utf-8')))} butir "
+                                   "kebutuhan laporan dan daftar revisi beserta status dan rujukan test case per butir"],
           ["tests/run-conformance-tests.mjs", "mesin eksekusi dan definisi test case backend"],
+          ["tests/run-hardening-tests.mjs", "definisi test case penguatan (proyek, pemisahan data, audit, sesi, "
+                                            "keamanan, lokalisasi)"],
+          ["tests/patch-frontend-results.mjs", "penyatu baris observasi DOM ke tests/frontend-results.json"],
+          ["tests/run-nf-tests.mjs", "pengukur waktu respons, probe basis data, dan agregat ketiga suite di atas"],
           ["tests/build_laporan_uji_sistem.py", "penyusun berkas Word ini"],
+          ["tests/build_bab4_pengujian.py", "penyusun laporan BAB IV (black-box + UAT) dari berkas hasil yang sama"],
           ["Laporan-Analisis-Kesesuaian-dan-Uji-Sistem-LuminPark.docx", "laporan yang sedang dibaca"],
       ], sizes=[9, 9])
 
 OUT = f"{BASE}/Laporan-Analisis-Kesesuaian-dan-Uji-Sistem-LuminPark.docx"
-doc.save(OUT)
+try:
+    doc.save(OUT)
+except PermissionError:
+    OUT = OUT.replace(".docx", f"-{hari.isoformat()}.docx")
+    doc.save(OUT)
+    print("PERINGATAN: berkas laporan lama sedang dibuka Word, hasilnya disimpan sebagai berkas baru.")
 print(f"Tersimpan: {OUT}")
-print(f"Baris backend {len(auto)}, baris frontend {len(ui)}, lulus {n_pass}, gagal {n_fail}")
+print(f"Baris backend {len(auto)}, penguatan {len(hard)}, frontend {len(ui)}, lulus {n_pass}, gagal {n_fail}")

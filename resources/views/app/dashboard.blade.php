@@ -4,7 +4,7 @@
 
 @section('page_title', 'Dashboard')
 
-@section('page_desc', 'Ringkasan unit, kinerja penjualan, dan aktivitas pemesanan terbaru sesuai peran Anda.')
+@section('page_desc', 'Rincian unit, kinerja penjualan, dan aktivitas pemesanan terbaru per proyek sesuai peran Anda.')
 
 @section('page_actions')
 <button id="dash-refresh" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Muat Ulang</button>
@@ -27,8 +27,20 @@
         </form>
     </section>
 
+    {{-- Revisi 10 & 32: super admin dan monitoring manajemen dapat mempersempit
+         angka ke satu proyek; rincian selalu ditampilkan per proyek. --}}
+    <section id="dash-proyek-block" class="hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <form id="dash-proyek-form" class="flex flex-wrap items-end gap-3">
+            <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Filter Proyek</span>
+                <select id="dash-proyek" class="w-64 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"></select>
+            </label>
+            <p id="dash-proyek-note" class="pb-2 text-xs text-zinc-500">Pilih proyek untuk mempersempit rincian, grafik, dan booking terbaru.</p>
+        </form>
+    </section>
+
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Ringkasan</h2>
+        <h2 id="dash-stats-title" class="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Ringkasan</h2>
         <div id="dash-stats"></div>
     </section>
 
@@ -55,12 +67,7 @@
             </div>
         </div>
         <div id="dash-chart"></div>
-        <p class="mt-2 text-xs text-zinc-500">Enam bulan terakhir, dihitung dari pembayaran terverifikasi dan booking berstatus lunas.</p>
-    </section>
-
-    <section id="dash-totals-block" class="hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Counter Operasional</h2>
-        <div id="dash-counters" class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+        <p class="mt-2 text-xs text-zinc-500">Enam bulan terakhir, dihitung dari pembayaran terverifikasi dan booking berstatus lunas pada proyek terpilih.</p>
     </section>
 
     <section id="dash-persales-block" class="hidden">
@@ -77,11 +84,13 @@
 
 @push('scripts')
 <script>
-  const LEAD_ORDER = ['cold', 'warm', 'hot', 'booking'];
-  const BOOKING_ORDER = ['menunggu dp', 'dp lunas', 'cicilan', 'lunas'];
+  const LEAD_ORDER = ['cold', 'warm', 'hot'];
+  const BOOKING_ORDER = ['menunggu dp', 'dp lunas', 'cicilan', 'lunas', 'dibatalkan'];
 
   let chartRows = [];
   let chartKey = 'revenue';
+  let dashUser = null;
+  let dashProyek = '';
 
   const firstOfMonth = () => LP.today().slice(0, 8) + '01';
 
@@ -96,49 +105,6 @@
         ${LP.badge(key)}
         <span class="text-sm font-bold tabular-nums text-zinc-800">${LP.number(source[key] || 0)}</span>
       </div>`).join('');
-  }
-
-  function counterList(host, source) {
-    const entries = Object.entries(source);
-    if (!entries.length) {
-      document.getElementById(host).innerHTML = '<p class="text-sm text-zinc-500">Tidak ada counter.</p>';
-      return;
-    }
-    document.getElementById(host).innerHTML = entries.map(([key, value]) => `
-      <div class="rounded-xl border border-zinc-200 px-3 py-2">
-        <p class="text-xs uppercase tracking-wide text-zinc-500">${LP.esc(key.replace(/_/g, ' '))}</p>
-        <p class="mt-1 text-lg font-bold tabular-nums">${LP.number(value)}</p>
-      </div>`).join('');
-  }
-
-  function managerStats(data) {
-    return statsGrid([
-      { label: 'Total Unit', value: LP.number(data.total_units), hint: 'Booking ' + LP.number(data.units_booking) + ' · Terjual ' + LP.number(data.units_sold_out) },
-      { label: 'Unit Tersedia', value: LP.number(data.units_available), tone: 'emerald' },
-      { label: 'Jumlah Sales', value: LP.number(data.total_sales), tone: 'sky' },
-      { label: 'Jumlah Konsumen', value: LP.number(data.total_customers), hint: 'Calon konsumen ' + LP.number(data.total_prospects) + ' · Total lead ' + LP.number(data.total_leads), tone: 'violet' },
-      { label: 'Booking Aktif', value: LP.number(data.active_bookings), hint: 'Total booking ' + LP.number(data.total_bookings), tone: 'amber' },
-      { label: 'Pembayaran Pending', value: LP.number(data.payments_pending), hint: 'Menunggu verifikasi super admin', tone: 'amber' },
-      { label: 'Total Pendapatan', value: LP.shortMoney(data.total_revenue), hint: 'Pembayaran terverifikasi', tone: 'emerald' },
-      { label: 'Belum Serah Terima', value: LP.number(data.units_not_delivered), hint: 'Booking lunas menunggu serah terima' },
-    ]);
-  }
-
-  function adminStats(data) {
-    const c = data.counters || {};
-    const t = data.totals || {};
-    const p = data.period || {};
-    const periodHint = p.start_date ? (LP.date(p.start_date) + ' - ' + LP.date(p.end_date)) : 'Periode berjalan';
-    return statsGrid([
-      { label: 'Total Unit', value: LP.number(c.total_units), hint: 'Terjual ' + LP.number(c.units_sold_out) },
-      { label: 'Unit Tersedia', value: LP.number(c.units_available), tone: 'emerald' },
-      { label: 'Jumlah Sales', value: LP.number(t.sales_count), tone: 'sky' },
-      { label: 'Jumlah Konsumen', value: LP.number(c.total_customers), tone: 'violet' },
-      { label: 'Booking Aktif', value: LP.number(c.active_bookings), tone: 'amber' },
-      { label: 'Pembayaran Pending', value: LP.number(c.payments_pending), hint: 'Perlu diverifikasi super admin', tone: 'amber' },
-      { label: 'Total Pendapatan', value: LP.shortMoney(t.total_revenue), hint: 'Periode ' + periodHint, tone: 'emerald' },
-      { label: 'Total Booking', value: LP.number(t.total_bookings), hint: 'Lead seluruh sales ' + LP.number(t.total_leads) },
-    ]);
   }
 
   function salesStats(data) {
@@ -180,6 +146,7 @@
       columns: [
         { label: 'Kode Booking', key: 'booking_code' },
         { label: 'Konsumen', render: (r) => LP.esc(r.customer || '-') },
+        { label: 'Proyek', render: (r) => LP.esc(r.project || '-') },
         { label: 'Unit', render: (r) => LP.esc(r.unit || '-') + (r.unit_type ? '<span class="block text-xs text-zinc-500">' + LP.esc(r.unit_type) + '</span>' : '') },
         { label: 'Sales', render: (r) => LP.esc(r.sales || '-') },
         { label: 'Tanggal Booking', render: (r) => LP.date(r.booking_date) },
@@ -207,18 +174,70 @@
     });
   }
 
+  // Revisi 10 & 32: penapis proyek beserta rincian angka tiap proyek. Tabel ini
+  // menggantikan kartu jumlah gabungan karena angka yang diminta adalah per proyek.
+  function renderProyek(data) {
+    document.getElementById('dash-proyek-block').classList.remove('hidden');
+    document.getElementById('dash-stats-title').textContent = 'Ringkasan per Proyek';
+
+    const pilihan = Array.isArray(data.projects) ? data.projects : [];
+    const aktif = data.project_filter ? String(data.project_filter) : '';
+    const namaAktif = (pilihan.find((item) => String(item.id) === aktif) || {}).name || '';
+
+    document.getElementById('dash-proyek').innerHTML = '<option value="">Semua Proyek</option>'
+      + pilihan.map((item) => '<option value="' + LP.esc(item.id) + '"'
+        + (String(item.id) === aktif ? ' selected' : '') + '>' + LP.esc(item.name) + '</option>').join('');
+
+    document.getElementById('dash-proyek-note').textContent = aktif
+      ? 'Rincian, grafik, dan booking terbaru dibatasi ke proyek ' + namaAktif + '.'
+      : 'Setiap baris adalah satu proyek. Klik baris proyek untuk mempersempit grafik dan booking terbaru; baris (belum ada proyek) berisi konsumen yang belum menautkan unit.';
+
+    LP.table({
+      mount: 'dash-stats',
+      rows: Array.isArray(data.per_project) ? data.per_project : [],
+      empty: 'Belum ada proyek dengan data.',
+      onRow: (row) => {
+        if (!row.cluster_id) return;
+        dashProyek = String(row.cluster_id);
+        load(dashUser);
+      },
+      columns: [
+        { label: 'Proyek', render: (r) => '<span class="font-semibold">' + LP.esc(r.name || '-') + '</span>' },
+        { label: 'Total Unit', align: 'right', render: (r) => LP.number(r.units_total) },
+        { label: 'Tersedia', align: 'right', render: (r) => LP.number(r.units_available) },
+        { label: 'Unit di Booking', align: 'right', render: (r) => LP.number(r.units_booking) },
+        { label: 'Unit Terjual', align: 'right', render: (r) => LP.number(r.units_sold_out) },
+        { label: 'Booking', align: 'right', render: (r) => LP.number(r.bookings_total) },
+        { label: 'Booking Aktif', align: 'right', render: (r) => LP.number(r.bookings_active) },
+        { label: 'Booking Dibatalkan', align: 'right', render: (r) => LP.number(r.bookings_cancelled) },
+        { label: 'Belum Serah Terima', align: 'right', render: (r) => LP.number(r.units_not_delivered) },
+        { label: 'Bayar Pending', align: 'right', render: (r) => LP.number(r.payments_pending) },
+        { label: 'Sales', align: 'right', render: (r) => LP.number(r.sales_count) },
+        { label: 'Prospek', align: 'right', render: (r) => LP.number(r.prospects) },
+        { label: 'Konsumen', align: 'right', render: (r) => LP.number(r.customers) },
+        { label: 'Konsumen Dibatalkan', align: 'right', render: (r) => LP.number(r.cancelled_customers) },
+        { label: 'Pendapatan', align: 'right', render: (r) => LP.money(r.revenue) },
+      ],
+    });
+  }
+
   async function load(user) {
+    dashUser = user;
     const isAdmin = user.role === 'admin_sales';
+    const params = new URLSearchParams();
+    if (dashProyek) params.set('cluster_id', dashProyek);
+    if (isAdmin) {
+      params.set('start_date', document.getElementById('dash-start').value || firstOfMonth());
+      params.set('end_date', document.getElementById('dash-end').value || LP.today());
+    }
+
     const endpoint = user.role === 'sales'
       ? '/dashboard/sales'
-      : isAdmin
-        ? '/dashboard/admin-sales' + '?' + new URLSearchParams({
-          start_date: document.getElementById('dash-start').value || firstOfMonth(),
-          end_date: document.getElementById('dash-end').value || LP.today(),
-        })
-        : '/dashboard/super-admin';
+      : (isAdmin ? '/dashboard/admin-sales' : '/dashboard/super-admin') + '?' + params.toString();
 
-    LP.loading('dash-stats', 'Memuat ringkasan dashboard...');
+    LP.loading('dash-stats', user.role === 'sales'
+      ? 'Memuat ringkasan dashboard...'
+      : 'Memuat rincian angka setiap proyek...');
     LP.loading('dash-chart', 'Memuat grafik penjualan...');
     LP.loading('dash-bookings', 'Memuat booking terbaru...');
     if (isAdmin) LP.loading('dash-persales');
@@ -227,22 +246,17 @@
       const data = await LP.fetchJson(endpoint);
 
       if (user.role === 'sales') {
+        document.getElementById('dash-stats-title').textContent = 'Ringkasan';
         document.getElementById('dash-stats').innerHTML = salesStats(data);
         document.getElementById('dash-mine').classList.remove('hidden');
         pillList('dash-lead-status', data.leads_by_status || {}, LEAD_ORDER);
         pillList('dash-booking-status', data.bookings_by_status || {}, BOOKING_ORDER);
-      } else if (isAdmin) {
-        document.getElementById('dash-stats').innerHTML = adminStats(data);
-        document.getElementById('dash-period').classList.remove('hidden');
-        document.getElementById('dash-totals-block').classList.remove('hidden');
-        counterList('dash-counters', Object.assign({}, data.counters, {
-          sales_count: (data.totals || {}).sales_count,
-          total_bookings: (data.totals || {}).total_bookings,
-          total_leads: (data.totals || {}).total_leads,
-        }));
-        renderPersales(data.per_sales);
       } else {
-        document.getElementById('dash-stats').innerHTML = managerStats(data);
+        renderProyek(data);
+        if (isAdmin) {
+          document.getElementById('dash-period').classList.remove('hidden');
+          renderPersales(data.per_sales);
+        }
       }
 
       chartRows = (data.sales_by_month || []).map((row) => ({
@@ -277,6 +291,11 @@
   document.getElementById('dash-period-form').addEventListener('submit', (event) => {
     event.preventDefault();
     LP.guard(['super_admin', 'admin_sales', 'sales'], load);
+  });
+
+  document.getElementById('dash-proyek').addEventListener('change', (event) => {
+    dashProyek = event.target.value;
+    if (dashUser) load(dashUser);
   });
 
   document.getElementById('dash-refresh').addEventListener('click', (event) => {

@@ -23,6 +23,7 @@ class SettingController extends Controller
         'min_dp_percent'          => 'required|numeric|min:0|max:100',
         'booking_validity_days'   => 'required|integer|min:1|max:365',
         'session_timeout_minutes' => 'required|integer|min:15|max:10080',
+        'login_lockout_minutes'   => 'required|integer|min:1|max:120',
         'google_login_enabled'    => 'nullable|in:0,1',
         'google_client_id'        => 'nullable|string|max:255',
         'google_client_secret'    => 'nullable|string|max:255',
@@ -34,6 +35,7 @@ class SettingController extends Controller
         'public_featured_unit_ids' => 'nullable|string|max:255',
         'public_show_unggulan'     => 'nullable|in:0,1',
         'public_show_skema'        => 'nullable|in:0,1',
+        'public_show_peta'         => 'nullable|in:0,1',
         'public_show_news'         => 'nullable|in:0,1',
         'public_show_gallery'      => 'nullable|in:0,1',
         'public_show_sales'        => 'nullable|in:0,1',
@@ -193,14 +195,22 @@ class SettingController extends Controller
             return 'integrasi';
         }
 
-        if (in_array($key, ['session_timeout_minutes'], true)) {
+        if (in_array($key, ['session_timeout_minutes', 'login_lockout_minutes'], true)) {
             return 'sistem';
         }
 
         return in_array($key, ['min_dp_percent', 'booking_validity_days'], true) ? 'penjualan' : 'identitas';
     }
 
-    /** Lama berlaku token login (menit); dipakai setiap kali sesi baru dibuat. */
+    /** Lama akun ditahan setelah tiga kali percobaan masuk gagal (menit). */
+    public static function lockoutMinutes(): int
+    {
+        $menit = (int) Setting::value('login_lockout_minutes', '5');
+
+        return ($menit >= 1 && $menit <= 120) ? $menit : 5;
+    }
+
+    /** Batas waktu tanpa aktivitas (menit); menjadi umur token login setiap kali sesi dibuka atau diperpanjang. */
     public static function sessionTimeoutMinutes(): int
     {
         $menit = (int) Setting::value('session_timeout_minutes', (string) (config('sanctum.expiration') ?: 1440));

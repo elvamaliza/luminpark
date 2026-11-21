@@ -57,6 +57,7 @@ window.LP = (() => {
     get: (path, options) => request('GET', path, null, options),
     post: (path, body, options) => request('POST', path, body, options),
     put: (path, body, options) => request('PUT', path, body, options),
+    patch: (path, body, options) => request('PATCH', path, body, options),
     del: (path, options) => request('DELETE', path, null, options),
   };
 
@@ -124,6 +125,7 @@ window.LP = (() => {
     paintIdentity(user);
     buildShell(user);
     loadUnreadBadge();
+    mulaiPenghitungSesi();
 
     if (onReady) {
       try {
@@ -219,7 +221,7 @@ window.LP = (() => {
   /* ---------- vocabulary ---------- */
 
   const ROLE_LABEL = {
-    super_admin: 'Super Admin', admin_sales: 'Admin Sales', sales: 'Sales', consumer: 'Konsumen',
+    super_admin: 'Super Admin', admin_sales: 'Monitoring Manajemen', sales: 'Sales', consumer: 'Konsumen',
   };
 
   const STATUS = {
@@ -231,6 +233,9 @@ window.LP = (() => {
     'dp lunas': ['DP Lunas', 'sky'],
     cicilan: ['Cicilan Berjalan', 'violet'],
     lunas: ['Lunas', 'emerald'],
+    'dibatalkan': ['Dibatalkan', 'rose'],
+    prospek: ['Prospek', 'sky'],
+    konsumen: ['Konsumen', 'emerald'],
     cold: ['Cold', 'sky'],
     warm: ['Warm', 'amber'],
     hot: ['Hot', 'rose'],
@@ -261,6 +266,16 @@ window.LP = (() => {
   }
 
   const roleLabel = (role) => ROLE_LABEL[role] || role;
+
+  // Revisi 1: foto sales pada daftar narahubung halaman publik. Tanpa foto, halaman
+  // tetap menampilkan ikon atau inisial yang sudah ada.
+  const fotoSales = (url, nama, classes = 'h-11 w-11') => '<img src="' + esc(url || '')
+    + '" alt="Foto ' + esc(nama || 'Sales') + '" loading="lazy" class="' + classes + ' shrink-0 rounded-full object-cover">';
+
+  // Aturan kata sandi pada alur ganti sandi mandiri (revisi 8).
+  const SANDI_POLA = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const sandiKuat = (value) => SANDI_POLA.test(String(value || ''));
+  const PESAN_SANDI = 'Kata sandi minimal 8 karakter serta memuat huruf besar, huruf kecil, dan angka.';
 
   /* ---------- toast ---------- */
 
@@ -517,6 +532,70 @@ window.LP = (() => {
     return values;
   }
 
+  /* ---------- lembar cetak laporan ---------- */
+
+  function blokCetak(id, html) {
+    let node = document.getElementById(id);
+    const shell = document.getElementById('app-shell');
+    if (!node) {
+      node = document.createElement('div');
+      node.id = id;
+      node.className = 'lp-print-only';
+      if (id === 'lp-print-kop') shell.insertBefore(node, shell.firstChild);
+      else shell.appendChild(node);
+    }
+    node.innerHTML = html;
+  }
+
+  /**
+   * Menyiapkan kop dan blok pengesahan lalu membuka dialog cetak peramban.
+   * "Simpan sebagai PDF" pada dialog tersebut menghasilkan berkas PDF-nya.
+   */
+  async function cetakLaporan({ judul, periode, catatan }) {
+    const identitas = await fillSettings().catch(() => ({}));
+    const pembuat = currentUser
+      ? currentUser.name + ' — ' + (ROLE_LABEL[currentUser.role] || currentUser.role)
+      : 'Pengguna tidak dikenal';
+
+    blokCetak('lp-print-kop', `
+      <div class="mb-4 border-b-2 border-zinc-800 pb-3">
+        <p class="text-base font-bold uppercase tracking-wide text-zinc-900">${esc(identitas.estate_name || 'Luminpark')}</p>
+        ${identitas.estate_address ? `<p class="text-[11px] text-zinc-700">${esc(identitas.estate_address)}</p>` : ''}
+        <p class="text-[11px] text-zinc-700">${esc([identitas.estate_phone, identitas.estate_email].filter(Boolean).join('  ·  '))}</p>
+      </div>
+      <div class="mb-4 text-center">
+        <p class="text-sm font-bold uppercase tracking-wide text-zinc-900">${esc(judul)}</p>
+        <p class="text-[11px] text-zinc-700">Periode: ${esc(periode || '-')} &nbsp;·&nbsp; Dicetak: ${esc(datetime(Date.now()))}</p>
+        ${catatan ? `<p class="text-[11px] text-zinc-700">${esc(catatan)}</p>` : ''}
+      </div>`);
+
+    blokCetak('lp-print-sign', `
+      <div class="mt-10 text-[12px] text-zinc-900">
+        <p class="mb-1">Dokumen ini dihasilkan sistem dan sah setelah ditandatangani pada kolom berikut.</p>
+        <table class="mt-6 w-full table-fixed">
+          <tbody>
+            <tr>
+              <td class="w-1/2 pr-6 text-center">
+                <p>Dibuat oleh,</p>
+                <p class="pt-1">${esc(currentUser ? ROLE_LABEL[currentUser.role] || currentUser.role : '')}</p>
+                <div class="h-20"></div>
+                <p class="border-t border-zinc-800 pt-1 font-semibold">${esc(currentUser ? currentUser.name : '.................................')}</p>
+              </td>
+              <td class="w-1/2 pl-6 text-center">
+                <p>Mengetahui,</p>
+                <p class="pt-1">Pimpinan / Atasan langsung</p>
+                <div class="h-20"></div>
+                <p class="border-t border-zinc-800 pt-1 font-semibold">.................................</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="mt-6 text-[11px] text-zinc-700">${esc(identitas.estate_name || 'Luminpark')}, ${esc(date(Date.now()))}. Tanda tangan digital dapat ditempelkan pada kolom di atas sebelum dokumen diedarkan.</p>
+      </div>`);
+
+    window.print();
+  }
+
   const debounce = (fn, wait = 250) => {
     let timer;
     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), wait); };
@@ -534,21 +613,35 @@ window.LP = (() => {
   const NAV = [
     { href: '/dashboard', label: 'Dashboard', icon: 'M3 12l9-8 9 8M5 10v10h14V10', roles: ['super_admin', 'admin_sales', 'sales'] },
     { href: '/data-unit', label: 'Data Unit Perumahan', icon: 'M4 20h16M6 20V8l6-4 6 4v12M9 20v-6h6v6', roles: ['super_admin', 'admin_sales'] },
+    { href: '/data-proyek', label: 'Data Proyek', icon: 'M4 20h16M6 20v-7h5v7M13 20v-11h5v11', roles: ['super_admin', 'admin_sales'] },
     { href: '/data-sales', label: 'Data Sales', icon: 'M16 11a4 4 0 10-8 0M4 20a8 8 0 0116 0', roles: ['super_admin', 'admin_sales'] },
-    { href: '/data-konsumen', label: 'Data Konsumen', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0', roles: ['super_admin', 'admin_sales', 'sales'] },
+    { href: '/data-konsumen', label: 'Data Konsumen', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0', roles: ['super_admin', 'admin_sales'] },
+    // Revisi 7: bagi sales, konsumen (sudah memesan) dipisah dari database prospek.
+    { href: '/data-konsumen?kategori=konsumen', label: 'Konsumen', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0', roles: ['sales'] },
+    { href: '/data-konsumen?kategori=prospek', label: 'Database Konsumen', icon: 'M5 13a7 7 0 0114 0M12 3v4M4 20h16', roles: ['sales'] },
     { href: '/booking', label: 'Booking Unit', icon: 'M8 3v4M16 3v4M3 9h18M5 5h14v16H5z', roles: ['super_admin', 'admin_sales', 'sales'] },
     { href: '/pembayaran', label: 'Data Pembayaran', icon: 'M3 10h18M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z', roles: ['super_admin', 'admin_sales', 'sales'] },
     { href: '/laporan', label: 'Laporan', icon: 'M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm2 6h6M9 13h6M9 17h4', roles: ['super_admin', 'admin_sales'] },
     { href: '/laporan-sales', label: 'Laporan Sales', icon: 'M9 17V7l4 5 4-5v10M5 21h14V3H5z', roles: ['sales'] },
+    // Revisi 30: Log Aktivitas tidak lagi dibuka Monitoring Manajemen, melainkan Super Admin.
     { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'M4 6h16M4 12h16M4 18h10', roles: ['super_admin'] },
   ];
+
+  // Penanda menu aktif; tautan konsumen sales dibedakan lewat parameter ?kategori=.
+  function navAktif(item) {
+    const [path, query = ''] = item.href.split('?');
+    if (location.pathname !== path && !location.pathname.startsWith(path + '/')) return false;
+    const kategoriItem = new URLSearchParams(query).get('kategori');
+    if (!kategoriItem) return true;
+    const kategoriHalaman = new URLSearchParams(location.search).get('kategori') || 'konsumen';
+    return kategoriItem === kategoriHalaman;
+  }
 
   function buildShell(user) {
     const nav = document.getElementById('lp-nav');
     if (nav) {
-      const current = location.pathname;
       nav.innerHTML = NAV.filter((item) => item.roles.includes(user.role)).map((item) => {
-        const active = current === item.href || current.startsWith(item.href + '/');
+        const active = navAktif(item);
         return `<a href="${item.href}" class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${active
           ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'}">
         <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="${item.icon}"/></svg>
@@ -627,6 +720,130 @@ window.LP = (() => {
       .catch(() => {});
   }
 
+  /* ---------- penghitung waktu sesi ---------- */
+
+  const PERINGATAN_SESI_DETIK = 300;
+  let sesiTimer = null;
+  let sesiDiperingatkan = false;
+  let sesiBatasIdleDetik = 0;
+  let sesiAktivitasTerakhir = Date.now();
+  let sesiSedangDiperpanjang = false;
+
+  function catatAktivitas() {
+    sesiAktivitasTerakhir = Date.now();
+  }
+
+  // Revisi 35: hanya ketiadaan aktivitas yang boleh mengakhiri sesi, jadi setiap
+  // interaksi pengguna menjadi penanda bahwa layar masih dipakai.
+  function pantauAktivitas() {
+    if (pantauAktivitas.siap) return;
+    pantauAktivitas.siap = true;
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((jenis) => {
+      document.addEventListener(jenis, catatAktivitas, { passive: true, capture: true });
+    });
+  }
+
+  function hentikanPenghitungSesi() {
+    if (sesiTimer) {
+      clearInterval(sesiTimer);
+      sesiTimer = null;
+    }
+  }
+
+  function keluarSesi(pesan) {
+    hentikanPenghitungSesi();
+    token.clear();
+    toast(pesan, 'error');
+    setTimeout(() => location.replace('/login?sesi=berakhir'), 1800);
+  }
+
+  function formatSisaSesi(detik) {
+    const dua = (n) => String(n).padStart(2, '0');
+    const jam = Math.floor(detik / 3600);
+    const menit = Math.floor((detik % 3600) / 60);
+    const detikKecil = Math.floor(detik % 60);
+    return jam > 0 ? `${dua(jam)}:${dua(menit)}:${dua(detikKecil)}` : `${dua(menit)}:${dua(detikKecil)}`;
+  }
+
+  async function perpanjangSesi(hening = false) {
+    const { json } = await request('POST', '/session/refresh', {});
+    token.set(json.access_token);
+    if (!hening) toast(json.message || 'Sesi berhasil diperpanjang.');
+    catatAktivitas();
+    await mulaiPenghitungSesi();
+  }
+
+  async function mulaiPenghitungSesi() {
+    const kotak = document.getElementById('lp-session');
+    if (!kotak) return;
+
+    let status;
+    try {
+      status = await fetchJson('/session/status', { quiet: true });
+    } catch {
+      return;
+    }
+
+    const sisa = Number(status?.remaining_seconds);
+    if (!Number.isFinite(sisa)) {
+      kotak.classList.add('hidden');
+      return;
+    }
+
+    sesiBatasIdleDetik = Math.max(0, Number(status?.session_timeout_minutes) * 60) || sisa;
+    sesiAktivitasTerakhir = Date.now();
+    pantauAktivitas();
+
+    const akhir = Date.now() + sisa * 1000;
+    const label = document.getElementById('lp-session-left');
+    const tombol = document.getElementById('lp-session-extend');
+    sesiDiperingatkan = false;
+    kotak.classList.remove('hidden', 'border-amber-300', 'bg-amber-50', 'text-amber-900');
+    if (tombol) tombol.classList.add('hidden');
+    hentikanPenghitungSesi();
+
+    if (tombol && !tombol.dataset.siap) {
+      tombol.dataset.siap = '1';
+      tombol.onclick = () => withBusy(tombol, perpanjangSesi);
+    }
+
+    const jalankan = () => {
+      const idle = Math.round((Date.now() - sesiAktivitasTerakhir) / 1000);
+      if (sesiBatasIdleDetik > 0 && idle >= sesiBatasIdleDetik) {
+        keluarSesi('Tidak ada aktivitas selama ' + formatSisaSesi(idle) + '. Silakan masuk kembali.');
+        return;
+      }
+
+      const detik = Math.max(0, Math.round((akhir - Date.now()) / 1000));
+      if (label) label.textContent = formatSisaSesi(detik);
+
+      if (detik <= PERINGATAN_SESI_DETIK) {
+        kotak.classList.add('border-amber-300', 'bg-amber-50', 'text-amber-900');
+        if (tombol) tombol.classList.remove('hidden');
+        if (!sesiDiperingatkan) {
+          sesiDiperingatkan = true;
+          toast('Sesi berakhir dalam ' + formatSisaSesi(detik) + '. Klik Perpanjang agar tidak keluar otomatis.', 'info');
+        }
+      }
+
+      // Layar yang masih dipakai diperpanjang sendiri; yang ditinggalkan dibiarkan habis.
+      if (detik <= 60 && idle < PERINGATAN_SESI_DETIK && !sesiSedangDiperpanjang) {
+        sesiSedangDiperpanjang = true;
+        perpanjangSesi(true)
+          .catch(() => keluarSesi('Sesi berakhir, silakan masuk kembali.'))
+          .finally(() => { sesiSedangDiperpanjang = false; });
+        return;
+      }
+
+      if (detik <= 0) {
+        keluarSesi('Waktu sesi habis. Silakan masuk kembali.');
+      }
+    };
+
+    jalankan();
+    sesiTimer = setInterval(jalankan, 1000);
+  }
+
   function initShell() {
     const logoutButton = document.getElementById('lp-logout');
     if (logoutButton) logoutButton.onclick = (e) => { e.preventDefault(); logout(); };
@@ -683,10 +900,12 @@ window.LP = (() => {
   return {
     BASE, ApiError, http, request, unwrap, fetchJson,
     token, login, logout, me, guard, NAV, buildShell, paintIdentity, loadUnreadBadge, initShell,
+    mulaiPenghitungSesi, perpanjangSesi,
     can: (roles) => !!currentUser && roles.indexOf(currentUser.role) !== -1,
     currentUserRole: () => (currentUser ? currentUser.role : ''),
-    money, shortMoney, number, date, datetime, monthLabel, isoDate, today, esc, badge, roleLabel,
+    money, shortMoney, number, date, datetime, monthLabel, isoDate, today, esc, badge, roleLabel, fotoSales,
+    sandiKuat, PESAN_SANDI,
     toast, confirm, formModal, table, statCard, loading, errorBox, barChart, download, debounce, withBusy,
-    fillSettings,
+    fillSettings, cetakLaporan,
   };
 })();

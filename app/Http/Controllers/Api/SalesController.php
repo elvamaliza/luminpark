@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class SalesController extends Controller
@@ -159,12 +160,21 @@ class SalesController extends Controller
             'join_date'       => 'nullable|date',
             'birth_date'      => 'nullable|date|before_or_equal:today',
             'whatsapp_number' => 'nullable|string|max:20',
+            'avatar'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user->fill(array_intersect_key($validated, array_flip(['name', 'phone', 'address'])));
 
         if (array_key_exists('account_status', $validated)) {
             $user->status = $validated['account_status'];
+        }
+
+        // Revisi 36: foto yang diunggah pengelola dipakai kartu narahubung pada halaman publik.
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
         }
 
         $user->save();
@@ -343,7 +353,7 @@ class SalesController extends Controller
         ], 200);
     }
 
-    /** Kata sandi awal sales: tanggal lahir ditulis ddmmyyyy, contoh 14031995. */
+    /** Kata sandi awal sales: tanggal lahir ditulis yyyymmdd, contoh 19950314. */
     private function passwordFromBirthDate(?string $birthDate): ?string
     {
         if (!$birthDate) {
@@ -351,7 +361,7 @@ class SalesController extends Controller
         }
 
         try {
-            return Carbon::parse($birthDate)->format('dmY');
+            return Carbon::parse($birthDate)->format('Ymd');
         } catch (\Exception $e) {
             return null;
         }

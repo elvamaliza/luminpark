@@ -44,7 +44,7 @@ class ProfileController extends Controller
 
     /**
      * Pembaruan mandiri: nama, kontak, alamat, dan foto profil. Role, status,
-     * dan email tetap menjadi kewenangan Super Admin/Admin Sales.
+     * dan email tetap menjadi kewenangan Super Admin/Monitoring Manajemen.
      */
     public function update(Request $request)
     {

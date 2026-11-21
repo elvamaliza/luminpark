@@ -104,6 +104,26 @@
       + '</dl></section>';
   }
 
+  function detailPhotoCard(row) {
+    const gambar = row.avatar_url
+      ? '<img src="' + LP.esc(row.avatar_url) + '" alt="Foto sales ' + LP.esc(row.name) + '" class="h-32 w-32 rounded-2xl object-cover">'
+      : '<div class="grid h-32 w-32 place-items-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 text-center text-xs text-zinc-500">Belum ada foto sales</div>';
+
+    return '<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">'
+      + '<h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Foto Sales</h2>'
+      + '<div class="mt-3 flex items-start gap-4">'
+      + gambar
+      + '<div class="min-w-0">'
+      + '<label class="block">'
+      + '<span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Ganti Foto</span>'
+      + '<input id="ds-avatar" type="file" accept="image/jpeg,image/png"'
+      + ' class="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-zinc-700">'
+      + '<span class="mt-1 block text-xs text-zinc-500">Format JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.</span>'
+      + '</label>'
+      + '<p class="mt-2 text-xs text-zinc-500">Foto yang disimpan di sini langsung tampil pada kartu narahubung sales di halaman publik, termasuk halaman Kontak dan detail unit.</p>'
+      + '</div></div></section>';
+  }
+
   function detailForm(row) {
     const p = profil() || {};
 
@@ -139,7 +159,7 @@
       + (nonaktif ? 'Aktifkan Akun Login' : 'Nonaktifkan Akun Login') + '</button>'
       + '<button id="ds-password" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Reset Kata Sandi</button>'
       + '</div>'
-      + '<p class="mt-3 text-xs text-zinc-500">Reset kata sandi mencabut seluruh sesi login sales ini. Bila dikembalikan ke tanggal lahir, format sandinya ddmmyyyy dan wajib diganti saat login berikutnya.</p>'
+      + '<p class="mt-3 text-xs text-zinc-500">Reset kata sandi mencabut seluruh sesi login sales ini. Bila dikembalikan ke tanggal lahir, format sandinya yyyymmdd dan wajib diganti saat login berikutnya dengan minimal 8 karakter serta huruf besar, huruf kecil, dan angka.</p>'
       + '</section>';
   }
 
@@ -276,7 +296,21 @@
     if (!body.sales_code) throw new Error('Kode sales wajib diisi.');
 
     detailShowErrors({});
-    const hasil = await LP.http.put('/sales/' + detailId, body);
+
+    const berkas = document.getElementById('ds-avatar');
+    const foto = berkas && berkas.files && berkas.files[0] ? berkas.files[0] : null;
+
+    let hasil;
+    if (foto) {
+      const muatan = new FormData();
+      muatan.append('_method', 'PUT');
+      Object.keys(body).forEach((key) => muatan.append(key, body[key]));
+      muatan.append('avatar', foto);
+      hasil = await LP.http.post('/sales/' + detailId, muatan);
+    } else {
+      hasil = await LP.http.put('/sales/' + detailId, body);
+    }
+
     LP.toast((hasil.json && hasil.json.message) || 'Data sales berhasil diperbarui.');
     await detailLoad();
   }
@@ -308,11 +342,11 @@
   function detailOpenPassword() {
     const p = profil();
     const tanggalLahir = p && p.birth_date ? LP.isoDate(p.birth_date) : '';
-    const sandiLahir = tanggalLahir ? tanggalLahir.split('-').reverse().join('') : '';
+    const sandiLahir = tanggalLahir ? tanggalLahir.replace(/-/g, '') : '';
 
     LP.formModal({
       title: 'Manajemen Kata Sandi — ' + detailSales.name,
-      description: 'Opsi 1 mengembalikan sandi ke tanggal lahir (ddmmyyyy). Opsi 2 mengisi kata sandi baru secara manual.',
+      description: 'Opsi 1 mengembalikan sandi ke tanggal lahir (yyyymmdd). Opsi 2 mengisi kata sandi baru secara manual.',
       fields: [
         {
           name: 'metode', label: 'Cara Reset', type: 'select', required: true, col: 2,
@@ -321,7 +355,7 @@
             { value: 'manual', label: 'Opsi 2 — Isi kata sandi baru' },
           ],
         },
-        { name: 'password', label: 'Kata Sandi Baru', type: 'password', col: 2, hint: 'Minimal 6 karakter. Kosongkan bila memakai Opsi 1.' },
+        { name: 'password', label: 'Kata Sandi Baru', type: 'password', col: 2, hint: 'Minimal 6 karakter. Sales tetap wajib menggantinya pada login pertama. Kosongkan bila memakai Opsi 1.' },
         { name: 'konfirmasi', label: 'Konfirmasi Kata Sandi', type: 'password', col: 2 },
       ],
       values: { metode: sandiLahir ? 'tanggal_lahir' : 'manual' },
@@ -365,7 +399,7 @@
     document.getElementById('sales-detail').innerHTML =
       '<div class="grid gap-4 lg:grid-cols-3">'
       + '<div class="space-y-4 lg:col-span-2">' + detailForm(row) + detailPerformanceCard() + '</div>'
-      + '<div class="space-y-4">' + detailIdentity(row) + detailAccountCard(row) + '</div></div>'
+      + '<div class="space-y-4">' + detailPhotoCard(row) + detailIdentity(row) + detailAccountCard(row) + '</div></div>'
       + detailBookings(row);
 
     detailRenderBookings();

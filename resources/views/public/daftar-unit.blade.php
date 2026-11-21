@@ -6,22 +6,18 @@
 <section class="border-b border-zinc-100 bg-brand-50">
     <div class="mx-auto max-w-6xl px-4 py-12">
         <h1 class="text-3xl font-bold tracking-tight text-brand-900">Daftar Unit Rumah</h1>
-        <p class="mt-2 max-w-2xl text-sm text-brand-900/70">Cari dan saring unit berdasarkan kode, tipe, cluster, atau harga untuk menemukan rumah yang sesuai.</p>
+        <p class="mt-2 max-w-2xl text-sm text-brand-900/70">Saring unit melalui pilihan proyek dan urutan harga untuk menemukan rumah yang sesuai.</p>
     </div>
 </section>
 
 <main class="mx-auto max-w-6xl px-4 py-12">
+    {{-- Revisi 38: kotak pencarian kode/tipe unit dihapus, hanya penapis proyek dan harga yang tersisa. --}}
     <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="lg:col-span-2">
-                <label for="cari" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cari</label>
-                <input id="cari" type="search" placeholder="Kode unit atau tipe rumah"
-                       class="w-full rounded-xl border border-zinc-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
-            </div>
+        <div class="grid gap-4 sm:grid-cols-2">
             <div>
-                <label for="cluster" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Cluster</label>
+                <label for="cluster" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Proyek</label>
                 <select id="cluster" class="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
-                    <option value="">Semua cluster</option>
+                    <option value="">Semua proyek</option>
                 </select>
             </div>
             <div>
@@ -46,7 +42,6 @@
     let SEMUA_UNIT = [];
 
     const gridMount = document.getElementById('unit-grid');
-    const cariInput = document.getElementById('cari');
     const clusterSelect = document.getElementById('cluster');
     const sortSelect = document.getElementById('sort');
     const countLabel = document.getElementById('unit-count');
@@ -81,16 +76,11 @@
     }
 
     function render() {
-        const q = cariInput.value.trim().toLowerCase();
         const cluster = clusterSelect.value;
         const sort = sortSelect.value;
 
         let hasil = SEMUA_UNIT.filter(function (u) {
-            const cocokTeks = !q
-                || String(u.unit_code || '').toLowerCase().indexOf(q) !== -1
-                || String(u.unit_type || '').toLowerCase().indexOf(q) !== -1;
-            const cocokCluster = !cluster || u.cluster === cluster;
-            return cocokTeks && cocokCluster;
+            return !cluster || u.cluster === cluster;
         });
 
         if (sort === 'asc') hasil.sort(function (a, b) { return Number(a.price) - Number(b.price); });
@@ -99,7 +89,7 @@
         countLabel.textContent = hasil.length + ' unit ditemukan.';
 
         if (!hasil.length) {
-            gridMount.innerHTML = '<div class="rounded-2xl border border-dashed border-zinc-300 bg-white p-12 text-center"><p class="text-sm text-zinc-500">Tidak ada unit yang cocok dengan pencarian Anda. Coba ubah kata kunci atau filter cluster.</p></div>';
+            gridMount.innerHTML = '<div class="rounded-2xl border border-dashed border-zinc-300 bg-white p-12 text-center"><p class="text-sm text-zinc-500">Tidak ada unit pada proyek ini. Coba pilih proyek lain atau tukar ke "Semua proyek".</p></div>';
             return;
         }
         gridMount.innerHTML = '<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">' + hasil.map(unitCard).join('') + '</div>';
@@ -107,19 +97,24 @@
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
-        cariInput.value = params.get('cari') || '';
 
         LP.loading(gridMount, 'Memuat daftar unit...');
         try {
             SEMUA_UNIT = (await LP.fetchJson('/public/units', ANON)) || [];
             isiCluster();
+
+            // Penanda pada peta beranda menautkan /unit?proyek=<nama proyek>.
+            const proyek = params.get('proyek');
+            if (proyek && Array.from(clusterSelect.options).some((o) => o.value === proyek)) {
+                clusterSelect.value = proyek;
+            }
+
             render();
         } catch (e) {
             LP.errorBox(gridMount, e.message || 'Gagal memuat daftar unit.');
         }
     }
 
-    cariInput.addEventListener('input', LP.debounce(render, 200));
     clusterSelect.addEventListener('change', render);
     sortSelect.addEventListener('change', render);
 

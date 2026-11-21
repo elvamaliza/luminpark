@@ -261,10 +261,11 @@
       fields: [
         { name: 'email', label: 'Email Akun', type: 'email', required: true, col: 2, hint: 'Harus sesuai dengan email akun yang sedang login.' },
         { name: 'password_lama', label: 'Kata Sandi Saat Ini', type: 'password', required: true },
-        { name: 'password_baru', label: 'Kata Sandi Baru', type: 'password', required: true, hint: 'Minimal 6 karakter dan berbeda dari kata sandi lama.' },
+        { name: 'password_baru', label: 'Kata Sandi Baru', type: 'password', required: true, hint: 'Minimal 8 karakter, memuat huruf besar, huruf kecil, dan angka; berbeda dari kata sandi lama.' },
       ],
       submitLabel: 'Ganti Kata Sandi',
       onSubmit: async (values) => {
+        if (!LP.sandiKuat(values.password_baru)) throw new Error(LP.PESAN_SANDI);
         const ok = await LP.confirm('Kata sandi akan diganti dan seluruh sesi login diakhiri. Anda akan diarahkan ke halaman masuk.', {
           title: 'Ganti Kata Sandi',
           okLabel: 'Ya, Ganti',

@@ -36,6 +36,7 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 Route::view('/dashboard', 'app.dashboard')->name('app.dashboard');
 Route::view('/data-unit', 'app.data-unit')->name('app.data-unit');
 Route::view('/data-unit/{id}', 'app.detail-unit')->name('app.detail-unit');
+Route::view('/data-proyek', 'app.data-proyek')->name('app.data-proyek');
 Route::view('/data-sales', 'app.data-sales')->name('app.data-sales');
 Route::view('/data-sales/{id}', 'app.detail-sales')->name('app.detail-sales');
 Route::view('/data-konsumen', 'app.data-konsumen')->name('app.data-konsumen');

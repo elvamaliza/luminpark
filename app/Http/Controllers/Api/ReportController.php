@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\FiltersProjects;
+use App\Http\Controllers\Concerns\PerProjectSummary;
 use App\Models\Booking;
+use App\Models\Cluster;
 use App\Models\CustomerLead;
 use App\Models\Payment;
 use App\Models\SalesProfile;
@@ -13,24 +16,55 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    use FiltersProjects;
+    use PerProjectSummary;
+
+    /**
+     * Daftar proyek untuk penapis pada halaman laporan (revisi 32).
+     */
+    private function daftarProyek()
+    {
+        return Cluster::query()->aktif()->orderBy('name')->get(['id', 'name']);
+    }
+
     /**
      * Laporan penjualan unit.
      */
     public function salesReport(Request $request)
     {
         [$start, $end] = $this->period($request);
+        $proyek = $this->clusterIdDari($request);
 
-        $rows = Booking::with(['customerLead', 'salesProfile.user', 'unit', 'paymentScheme'])
+        $rows = $this->padaProyek(
+            Booking::with(['customerLead', 'salesProfile.user', 'unit', 'paymentScheme']),
+            $proyek,
+            'unit'
+        )
             ->whereBetween('booking_date', [$start, $end])
             ->orderBy('booking_date')
             ->get();
 
+        $rows = $this->tandaiProyek($rows, fn (Booking $b) => optional($b->unit)->cluster_id);
+
         return response()->json([
             'success'               => true,
             'period'                => ['start_date' => $start, 'end_date' => $end],
+            'project_filter'        => $proyek,
+            'projects'              => $this->daftarProyek(),
+            'per_project'           => $this->rangkumPerProyek(
+                $rows,
+                fn (Booking $b) => optional($b->unit)->cluster_id,
+                fn (array $group) => [
+                    'transactions'    => count($group),
+                    'cancelled'       => collect($group)->where('status', Booking::STATUS_DIBATALKAN)->count(),
+                    'sales_value'     => round((float) collect($group)->where('status', '!=', Booking::STATUS_DIBATALKAN)->sum('total_price'), 2),
+                    'remaining_value' => round((float) collect($group)->where('status', '!=', Booking::STATUS_DIBATALKAN)->sum('remaining_amount'), 2),
+                ]
+            ),
             'total_transactions'    => $rows->count(),
-            'total_sales_value'     => round((float) $rows->sum('total_price'), 2),
-            'total_remaining_value' => round((float) $rows->sum('remaining_amount'), 2),
+            'total_cancelled'       => $rows->where('status', Booking::STATUS_DIBATALKAN)->count(),
+            'total_sales_value'     => round((float) $rows->where('status', '!=', Booking::STATUS_DIBATALKAN)->sum('total_price'), 2),
+            'total_remaining_value' => round((float) $rows->where('status', '!=', Booking::STATUS_DIBATALKAN)->sum('remaining_amount'), 2),
             'data'                  => $rows,
         ], 200);
     }
@@ -41,12 +75,18 @@ class ReportController extends Controller
     public function settlementReport(Request $request)
     {
         [$start, $end] = $this->period($request);
+        $proyek = $this->clusterIdDari($request);
 
-        $rows = Payment::with(['booking.customerLead', 'booking.unit', 'verifier'])
+        $rows = $this->padaProyek(
+            Payment::with(['booking.customerLead', 'booking.unit', 'verifier']),
+            $proyek
+        )
             ->where('verification_status', Payment::VERIFY_VERIFIED)
             ->whereBetween('payment_date', [$start, $end])
             ->orderBy('payment_date')
             ->get();
+
+        $rows = $this->tandaiProyek($rows, fn (Payment $p) => optional(optional($p->booking)->unit)->cluster_id);
 
         $byConsumer = $rows->groupBy(fn (Payment $p) => $p->booking?->customerLead?->name ?? '(tanpa nama)')
             ->map(fn ($group) => [
@@ -69,6 +109,16 @@ class ReportController extends Controller
         return response()->json([
             'success'              => true,
             'period'               => ['start_date' => $start, 'end_date' => $end],
+            'project_filter'       => $proyek,
+            'projects'             => $this->daftarProyek(),
+            'per_project'          => $this->rangkumPerProyek(
+                $rows,
+                fn (Payment $p) => optional(optional($p->booking)->unit)->cluster_id,
+                fn (array $group) => [
+                    'transactions' => count($group),
+                    'total_amount' => round((float) collect($group)->sum('amount'), 2),
+                ]
+            ),
             'total_transactions'   => $rows->count(),
             'total_settled_amount' => round((float) $rows->sum('amount'), 2),
             'recap'                => [
@@ -82,20 +132,30 @@ class ReportController extends Controller
 
     /**
      * Laporan kinerja sales: jumlah leads, booking, closing, dan capaian target.
+     * Revisi 32: angka per sales dapat dipersempit ke satu proyek dan dilengkapi
+     * rincian per proyek.
      */
     public function salesPerformanceReport(Request $request)
     {
         [$start, $end] = $this->period($request);
+        $proyek = $this->clusterIdDari($request);
 
         $rows = SalesProfile::with('user')
-            ->withCount(['customerLeads', 'bookings'])
-            ->withSum('bookings', 'total_price')
+            ->withCount([
+                'customerLeads' => fn ($q) => $this->leadProyek($q, $proyek),
+                'bookings' => fn ($q) => $this->padaProyek($q, $proyek, 'unit'),
+            ])
             ->with(['targets' => fn ($q) => $q->whereDate('period_start', '<=', $end)->whereDate('period_end', '>=', $start)])
+            ->withSum(['bookings' => fn ($q) => $this->padaProyek($q, $proyek, 'unit')], 'total_price')
             ->get()
-            ->map(function (SalesProfile $profile) use ($start, $end) {
-                $closed = Booking::where('sales_id', $profile->id)
-                    ->where('status', Booking::STATUS_LUNAS)
-                    ->whereBetween('booking_date', [$start, $end]);
+            ->map(function (SalesProfile $profile) use ($start, $end, $proyek) {
+                $closed = $this->padaProyek(
+                    Booking::where('sales_id', $profile->id)
+                        ->where('status', Booking::STATUS_LUNAS)
+                        ->whereBetween('booking_date', [$start, $end]),
+                    $proyek,
+                    'unit'
+                );
 
                 $target = $profile->targets->first();
 
@@ -119,9 +179,27 @@ class ReportController extends Controller
                 ];
             });
 
+        $bookingProyek = $this->padaProyek(
+            Booking::with('unit:id,cluster_id')->whereBetween('booking_date', [$start, $end]),
+            $proyek,
+            'unit'
+        )->get();
+
         return response()->json([
             'success' => true,
             'period'  => ['start_date' => $start, 'end_date' => $end],
+            'project_filter' => $proyek,
+            'projects'       => $this->daftarProyek(),
+            'per_project'    => $this->rangkumPerProyek(
+                $bookingProyek,
+                fn (Booking $b) => optional($b->unit)->cluster_id,
+                fn (array $group) => [
+                    'transactions'  => count($group),
+                    'units_sold'    => collect($group)->where('status', Booking::STATUS_LUNAS)->count(),
+                    'revenue_sold'  => round((float) collect($group)->where('status', Booking::STATUS_LUNAS)->sum('total_price'), 2),
+                    'sales_count'   => collect($group)->pluck('sales_id')->filter()->unique()->count(),
+                ]
+            ),
             'totals'  => [
                 'total_leads'    => (int) $rows->sum('total_leads'),
                 'total_bookings' => (int) $rows->sum('total_bookings'),
@@ -138,10 +216,14 @@ class ReportController extends Controller
     public function consumerReport(Request $request)
     {
         [$start, $end] = $this->period($request);
+        $proyek = $this->clusterIdDari($request);
 
         $query = CustomerLead::with([
             'salesProfile.user',
-            'unit',
+            'unit:id,cluster_id,unit_code',
+            'bookings:id,lead_id,status,unit_id',
+            'bookings.unit:id,cluster_id',
+            'bookings.payments:id,booking_id,verification_status',
             'followUpHistories' => fn ($q) => $q->latest('follow_up_date')->limit(1),
         ]);
 
@@ -149,19 +231,53 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $rows = $query->whereBetween('created_at', [$start, $end . ' 23:59:59'])
-            ->orderBy('name')
-            ->get();
+        // Revisi 5 & 7: pembatalan dilihat lewat kategori, bukan lagi status 'booking'.
+        if ($request->filled('category')) {
+            match ($request->category) {
+                CustomerLead::CATEGORY_PROSPEK => $query->prospects(),
+                CustomerLead::CATEGORY_KONSUMEN => $query->customers(),
+                CustomerLead::CATEGORY_DIBATALKAN => $query->cancelled(),
+                CustomerLead::CATEGORY_RIWAYAT => $query->history(),
+                default => null,
+            };
+        }
+
+        $rows = $this->tandaiProyek(
+            $this->denganKategoriLead(
+                $this->leadProyek($query, $proyek)
+                    ->whereBetween('created_at', [$start, $end . ' 23:59:59'])
+                    ->orderBy('name')
+                    ->get()
+            ),
+            fn (CustomerLead $l) => $this->proyekDariLead($l)
+        );
 
         return response()->json([
             'success' => true,
             'period'  => ['start_date' => $start, 'end_date' => $end],
+            'project_filter' => $proyek,
+            'projects'       => $this->daftarProyek(),
+            'per_project'    => $this->rangkumPerProyek(
+                $rows,
+                fn (CustomerLead $l) => $this->proyekDariLead($l),
+                fn (array $group) => [
+                    'total'     => count($group),
+                    'cold'      => collect($group)->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_COLD)->count(),
+                    'warm'      => collect($group)->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_WARM)->count(),
+                    'hot'       => collect($group)->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_HOT)->count(),
+                    'prospek'   => collect($group)->where('category', CustomerLead::CATEGORY_PROSPEK)->count(),
+                    'customer'  => collect($group)->where('category', CustomerLead::CATEGORY_KONSUMEN)->count(),
+                    'cancelled' => collect($group)->where('category', CustomerLead::CATEGORY_DIBATALKAN)->count(),
+                ]
+            ),
             'totals'  => [
-                'total'    => $rows->count(),
-                'cold'     => $rows->where('status', CustomerLead::STATUS_COLD)->count(),
-                'warm'     => $rows->where('status', CustomerLead::STATUS_WARM)->count(),
-                'hot'      => $rows->where('status', CustomerLead::STATUS_HOT)->count(),
-                'customer' => $rows->where('status', CustomerLead::STATUS_BOOKING)->count(),
+                'total'     => $rows->count(),
+                'cold'      => $rows->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_COLD)->count(),
+                'warm'      => $rows->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_WARM)->count(),
+                'hot'       => $rows->where('category', CustomerLead::CATEGORY_PROSPEK)->where('status', CustomerLead::STATUS_HOT)->count(),
+                'prospek'   => $rows->where('category', CustomerLead::CATEGORY_PROSPEK)->count(),
+                'customer'  => $rows->where('category', CustomerLead::CATEGORY_KONSUMEN)->count(),
+                'cancelled' => $rows->where('category', CustomerLead::CATEGORY_DIBATALKAN)->count(),
             ],
             'data'    => $rows,
         ], 200);
@@ -181,7 +297,8 @@ class ReportController extends Controller
             [
                 'units_sold'    => (int) Booking::whereBetween('booking_date', [$start, $end])
                     ->where('status', Booking::STATUS_LUNAS)->count(),
-                'total_revenue' => round((float) Booking::whereBetween('booking_date', [$start, $end])->sum('total_price'), 2),
+                'total_revenue' => round((float) Booking::whereBetween('booking_date', [$start, $end])
+                    ->whereIn('status', Booking::ACTIVE_STATUSES)->sum('total_price'), 2),
                 'total_leads'   => (int) CustomerLead::whereBetween('created_at', [$start, $end . ' 23:59:59'])->count(),
                 'total_closing' => round((float) Payment::verified()
                     ->whereBetween('payment_date', [$start, $end])->sum('amount'), 2),
@@ -199,12 +316,13 @@ class ReportController extends Controller
     {
         [$start, $end] = $this->period($request);
         $type = $request->query('type', 'sales');
+        $proyek = $this->clusterIdDari($request);
 
         [$headings, $rows] = match ($type) {
-            'settlement' => $this->settlementExport($start, $end),
-            'performance' => $this->performanceExport($start, $end),
-            'consumer' => $this->consumerExport($start, $end),
-            default => $this->salesExport($start, $end),
+            'settlement' => $this->settlementExport($start, $end, $proyek),
+            'performance' => $this->performanceExport($start, $end, $proyek),
+            'consumer' => $this->consumerExport($start, $end, $proyek),
+            default => $this->salesExport($start, $end, $proyek),
         };
 
         $filename = sprintf('laporan-%s-%s-%s.csv', $type, $start, $end);
@@ -225,11 +343,15 @@ class ReportController extends Controller
         ]);
     }
 
-    private function salesExport(string $start, string $end): array
+    private function salesExport(string $start, string $end, ?int $proyek = null): array
     {
-        $headings = ['Kode Booking', 'Tanggal', 'Calon Konsumen', 'Sales', 'Unit', 'Cluster', 'Skema', 'Harga Total', 'Uang Muka', 'Angsuran', 'Sisa', 'Status', 'Status Serah Terima'];
+        $headings = ['Kode Booking', 'Tanggal', 'Calon Konsumen', 'Sales', 'Unit', 'Proyek', 'Skema', 'Harga Total', 'Biaya Tambahan Konstruksi', 'Keterangan Tambahan', 'Uang Muka', 'Angsuran', 'Sisa', 'Status', 'Status Serah Terima'];
 
-        $rows = Booking::with(['customerLead', 'salesProfile.user', 'unit.cluster', 'paymentScheme'])
+        $rows = $this->padaProyek(
+            Booking::with(['customerLead', 'salesProfile.user', 'unit.cluster', 'paymentScheme']),
+            $proyek,
+            'unit'
+        )
             ->whereBetween('booking_date', [$start, $end])
             ->orderBy('booking_date')
             ->get()
@@ -242,6 +364,8 @@ class ReportController extends Controller
                 $b->unit?->cluster?->name,
                 $b->paymentScheme?->scheme_name,
                 $b->total_price,
+                $b->addition_cost,
+                $b->addition_description,
                 $b->down_payment_amount,
                 $b->installment_amount,
                 $b->remaining_amount,
@@ -253,11 +377,14 @@ class ReportController extends Controller
         return [$headings, $rows];
     }
 
-    private function settlementExport(string $start, string $end): array
+    private function settlementExport(string $start, string $end, ?int $proyek = null): array
     {
-        $headings = ['Tanggal Bayar', 'Kode Booking', 'Calon Konsumen', 'Jenis', 'Nominal', 'Bank', 'Rekening', 'Atas Nama', 'Verifikasi', 'Verifikator'];
+        $headings = ['Tanggal Bayar', 'Kode Booking', 'Calon Konsumen', 'Proyek', 'Unit', 'Jenis', 'Nominal', 'Bank', 'Rekening', 'Atas Nama', 'Verifikasi', 'Verifikator'];
 
-        $rows = Payment::with(['booking.customerLead', 'verifier'])
+        $rows = $this->padaProyek(
+            Payment::with(['booking.customerLead', 'booking.unit.cluster']),
+            $proyek
+        )
             ->where('verification_status', Payment::VERIFY_VERIFIED)
             ->whereBetween('payment_date', [$start, $end])
             ->orderBy('payment_date')
@@ -266,6 +393,8 @@ class ReportController extends Controller
                 $p->payment_date?->toDateString(),
                 $p->booking?->booking_code,
                 $p->booking?->customerLead?->name,
+                $p->booking?->unit?->cluster?->name,
+                $p->booking?->unit?->unit_code,
                 $p->payment_type,
                 $p->amount,
                 $p->bank_name,
@@ -279,12 +408,21 @@ class ReportController extends Controller
         return [$headings, $rows];
     }
 
-    private function performanceExport(string $start, string $end): array
+    private function performanceExport(string $start, string $end, ?int $proyek = null): array
     {
-        $headings = ['Kode Sales', 'Nama', 'Leads', 'Booking', 'Closing (Rp)', 'Unit Terjual', 'Target Unit', 'Capaian Unit', 'Progress Unit (%)'];
+        $headings = ['Kode Sales', 'Nama', 'Proyek', 'Leads', 'Booking', 'Closing (Rp)', 'Unit Terjual', 'Target Unit', 'Capaian Unit', 'Progress Unit (%)'];
 
-        $rows = SalesProfile::with('user')->withCount(['customerLeads', 'bookings'])->get()
-            ->map(function (SalesProfile $profile) use ($start, $end) {
+        $namaProyek = $proyek
+            ? (Cluster::withTrashed()->where('id', $proyek)->value('name') ?? '(proyek arsip)')
+            : 'Semua Proyek';
+
+        $rows = SalesProfile::with('user')
+            ->withCount([
+                'customerLeads' => fn ($q) => $this->leadProyek($q, $proyek),
+                'bookings' => fn ($q) => $this->padaProyek($q, $proyek, 'unit'),
+            ])
+            ->get()
+            ->map(function (SalesProfile $profile) use ($start, $end, $proyek, $namaProyek) {
                 $target = $profile->targets()
                     ->whereDate('period_start', '<=', $end)
                     ->whereDate('period_end', '>=', $start)
@@ -293,12 +431,21 @@ class ReportController extends Controller
                 return [
                     $profile->sales_code,
                     $profile->user?->name,
+                    $namaProyek,
                     $profile->customer_leads_count,
                     $profile->bookings_count,
-                    round((float) Booking::where('sales_id', $profile->id)->sum('total_price'), 2),
-                    (int) Booking::where('sales_id', $profile->id)
-                        ->where('status', Booking::STATUS_LUNAS)
-                        ->whereBetween('booking_date', [$start, $end])->count(),
+                    round((float) $this->padaProyek(
+                        Booking::where('sales_id', $profile->id),
+                        $proyek,
+                        'unit'
+                    )->sum('total_price'), 2),
+                    (int) $this->padaProyek(
+                        Booking::where('sales_id', $profile->id)
+                            ->where('status', Booking::STATUS_LUNAS)
+                            ->whereBetween('booking_date', [$start, $end]),
+                        $proyek,
+                        'unit'
+                    )->count(),
                     $target?->target_units,
                     $target?->achieved_units,
                     $target?->unit_progress,
@@ -309,24 +456,43 @@ class ReportController extends Controller
         return [$headings, $rows];
     }
 
-    private function consumerExport(string $start, string $end): array
+    private function consumerExport(string $start, string $end, ?int $proyek = null): array
     {
-        $headings = ['Nama', 'Telepon', 'Email', 'Status', 'Sales', 'Unit Diminati', 'Anggaran', 'Follow Up Terakhir'];
+        $headings = ['Nama', 'Telepon', 'Email', 'Status', 'Kategori', 'Proyek', 'Sales', 'Unit Diminati', 'Anggaran', 'Tanggal Chat Awal', 'Follow Up Terakhir'];
 
-        $rows = CustomerLead::with(['salesProfile.user', 'unit'])
-            ->whereBetween('created_at', [$start, $end . ' 23:59:59'])
-            ->orderBy('name')
-            ->get()
-            ->map(fn (CustomerLead $l) => [
-                $l->name,
-                $l->phone,
-                $l->email,
-                $l->status,
-                $l->salesProfile?->user?->name,
-                $l->unit?->unit_code,
-                $l->budget,
-                $l->last_follow_up?->toDateString(),
-            ])
+        $namaProyek = Cluster::withTrashed()->pluck('name', 'id');
+
+        $rows = $this->denganKategoriLead(
+            $this->leadProyek(
+                CustomerLead::with([
+                    'salesProfile.user',
+                    'unit:id,cluster_id,unit_code',
+                    'bookings:id,lead_id,status,unit_id',
+                    'bookings.unit:id,cluster_id',
+                ]),
+                $proyek
+            )
+                ->whereBetween('created_at', [$start, $end . ' 23:59:59'])
+                ->orderBy('name')
+                ->get()
+        )
+            ->map(function (CustomerLead $l) use ($namaProyek) {
+                $clusterId = $this->proyekDariLead($l);
+
+                return [
+                    $l->name,
+                    $l->phone,
+                    $l->email,
+                    $l->status,
+                    $l->category(),
+                    $clusterId ? ($namaProyek[$clusterId] ?? '(proyek arsip)') : '(belum ada proyek)',
+                    $l->salesProfile?->user?->name,
+                    $l->unit?->unit_code,
+                    $l->budget,
+                    $l->first_chat_date?->toDateString(),
+                    $l->last_follow_up?->toDateString(),
+                ];
+            })
             ->all();
 
         return [$headings, $rows];
@@ -439,18 +605,22 @@ class ReportController extends Controller
                     'scheme'           => $b->paymentScheme?->scheme_name,
                     'paid_amount'      => round($paid, 2),
                     'remaining_amount' => round((float) $b->remaining_amount, 2),
-                    'status_label'     => $b->status === Booking::STATUS_LUNAS ? 'Terjual' : 'Pemesanan',
+                    'status_label'     => match ($b->status) {
+                        Booking::STATUS_LUNAS => 'Terjual',
+                        Booking::STATUS_DIBATALKAN => 'Dibatalkan',
+                        default => 'Pemesanan',
+                    },
                     'status'           => $b->status,
                 ];
             });
 
         $prospects = CustomerLead::with('unit')
             ->where('sales_id', $profile->id)
-            ->where('status', '!=', CustomerLead::STATUS_BOOKING)
+            ->prospects()
             ->whereBetween('created_at', [$start, $end . ' 23:59:59'])
             ->get()
             ->map(fn (CustomerLead $l) => [
-                'date'             => ($l->last_follow_up ?? $l->created_at)?->toDateString(),
+                'date'             => ($l->first_chat_date ?? $l->last_follow_up ?? $l->created_at)?->toDateString(),
                 'customer'         => $l->name,
                 'unit'             => $l->unit?->unit_code ?? $l->interested_unit,
                 'booking_code'     => '-',

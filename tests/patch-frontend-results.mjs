@@ -1,0 +1,1378 @@
+/**
+ * Menyuntik hasil observasi DOM terbaru (basis data uji luminpark_test, port 8081)
+ * ke dalam berkas hasil uji frontend. Kelompok FF-A/B/C/D yang berubah setelah
+ * daftar revisi 1-43 diperbarui, lalu baris FF-R01..FF-R43 ditambahkan sebagai
+ * bukti antarmuka untuk tiap butir revisi.
+ */
+import { readFileSync, writeFileSync } from 'node:fs';
+
+const OUT = 'tests/frontend-results.json';
+const rows = JSON.parse(readFileSync(OUT, 'utf8'));
+const find = (id) => rows.find((r) => r.id === id);
+
+const BARU = [
+  /* ---------- Baris hasil revisi 1-13 ---------- */
+  {
+    id: 'FF-R01',
+    nama: 'Foto sales pada daftar narahubung',
+    skenario: 'Revisi 1 — foto sales',
+    deskripsi: 'Daftar narahubung pada halaman publik menampilkan foto sales yang menangani konsumen, dan tetap terbaca bila foto belum diunggah.',
+    langkah: '1. Tanpa login buka /kontak 2. Tunggu GET /public/sales-contacts 3. Baca elemen img pada kartu sales 4. Periksa berkas avatar melalui HTTP',
+    dataUji: 'peran=tanpa login; sales SL-001 dan SL-002 memiliki avatar, SL-003 belum',
+    ekspektasi: 'Kartu sales ber-avatar menampilkan <img> dengan alt "Foto <nama>"; tanpa avatar dipakai lingkaran inisial; berkas avatar dapat diunduh',
+    method: 'UI',
+    path: '/kontak',
+    actualStatus: null,
+    actualBody: '3 kartu = ["Budi Sales Utama SL-001 WhatsApp","Sari Sales Timur SL-002 WhatsApp","Andi Sales Barat SL-003 WhatsApp"]; '
+      + '2 elemen <img class="h-20 w-20 shrink-0 rounded-full object-cover" alt="Foto Budi Sales Utama" src="http://127.0.0.1:8081/storage/avatars/vXzVj9wR….png"> terukur 80×80 px; '
+      + 'GET berkas avatar tersebut = HTTP 200; SL-003 memakai inisial "A"',
+    status: 'Pass',
+    catatan: 'Dibantu LP.fotoSales() (public/js/luminpark.js) yang memayungi alt="Foto …"; halaman /tentang memakai pola yang sama pada seksi Tim Sales Kami. Sisi API dibuktikan TC-R07 (kolom avatar_url pada /public/sales-contacts). '
+      + 'Sejak revisi 36 ukuran foto diperbesar menjadi h-20 w-20 dan avatarnya diunggah pengelola dari Detail Sales (bukti: FF-R35, TC-R27).',
+    kebutuhan: 'Revisi 1 (foto sales pada daftar kontak halaman publik)',
+  },
+  {
+    id: 'FF-R02',
+    nama: 'Kolom dan isian Tanggal Chat Awal',
+    skenario: 'Revisi 2 — tanggal chat awal',
+    deskripsi: 'Form tambah konsumen pada peran Sales memuat kolom tanggal chat awal, dan daftar konsumen menampilkan kolom tersebut.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Buka /data-konsumen?kategori=prospek 3. Klik Tambah Konsumen dan baca label isian 4. Baca header tabel',
+    dataUji: 'peran=sales, halaman Database Konsumen',
+    ekspektasi: 'Modal berisi isian tanggal "Tanggal Chat Awal" dengan petunjuk waktu kontak pertama; tabel punya kolom "Chat Awal"; nilai default hari ini',
+    method: 'UI',
+    path: '/data-konsumen?kategori=prospek',
+    actualStatus: null,
+    actualBody: 'label modal = ["Nama Konsumen *","Nomor Telepon * Maksimal 15 karakter.","Email","Status Konsumen * ColdWarmHot", '
+      + '"Tanggal Chat Awal Tanggal konsumen pertama kali menghubungi sales.","Unit Diminati …","Kode Tipe Unit (teks) …","Perkiraan Anggaran (Rp)", '
+      + '"Follow Up Terakhir","Sumber Konsumen","Alamat","Catatan"]; isian first_chat_date tipe date ada dan terisi default 19 Nov 2026; '
+      + 'header tabel = [Konsumen, No. Telepon, Kategori, Sales, Unit Diminati, Chat Awal, Follow Up Terakhir, Aksi] — kolom Status tidak lagi dirender untuk role sales (revisi 39)',
+    status: 'Pass',
+    catatan: 'Kolom first_chat_date ikut dikirim pada POST/PUT /leads dan dibaca kembali di halaman detail konsumen; validasi API dibuktikan TC-R01. '
+      + 'Kolom Status dan penapis Sales Penanganan dilepas dari daftar versi role sales sejak revisi 39, sedangkan penapis Status Cold/Warm/Hot tetap tersedia karena status masih dimiliki calon konsumen.',
+    kebutuhan: 'Revisi 2 (kolom tanggal chat awal pada form tambah konsumen role Sales)',
+  },
+  {
+    id: 'FF-R03',
+    nama: 'Pilihan metode pembayaran pada peran Sales',
+    skenario: 'Revisi 3 — metode pembayaran',
+    deskripsi: 'Selain jenis skema (KPR/Cash/Cash Bertahap), sales memilih metode pembayaran aktual termasuk nontunai di luar uang piutang.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Buka /pembayaran 3. Klik Catat Pembayaran dan baca opsi Metode Pembayaran 4. Baca header tabel',
+    dataUji: 'peran=sales, 19 catatan pembayaran',
+    ekspektasi: 'Modal punya pemilih "Metode Pembayaran" wajib dengan opsi di luar transfer bank (QRIS dsb.); tabel menampilkan kolom Metode',
+    method: 'UI',
+    path: '/pembayaran',
+    actualStatus: null,
+    actualBody: 'opsi select payment_method = ["Transfer Bank=transfer bank","Tunai=tunai","QRIS=qris","Virtual Account=virtual account","Cek / Giro=cek/giro"]; '
+      + 'hint "Cara pembayaran aktual, termasuk di luar skema uang piutang."; nilai awal form {payment_date: hari ini, payment_type: "cash bertahap", payment_method: "transfer bank"}; '
+      + 'header tabel = [Tanggal, Kode Booking, Konsumen, Jenis, Metode, Nominal, Bank, Verifikasi, Verifikator, Aksi]; 19 baris terbaca',
+    status: 'Pass',
+    catatan: 'Detail booking menampilkan metode pada tabel Riwayat Pembayaran (contoh baris 19 Nov 2026 · cash bertahap · qris · Rp 100.000); '
+      + 'validasi nilai metode dan penyaringannya dibuktikan TC-R03.',
+    kebutuhan: 'Revisi 3 (metode pembayaran termasuk di luar uang piutang)',
+  },
+  {
+    id: 'FF-R04',
+    nama: 'Penyebutan Proyek menggantikan Cluster',
+    skenario: 'Revisi 4 — penamaan proyek',
+    deskripsi: 'Seluruh antarmuka memakai istilah Proyek untuk cluster, termasuk judul halaman, tombol, kolom, pesan sistem, dan keterangan jejak audit.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /data-proyek dan /data-unit 3. Baca judul, tombol, header tabel 4. Buat lalu hapus proyek uji dan baca toast 5. Buka /log-aktivitas sebagai Super Admin',
+    dataUji: 'peran=super_admin; proyek uji "Proyek UI Verifikasi 290640"',
+    ekspektasi: 'Tidak ada label "Cluster" pada judul/tombol/kolom/pesan; keterangan jejak audit memakai kata proyek',
+    method: 'UI',
+    path: '/data-proyek + /data-unit',
+    actualStatus: null,
+    actualBody: 'judul halaman "Pengelolaan Proyek"; tombol "Tambah Proyek", "Kelola Proyek", "Tambah Unit"; header /data-proyek = [Proyek, Perumahan, Alamat, Peta, Jumlah Unit, Status, Deskripsi, Aksi]; '
+      + 'header /data-unit = [No., Blok / Kode Unit, Proyek, Tipe Unit, Luas Tanah, Luas Bangunan, Harga, Status, Aksi]; penapis "Proyek — Semua Proyek"; '
+      + 'toast pembuatan "Proyek baru berhasil ditambahkan." dan penghapusan "Proyek berhasil dihapus. Baris datanya tetap tersimpan di basis data."; '
+      + 'jejak audit terbaru memakai pola action *_proyek (keterangan "… proyek Cluster Asena")',
+    status: 'Pass',
+    catatan: 'Kata "Cluster Asena" dan semacamnya yang masih tampil adalah nama data yang dibuat pengguna, bukan label sistem. Tabel basis data tetap '
+      + 'bernama clusters dan parameter API tetap cluster_id (keputusan nama tabel Inggris + lampiran pemetaan ERD).',
+    kebutuhan: 'Revisi 4 (semua penyebutan Cluster diubah menjadi Proyek)',
+  },
+  {
+    id: 'FF-R05',
+    nama: 'Pembatalan booking beserta riwayat pembeliannya',
+    skenario: 'Revisi 5 — status pembatalan',
+    deskripsi: 'Booking aktif dapat dibatalkan beserta alasannya; konsumen berpindah ke kategori Dibatalkan sementara pemesanan dan pembayaran lamanya tetap terbaca.',
+    langkah: '1. Buka /booking sebagai sales 2. Saring Status Booking = Dibatalkan 3. Klik Detail pada booking dibatalkan 4. Buka /data-konsumen?kategori=dibatalkan lalu Detail konsumennya',
+    dataUji: 'booking BK2026110007 (status Dibatalkan, alasan "Konsumen mengundurkan diri (uji revisi 5)")',
+    ekspektasi: 'Detail booking memuat waktu dan alasan pembatalan serta riwayat pembayaran; detail konsumen memuat tabel pemesanan dengan kolom Pembatalan',
+    method: 'UI',
+    path: '/booking + /data-konsumen/30',
+    actualStatus: null,
+    actualBody: 'penapis status = [Semua Status, Menunggu DP, DP Lunas, Cicilan Berjalan, Lunas, Dibatalkan]; aksi baris = ["Detail","Serah Terima","Batalkan"]; '
+      + 'modal Detail BK2026110007: "Status Dibatalkan · Status Pelunasan dibatalkan · Waktu Pembatalan 19 Nov 2026, 17.37 · Alasan Pembatalan Konsumen mengundurkan diri (uji revisi 5) · '
+      + 'Riwayat Pembayaran (1) — 19 Nov 2026 cash bertahap qris Rp 100.000 Menunggu Verifikasi"; '
+      + '/data-konsumen/30: seksi "Booking Konsumen — 1 pemesanan tercatat untuk konsumen ini" dengan header [Kode Booking, Tanggal, Total Harga, Uang Muka, Sisa, Status, Serah Terima, Pembatalan] '
+      + 'dan nilai "BK2026110009 … Dibatalkan … Konsumen mengundurkan diri (uji revisi 5)"',
+    status: 'Pass',
+    catatan: 'Gaya penulisan alasan dijaga server (min 5 karakter) dan pembayaran pada booking dibatalkan ditolak (TC-R04).',
+    kebutuhan: 'Revisi 5 (status pembatalan dan riwayat pembelian tetap tersimpan)',
+  },
+  {
+    id: 'FF-R06',
+    nama: 'Judul halaman Data Konsumen untuk super admin',
+    skenario: 'Revisi 6 — nama halaman super admin',
+    deskripsi: 'Peran super admin tetap melihat halaman dengan judul "Data Konsumen" lengkap dengan seluruh kategorinya.',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /data-konsumen 3. Baca #lead-judul, #lead-desc, kartu ringkasan, dan penapis',
+    dataUji: 'peran=super_admin, 25 lead',
+    ekspektasi: 'Judul "Data Konsumen"; ringkasan menyebut konsumen, calon, dan riwayat pembatalan; penapis kategori tersedia',
+    method: 'UI',
+    path: '/data-konsumen',
+    actualStatus: null,
+    actualBody: 'judul "Data Konsumen"; deskripsi "Konsumen, calon konsumen, dan riwayat pembatalan. Buka Detail untuk mengubah data, menyesuaikan status, atau mencatat follow up."; '
+      + 'kartu = [Total Data Konsumen 25 (Konsumen, calon, dan riwayat pembatalan), Calon Konsumen 16 (Cold, Warm, Hot), Konsumen 6 (Pemesanan aktif), Perlu Follow Up 15 (Belum ada kontak 7 hari terakhir)]; '
+      + 'penapis Kategori = [Semua Kategori, Konsumen (sudah booking), Calon Konsumen, Dibatalkan]; penapis Status = [Semua Status, Cold, Warm, Hot]; pemilih Sales dan pencarian nama/telepon ada; '
+      + '"25 konsumen ditampilkan dari 25 data konsumen."',
+    status: 'Pass',
+    catatan: 'Judul dirender lewat span #lead-judul sehingga dapat diganti sesuai peran tanpa memuat ulang halaman (block @section pada Blade agar tag tidak ter-escape).',
+    kebutuhan: 'Revisi 6 (super admin tetap memakai nama Data Konsumen)',
+  },
+  {
+    id: 'FF-R07',
+    nama: 'Pemisahan Konsumen dan Database Konsumen untuk Sales',
+    skenario: 'Revisi 7 — kategori konsumen',
+    deskripsi: 'Menu sales memisahkan Konsumen (sudah memesan dan sah) dari Database Konsumen (calon), dan status lead hanya Cold, Warm, atau Hot.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Baca tautan sidebar 3. Buka /data-konsumen?kategori=prospek lalu ?kategori=konsumen 4. Baca judul, deskripsi, penapis, dan kartu',
+    dataUji: 'peran=sales (Budi Sales Utama), 17 lead dalam daftarnya',
+    ekspektasi: 'Dua tautan menu khusus sales; judul halaman berubah mengikuti kategori; status hanya Cold/Warm/Hot; kategori dihitung dari ada tidaknya pemesanan aktif',
+    method: 'UI',
+    path: '/data-konsumen?kategori=prospek + ?kategori=konsumen',
+    actualStatus: null,
+    actualBody: 'sidebar sales = [/dashboard, /data-konsumen?kategori=konsumen|Konsumen, /data-konsumen?kategori=prospek|Database Konsumen, /booking, /pembayaran, /laporan-sales]; '
+      + 'kategori=prospek → judul "Database Konsumen", deskripsi "Calon konsumen yang Anda tangani, dengan status Cold, Warm, atau Hot. Data berpindah menjadi Konsumen setelah pemesanan dibuat.", '
+      + '"10 konsumen ditampilkan dari 17 data konsumen."; kategori=konsumen → judul "Konsumen" dan hanya baris category=konsumen; '
+      + 'pemilih status hanya [Semua Status, Cold, Warm, Hot] (opsi Booking tidak ada lagi); kolom Kategori memakai badge Prospek/Konsumen/Dibatalkan',
+    status: 'Pass',
+    catatan: 'Kategori dihitung CustomerLead::category() dari relasi bookings (aktif → konsumen, pernah tetapi dibatalkan → dibatalkan, sisanya prospek); '
+      + 'API menolak status booking pada lead dan menyaring lewat ?category= (TC-R02).',
+    kebutuhan: 'Revisi 7 (konsumen sales hanya yang sudah booking; database konsumen Cold/Warm/Hot)',
+  },
+  {
+    id: 'FF-R08',
+    nama: 'Form tambah sales memakai tanggal lahir sebagai sandi awal',
+    skenario: 'Revisi 8 — sandi awal sales',
+    deskripsi: 'Saat admin menambahkan sales, kolom kata sandi dapat dikosongkan dan sistem memakai tanggal lahir (yyyymmdd) sebagai sandi awal yang wajib diganti.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /data-sales 3. Klik Tambah Sales 4. Baca field dan petunjuk yang dirender',
+    dataUji: 'peran=super_admin, modal Tambah Sales',
+    ekspektasi: 'Ada isian Tanggal Lahir; petunjuk menyatakan sandi awal memakai tanggal lahir format yyyymmdd dan wajib diganti dengan sandi kuat (8 karakter, huruf besar, huruf kecil, angka)',
+    method: 'UI',
+    path: '/data-sales',
+    actualStatus: null,
+    actualBody: 'field modal = [Nama Lengkap *, Kode Sales * (Kode unik, maksimal 30 karakter.), Email Login * (Email ini dipakai sales untuk masuk ke sistem.), '
+      + 'Nomor Telepon, Nomor WhatsApp, Tanggal Bergabung, Status Sales *, Alamat, Target Unit (opsional), Target Nilai (Rp, opsional), Awal Periode Target, Akhir Periode Target]; '
+      + 'input[name=birth_date] tipe date ada; petunjuk 1: "Bila kata sandi dikosongkan, sistem memakai tanggal lahir sebagai kata sandi awal (yyyymmdd)."; '
+      + 'petunjuk 2: "Kosongkan agar kata sandi awal otomatis memakai tanggal lahir. Pada login pertama sales wajib menggantinya dengan kata sandi kuat: minimal 8 karakter, huruf besar, huruf kecil, dan angka."',
+    status: 'Pass',
+    catatan: 'Alur lengkapnya otomatis: POST /sales tanpa password → auth.password_source=birth_date dan must_change_password, login dengan 19950314, '
+      + 'sandi lemah ditolak 422, LuminPark2026 diterima dan sandi lama hangus (TC-R08, FF-D06).',
+    kebutuhan: 'Revisi 8 (sandi awal dari tanggal lahir dan syarat keamanan sandi)',
+  },
+  {
+    id: 'FF-R09',
+    nama: 'Log Aktivitas hanya untuk Super Admin',
+    skenario: 'Revisi 9 dan 30 — hak log aktivitas',
+    deskripsi: 'Halaman Log Aktivitas menjadi satu-satunya modul pemantau yang hanya dibuka Super Admin; peran Monitoring Manajemen (admin sales) dan Sales tidak lagi dapat membukanya.',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /log-aktivitas 3. Baca tab, jumlah baris, dan tukar tab 4. Ulangi dengan token admin.sales@luminpark.com',
+    dataUji: 'peran=super_admin lalu admin_sales pada halaman yang sama',
+    ekspektasi: 'Super Admin melihat kedua tab terisi; Monitoring Manajemen memperoleh panel penolakan peran dan kedua endpoint log menolak 403',
+    method: 'UI',
+    path: '/log-aktivitas',
+    actualStatus: null,
+    actualBody: 'super_admin: tab = ["Jejak audit data"(aktif), "Aktivitas sistem & login"] + tombol "Muat Ulang"; jejak audit "100 dari 100 log ditampilkan" dengan header '
+      + '[Waktu, Pengguna, Modul & aksi, Keterangan, Alamat IP, Perangkat] dan baris teratas ["21 Nov 2026, 13.40","Budi Sales Utama · Sales","deleted calon konsumen",'
+      + '"Menghapus calon konsumen Konsumen Notifikasi 089407","127.0.0.1","-"]; pemilih pengguna #log-user 4 opsi; tab "Aktivitas sistem & login" ikut termuat. '
+      + 'admin_sales: #app-shell = "Halaman belum tersedia untuk peran Anda — Peran Monitoring Manajemen tidak memiliki hak akses ke modul ini — Kembali ke Dashboard" dan sidebar peran ini tidak lagi memuat /log-aktivitas (8 tautan)',
+    status: 'Pass',
+    catatan: 'Guard halaman resources/views/app/log-aktivitas.blade.php LP.guard([\'super_admin\'], load) sejajar dengan routes/api.php role:super_admin pada /activity-logs dan /system-logs; '
+      + 'verifikasi API pada TC-R21, TC-L04, TC-O03, dan TC-I05. Revisi 30 memindahkan modul ini dari Monitoring Manajemen (revisi 9) ke Super Admin.',
+    kebutuhan: 'Revisi 9 (log aktivitas pada satu peran pemantau) + Revisi 30 (menu Log Aktivitas dihapus dari Admin Sales)',
+  },
+  {
+    id: 'FF-R10',
+    nama: 'Filter dan rincian per proyek pada dashboard',
+    skenario: 'Revisi 10 dan 32 — statistik per proyek',
+    deskripsi: 'Super admin menyaring dashboard menurut satu proyek dan membaca tabel rekapitulasi seluruh proyek; sejak revisi 32 hanya rincian per proyek yang tampil, tanpa kartu angka gabungan.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /dashboard 3. Baca tabel "Ringkasan per Proyek" tanpa filter 4. Pilih satu proyek pada #dash-proyek 5. Klik satu baris proyek dan bandingkan daftar booking terbaru',
+    dataUji: 'peran=super_admin; 25 baris = 24 proyek aktif + satu ember "(belum ada proyek)" pada basis data uji port 8081',
+    ekspektasi: 'Pemilih proyek tersedia; tabel per proyek memuat seluruh proyek dengan kolom unit, booking, sales, prospek, konsumen, pembatalan, dan pendapatan; tidak ada lagi kartu total gabungan; baris proyek dapat diklik sebagai pintasan penyaringan',
+    method: 'UI',
+    path: '/dashboard',
+    actualStatus: null,
+    actualBody: 'pemilih #dash-proyek = ["Semua Proyek","Cluster Asena","Cluster Bruna","Cluster Cendana", … "Cluster Uji Sistem …"] (value "" saat semua proyek); '
+      + 'petunjuk "Setiap baris adalah satu proyek. Klik baris proyek untuk mempersempit grafik dan booking terbaru; baris (belum ada proyek) berisi konsumen yang belum menautkan unit."; '
+      + 'tabel "Ringkasan per Proyek" 25 baris dengan header [Proyek, Total Unit, Tersedia, Unit di Booking, Unit Terjual, Booking, Booking Aktif, Booking Dibatalkan, Belum Serah Terima, '
+      + 'Bayar Pending, Sales, Prospek, Konsumen, Konsumen Dibatalkan, Pendapatan]; baris pertama ["(belum ada proyek)","0","0","0","0","0","0","0","0","0","0","137","0","0","Rp 0"] dan '
+      + '["Cluster Asena","3","1","0","2","14","2","12","1","0","2","0","2","12","Rp 2.393.122.222"]; kartu angka gabungan tidak lagi dirender dan daftar booking terbaru tetap di bawah tabel',
+    status: 'Pass',
+    catatan: 'Angka tiap baris dijumlahkan pada API dan harus sama dengan kunci lama (TC-R23); penyaringan cluster_id diuji terpisah (TC-R05). Baris (belum ada proyek) '
+      + 'muncul karena lead belum menautkan unit — sumbernya COALESCE(cluster_id,0) pada DashboardController::rekapPerProyek() dan metrikLeadPerProyek().',
+    kebutuhan: 'Revisi 10 (filter per proyek dan statistik berdasarkan proyek) + Revisi 32 (rincian per proyek menggantikan angka gabungan)',
+  },
+  {
+    id: 'FF-R11',
+    nama: 'Penapis Blok, Status, dan Proyek pada Data Unit',
+    skenario: 'Revisi 11 — pencarian data unit',
+    deskripsi: 'Halaman Data Unit menyediakan pencarian berdasarkan blok, status, dan proyek sekaligus, bukan hanya satu kotak pencarian.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /data-unit 3. Baca label dan opsi ketiga penapis 4. Kombinasikan blok+status+proyek dan baca jumlah baris',
+    dataUji: 'peran=super_admin, 14 unit; kombinasi "LT-00" + Tersedia + Cluster Asena',
+    ekspektasi: 'Tiga penapis tampil (Blok, Status, Proyek) dan kombinasi memangkas daftar secara langsung',
+    method: 'UI',
+    path: '/data-unit',
+    actualStatus: null,
+    actualBody: 'penapis = [label "Blok" placeholder "kode blok unit, mis. LT-01", "Status" = [Semua Status, Tersedia, Booking, Terjual, Proses Serah Terima], '
+      + '"Proyek" = [Semua Proyek, Cluster Asena, Cluster Bruna, Cluster Cendana, 5 proyek uji]]; seluruhnya terpasang pada #unit-search, #unit-status, #unit-cluster; '
+      + 'kondisi awal 14 baris ("14 unit ditampilkan dari 14 unit keseluruhan.") → kombinasi LT-00 + available + Cluster Asena = 1 baris "LT-002 · Cluster Asena · Modern Tropical 90" '
+      + '("1 unit ditampilkan dari 14 unit keseluruhan.") dengan aksi baris ["Detail","Hapus"]',
+    status: 'Pass',
+    catatan: 'Penapis bekerja di sisi klien setelah GET /units; parameter cluster_id dan status juga didukung API (TC-R09).',
+    kebutuhan: 'Revisi 11 (pencarian Data Unit menurut Blok, Status, Proyek)',
+  },
+  {
+    id: 'FF-R12',
+    nama: 'Peta lokasi proyek pada halaman beranda publik',
+    skenario: 'Revisi 12 — peta beranda',
+    deskripsi: 'Beranda situs publik menampilkan peta beserta daftar lokasi tiap proyek yang memiliki koordinat.',
+    langkah: '1. Tanpa login buka / 2. Tunggu GET /public/project-locations 3. Baca seksi Lokasi Proyek, penanda peta, dan daftar samping',
+    dataUji: 'peran=tanpa login; proyek dengan latitude/longitude terisi',
+    ekspektasi: 'Seksi "Lokasi Proyek" tampil dengan peta Leaflet (#beranda-map), kendali zoom, penanda, dan daftar proyek beserta alamat; sejak revisi 37 penanda memperbesar ke zoom jalan dan ada kendali rute',
+    method: 'UI',
+    path: '/',
+    actualStatus: null,
+    actualBody: 'urutan seksi h2 = ["Unit Unggulan","Skema Pembayaran","Lokasi Proyek","Kabar Terbaru","Galeri Perumahan","Hubungi Sales"]; '
+      + 'elemen #beranda-map, #beranda-rute, dan #beranda-map-list terpasang; teks seksi "Klik penanda pada peta untuk melihat detail jalan di sekitar proyek, lalu gunakan tombol rute untuk mengetahui cara menuju lokasinya."; '
+      + 'peta aktif dengan kendali "+ −" dan atribusi "Leaflet | © kontributor OpenStreetMap"; entri daftar: "Proyek Asena — Jl. Uji Revisi 881534, Padang — 2 unit tersedia"',
+    status: 'Pass',
+    catatan: 'Koordinat dikelola super admin pada /data-proyek (isian latitude/longitude pada modal Ubah) dan divalidasi lewat TC-R06; proyek tanpa koordinat dilewati dari daftar. Perluasan zoom jalan dan tombol rute dicatat pada FF-R36 (revisi 37).',
+    kebutuhan: 'Revisi 12 (menambahkan peta lokasi proyek pada halaman beranda)',
+  },
+  {
+    id: 'FF-R13',
+    nama: 'Halaman Tentang Kami tanpa informasi skema pembayaran',
+    skenario: 'Revisi 13 — hilangkan skema di Tentang Kami',
+    deskripsi: 'Seksi dan kalimat yang menjelaskan skema pembayaran dihapus dari halaman Tentang Kami; informasinya tetap ada pada Beranda dan halaman Skema Pembayaran.',
+    langkah: '1. Tanpa login buka /tentang 2. Daftar seluruh heading 3. Cari kata skema/KPR/cash bertahap pada teks 4. Set public_show_gallery=0 lalu buka kembali dan pulihkan',
+    dataUji: 'saklar public_show_gallery=0 lalu=1; pengaturan about_text aktif',
+    ekspektasi: 'Tidak ada seksi skema pembayaran maupun penjelasannya di badan halaman; saklar seksi lain tetap dipatuhi',
+    method: 'UI',
+    path: '/tentang',
+    actualStatus: null,
+    actualBody: 'heading = ["Gambaran Umum","Identitas Proyek","Galeri Perumahan","Tim Sales Kami"] (tanpa "Skema Pembayaran"); '
+      + 'paragraf about_text = "Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung konsep hunian minimalis, asri, dan islami. '
+      + 'Tersedia beberapa tipe rumah pada sejumlah proyek yang sedang dipasarkan."; penelusuran teks halaman menemukan 1 frasa "Skema pembayaran" yang berada di daftar NAVIGASI footer, '
+      + 'nol kecocokan di dalam <main>; uji saklar: galleryHidden=true dengan #tentang-gallery kosong (0 karakter, tanpa permintaan data) sedangkan Tim Sales tetap 3 kartu; pemulihan=HTTP 200',
+    status: 'Pass',
+    catatan: 'Perubahan meliputi seksi blade (resources/views/public/tentang.blade.php), judul "Identitas Project" menjadi "Identitas Proyek", dan nilai pengaturan about_text '
+      + 'pada basis data kerja maupun basis data uji. Halaman /skema-pembayaran dan seksi skema pada beranda tidak diubah.',
+    kebutuhan: 'Revisi 13 (skema pembayaran dihilangkan dari halaman Tentang Kami)',
+  },
+  {
+    id: 'FF-R14',
+    nama: 'Halaman atur ulang sandi tiga langkah lewat email',
+    skenario: 'Revisi 14 — lupa password tanpa sandi lama',
+    deskripsi: 'Halaman /reset-password tidak lagi meminta kata sandi saat ini; alurnya email → cek email → kata sandi baru + verifikasi → simpan.',
+    langkah: '1. Tanpa login buka /reset-password 2. Daftar label isian dan cari field kata sandi lama 3. Isi email akun lalu klik Kirim Verifikasi 4. Baca langkah kedua dan tombol kirim ulang 5. Buka tautan dari email dan baca langkah ketiga 6. Uji sandi lemah, konfirmasi beda, lalu simpan sandi sah',
+    dataUji: 'peran=tanpa login; email=sales@luminpark.com; token diambil dari antrean driver email "log"; sandi lemah putih123/lemahsekali, sandi sah LuminBaru2026',
+    ekspektasi: 'Tidak ada isian "Kata Sandi Saat Ini"; langkah dua menampilkan email tersamar dan hitungan kirim ulang; tautan email membuka langkah tiga; validasi sandi memakai LP.PESAN_SANDI; setelah tersimpan halaman diarahkan ke /login',
+    method: 'UI',
+    path: '/reset-password',
+    actualStatus: null,
+    actualBody: 'label isian = ["Email Akun","Kata Sandi Baru","Verifikasi Kata Sandi Baru"] dan document.getElementById("password_lama") = null; '
+      + 'setelah Kirim Verifikasi langkah yang tampil = [step2] dengan email tersamar "sa***@luminpark.com" dan tombol "Kirim Ulang dalam 59 detik" dalam keadaan disabled; '
+      + 'tautan email /reset-password?token=…&email=… membuka [step3], alamat peramban dibersihkan menjadi /reset-password, dan tertulis "sa***@luminpark.com"; '
+      + 'sandi "lemahsekali" memunculkan toast "Kata sandi minimal 8 karakter serta memuat huruf besar, huruf kecil, dan angka.", konfirmasi berbeda memunculkan '
+      + '"Verifikasi password baru tidak sama.", dan submit sah memunculkan "Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru." lalu halaman berpindah ke /login; '
+      + 'ikon mata mengubah tipe isian dari password ke text',
+    status: 'Pass',
+    catatan: 'Permintaan "kata sandi saat ini" hanya hilang pada halaman publik ini; halaman Profil dan /ganti-sandi tetap memakainya karena pengguna sedang masuk. '
+      + 'Sisi API dibuktikan TC-R10 (tautan dikirim ke email akun) dan TC-R11 (token dipakai tanpa sandi lama).',
+    kebutuhan: 'Revisi 14 (reset password diverifikasi lewat email, tanpa kata sandi lama)',
+  },
+  {
+    id: 'FF-R15',
+    nama: 'Kategori konsumen mengikuti pembayaran terverifikasi',
+    skenario: 'Revisi 15 — konsumen baru setelah pembayaran diverifikasi',
+    deskripsi: 'Menu Konsumen hanya berisi lead yang pembayaran pemesanannya sudah disetujui super admin; selama pembayaran masih menunggu, '
+      + 'data tetap berada di Database Konsumen sehingga tidak ada konsumen fiktif pada daftar.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=prospek 3. Baca judul, isi penapis kategori, kartu ringkasan, dan catatan halaman 4. '
+      + 'Buka /data-konsumen?kategori=konsumen dan bandingkan jumlah barisnya',
+    dataUji: 'peran=sales, basis data uji luminpark_test dengan 35 lead (4 berbayar terverifikasi, 28 calon, 3 dibatalkan)',
+    ekspektasi: 'Penapis kategori memuat Semua Kategori, Konsumen, Calon Konsumen, dan Dibatalkan tanpa pilihan riwayat terpisah; kategori konsumen hanya terisi setelah '
+      + 'verifikasi; kartu ringkasan memisahkan Calon Konsumen, Konsumen, dan Konsumen Dibatalkan',
+    method: 'UI',
+    path: '/data-konsumen?kategori=prospek',
+    actualStatus: null,
+    actualBody: '#lead-judul = "Database Konsumen"; opsi #lead-category = ["Semua Kategori","Konsumen (pembayaran terverifikasi)","Calon Konsumen","Dibatalkan"] '
+      + '(pilihan riwayat memang tidak pernah muncul pada daftar ini; sejak revisi 39 opsi "Calon Konsumen" berstatus hidden pada role sales sehingga tidak selectable, '
+      + 'tetapi nilainya tetap dipakai saat halaman dibuka lewat ?kategori=prospek — value terbaca "prospek"); #lead-count = "28 konsumen ditampilkan dari 35 data konsumen."; '
+      + 'kartu ringkasan = ["Total Data Konsumen 35 Konsumen, calon, dan riwayat pembatalan","Calon Konsumen 28 Cold, Warm, Hot","Konsumen 4 Pembayaran terverifikasi", '
+      + '"Konsumen Dibatalkan 3 Dibuka lewat penapis Kategori","Perlu Follow Up 27 Belum ada kontak 7 hari terakhir"]; '
+      + 'header tabel = [Konsumen, No. Telepon, Kategori, Sales, Unit Diminati, Chat Awal, Follow Up Terakhir, Aksi] dan kolom Kategori baris prospek selalu "Prospek"; '
+      + 'catatan halaman berbunyi "Calon konsumen yang Anda tangani, dengan status Cold, Warm, atau Hot. Data berpindah menjadi Konsumen setelah pembayaran pertamanya disetujui."; '
+      + 'pada /data-konsumen?kategori=konsumen tabel hanya menampilkan 4 baris berkategori "Konsumen"',
+    status: 'Pass',
+    catatan: 'Pergeseran kategori mengikuti persetujuan super admin pada /data-pembayaran; aturan yang sama diuji pada sisi API lewat TC-R12 '
+      + '(prospek → konsumen setelah PUT /payments/{id}/verify) dan TC-D07. Versi ini dibaca ulang pada 21 November 2026 setelah revisi 39-41: kolom Status '
+      + 'dilepas dari daftar role sales dan jumlah lead basis data uji berbeda dari pengujian sebelumnya karena suite memang menambah serta soft-delete datanya sendiri.',
+    kebutuhan: 'Revisi 15 (konsumen otomatis setelah verifikasi pembayaran)',
+  },
+  {
+    id: 'FF-R16',
+    nama: 'Riwayat pembatalan dibaca dari kategori Dibatalkan',
+    skenario: 'Revisi 16 dan 25 — alasan serta tanggal pembatalan tetap dapat ditelusuri tanpa halaman khusus',
+    deskripsi: 'Setelah menu History dihapus, konsumen yang pemesananannya dibatalkan tetap tercatat lengkap: daftar kategori Dibatalkan pada menu Konsumen '
+      + 'menampilkan barisnya dan halaman detail konsumen memuat kode booking, tanggal batal, serta alasan pembatalan.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=konsumen lalu pilih Kategori = Dibatalkan 3. Baca judul, jumlah baris, dan kolom Aksi 4. '
+      + 'Klik Detail pada satu baris dan baca blok Booking Konsumen 5. Panggil /history dan /pembatalan-konsumen',
+    dataUji: 'peran=sales, 9 konsumen berkategori Dibatalkan dari 116 lead',
+    ekspektasi: 'Alamat /history dan /pembatalan-konsumen keduanya menghasilkan HTTP 404; daftar Dibatalkan dapat dibuka dari penapis Kategori dan '
+      + 'detail konsumen menampilkan kolom Pembatalan berisi alasan beserta tanggalnya',
+    method: 'UI',
+    path: '/data-konsumen?kategori=dibatalkan',
+    actualStatus: null,
+    actualBody: '#lead-judul berubah menjadi "Konsumen Dibatalkan" dengan #lead-count = "9 konsumen ditampilkan dari 116 data konsumen."; baris pertama '
+      + '"Konsumen Revisi 182858 | Tanpa email | 081234182858 | Dibatalkan | Hot | Budi Sales Utama | - | - | Detail | Hapus" dan label Status berada pada '
+      + 'kolom Kategori, bukan pada penapis; tautan Detail menuju /data-konsumen/164 yang pada blok "Booking Konsumen — 1 pemesanan tercatat" memuat header '
+      + '[Kode Booking, Tanggal, Total Harga, Biaya Tambahan, Uang Muka, Sisa, Status, Serah Terima, Pembatalan] dengan isi '
+      + '"BK2026110076 | 18 Nov 2026 | Rp 1.050.000.000 | Rp 0 | Rp 315.000.000 | Rp 1.050.000.000 | Dibatalkan | Belum Proses | Konsumen mengundurkan diri (uji revisi 5) | 21 Nov 2026, 12.01"; '
+      + 'teks "History" tidak lagi ditemukan pada kedua halaman; GET /history = HTTP 404 ("Not Found") dan GET /pembatalan-konsumen = HTTP 404',
+    status: 'Pass',
+    catatan: 'Alasan dan tanggal dibaca dari bookings.cancellation_reason serta bookings.cancelled_at yang tetap disimpan saat pembatalan (TC-R13 dan TC-R17 '
+      + 'membuktikan nominal terverifikasi tidak hilang); penapis API category=riwayat tetap tersedia walau tidak lagi dipakai antarmuka.',
+    kebutuhan: 'Revisi 16 (pembatalan pascabayar) + Revisi 25 (History dihapus, riwayat dibaca lewat kategori Dibatalkan)',
+  },
+  {
+    id: 'FF-R17',
+    nama: 'Biaya tambahan konstruksi pada form booking',
+    skenario: 'Revisi 17 — request tambahan bangunan saat booking',
+    deskripsi: 'Form booking menerima biaya tambahan konstruksi beserta keterangannya di luar harga utama perumahan, sehingga uang muka dan angsuran tidak berubah.',
+    langkah: '1. Masuk sebagai sales 2. Buka /booking dan baca header tabel 3. Klik "Buat Booking" lalu isi unit, skema cash bertahap, dan tanggal 4. '
+      + 'Isi Biaya Tambahan Konstruksi 25.000.000 dengan keterangan "kanopi carport + upgrade granit" 5. Bandingkan blok simulasi sebelum dan sesudah isian 6. Periksa catatan biaya tambahan dan simpan',
+    dataUji: 'peran=sales, unit tersedia harga Rp 900.000.000, skema cash bertahap 180 bulan, biaya tambahan 25.000.000',
+    ekspektasi: 'Isian biaya tambahan dan keterangan tersedia pada modal, simulasi uang muka/angsuran tidak berubah, ada catatan yang menegaskan biaya tambahan di luar harga utama, '
+      + 'kolom Biaya Tambahan muncul pada tabel dan laporan ekspor',
+    method: 'UI',
+    path: '/booking',
+    actualStatus: null,
+    actualBody: 'header tabel booking memuat kolom "Biaya Tambahan"; modal #btn-buat-booking memunculkan label "Biaya Tambahan Konstruksi (Rp)" dengan petunjuk '
+      + '"Di luar harga utama perumahan; tidak mengubah uang muka maupun angsuran." serta isian "Request Tambahan Bangunan"; setelah isian 25.000.000 blok simulasi tetap '
+      + '"Uang Muka Rp 210.000.000 / Angsuran Rp 11.316.667 / 180 bulan / Total Bunga Rp 1.197.000.000" (sama dengan keadaan tanpa biaya tambahan); '
+      + 'catatan yang terrender: "Biaya tambahan konstruksi Rp 25.000.000 untuk kanopi carport + upgrade granit berada di luar harga utama unit dan tidak mengubah simulasi di atas."',
+    status: 'Pass',
+    catatan: 'Perhitungan uang muka/angsuran tetap memakai harga utama; validasi negatif (biaya < 0 → 422), kesamaan dengan POST /payment-schemes/simulate, '
+      + 'dan munculnya kolom "Biaya Tambahan Konstruksi"/"Keterangan Tambahan" pada ekspor laporan diverifikasi pada TC-R14.',
+    kebutuhan: 'Revisi 17 (biaya tambahan konstruksi di luar biaya utama perumahan pada booking)',
+  },
+  {
+    id: 'FF-R18',
+    nama: 'Susunan menu peran Sales tanpa History',
+    skenario: 'Revisi 18 dan 25 — susunan menu sales',
+    deskripsi: 'Navigasi peran Sales berisi Dashboard, Konsumen, Database Konsumen, Booking Unit, Data Pembayaran, dan Laporan Sales; menu History '
+      + 'yang sempat ditambahkan pada revisi 18 dihapus kembali karena riwayat pembatalan cukup dibaca dari penapis Kategori.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Buka /dashboard dan baca daftar tautan sidebar 3. Ulangi pembacaan setelah masuk sebagai superadmin@gmail.com pada /data-konsumen',
+    dataUji: 'peran=sales (6 menu) dan peran=super_admin (8 menu)',
+    ekspektasi: 'Tautan /history maupun /pembatalan-konsumen tidak muncul pada peran mana pun; menu Konsumen dan Database Konsumen tetap memakai query kategori '
+      + 'yang sama seperti sebelumnya',
+    method: 'UI',
+    path: '/dashboard',
+    actualStatus: null,
+    actualBody: 'sidebar sales = ["Dashboard -> /dashboard","Konsumen -> /data-konsumen?kategori=konsumen","Database Konsumen -> /data-konsumen?kategori=prospek", '
+      + '"Booking Unit -> /booking","Data Pembayaran -> /pembayaran","Laporan Sales -> /laporan-sales"] (6 tautan, tanpa History maupun Pembatalan Konsumen); '
+      + 'sidebar super_admin = ["Dashboard","Data Unit Perumahan","Data Proyek","Data Sales","Data Konsumen","Booking Unit","Data Pembayaran","Laporan"] (8 tautan); '
+      + 'document.title = "Dashboard · Luminpark" dan tidak ada galat konsol selain peringatan CDN Tailwind',
+    status: 'Pass',
+    catatan: 'Daftar menu dibangun dari array NAV pada public/js/luminpark.js yang menyaring per peran; rute /history dan /pembatalan-konsumen keduanya sudah '
+      + 'dihapus dari routes/web.php sehingga alamat lawasnya menghasilkan HTTP 404 (dibuktikan pada FF-R16).',
+    kebutuhan: 'Revisi 18 (menu sales) + Revisi 25 (menu History dihapus dari navigasi)',
+  },
+  {
+    id: 'FF-R19',
+    nama: 'Nomor handphone hanya sekali pakai',
+    skenario: 'Revisi 19 — satu nomor untuk satu konsumen',
+    deskripsi: 'Sales menambah calon konsumen pada Database Konsumen memakai nomor handphone yang tidak boleh sama dengan konsumen lain, '
+      + 'sehingga satu nomor hanya mewakili satu konsumen.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=prospek 3. Klik Tambah Konsumen dan baca petunjuk isian Nomor Telepon 4. '
+      + 'Isi nama baru dengan nomor milik konsumen yang baru saja dibatalkan (081233182858) 5. Klik Simpan dan baca pesan galat 6. Tutup modal tanpa menyimpan',
+    dataUji: 'peran=sales, nomor 081233182858 sudah dipakai "Consumer Uji" yang berkategori Dibatalkan sejak FF-R23',
+    ekspektasi: 'Nomor ganda ditolak dengan pesan yang menjelaskan nomor hanya dapat dipakai satu kali, pesan tampil di bawah isian dan sebagai toast, '
+      + 'jumlah baris tidak bertambah; petunjuk isian menegaskan nomor tetap terkunci walau konsumen sudah dibatalkan',
+    method: 'UI',
+    path: '/data-konsumen?kategori=prospek',
+    actualStatus: null,
+    actualBody: 'petunjuk isian = "Nomor Telepon * Maksimal 15 karakter. Satu nomor hanya untuk satu konsumen, termasuk konsumen yang sudah dibatalkan."; '
+      + 'mengirim nama "Cek Nomor Dibatalkan UI" dengan 081233182858 menghasilkan span[data-error=phone] = '
+      + '"Nomor handphone ini sudah dipakai konsumen lain dan hanya dapat digunakan satu kali." (tidak lagi berkelas hidden) dengan toast berisi kalimat yang sama; '
+      + 'modal tetap terbuka dan #lead-count masih "91 konsumen ditampilkan dari 116 data konsumen." sehingga tidak ada baris baru',
+    status: 'Pass',
+    catatan: 'Aturan diterapkan memakai Rule::unique pada tabel customer_leads dengan filter whereNull(deleted_at) dan ignore(id) saat pembaruan; status cold/warm/hot '
+      + 'maupun pembatalan tidak melepas nomor karena baris lead tetap hidup — hanya penghapusan lunak yang membebaskannya. Sisi API dibuktikan TC-R15 '
+      + '(duplikat → 422, nomor milik sendiri → 200, nomor lead terhapus → 201) dan TC-R19 (ditolak saat cold dan setelah dibatalkan).',
+    kebutuhan: 'Revisi 19 (nomor handphone hanya bisa sekali pakai) + Revisi 24 (tetap terkunci walau cold atau sudah dibatalkan)',
+  },
+  {
+    id: 'FF-R20',
+    nama: 'Pilihan konsumen booking dibatasi status Hot',
+    skenario: 'Revisi 20 — booking hanya untuk konsumen siap',
+    deskripsi: 'Saat sales membuat pemesanan pada menu Booking Unit, daftar konsumen hanya berisi calon konsumen berstatus Hot sehingga '
+      + 'prospek yang belum siap tidak dapat dibooking.',
+    langkah: '1. Masuk sebagai sales 2. Buka /booking 3. Klik "Buat Booking" 4. Baca placeholder dan seluruh opsi pemilih Konsumen 5. Bandingkan dengan status lead pada Database Konsumen',
+    dataUji: 'peran=sales, 49 lead berstatus Hot dari 59 calon konsumen',
+    ekspektasi: 'Opsi pertama bertuliskan "Pilih konsumen berstatus Hot"; seluruh opsi berikutnya berlabel "Nama — nomor telepon" tanpa embel-embel Cold/Warm; '
+      + 'lead berstatus Cold/Warm tidak muncul dan API menolak pemesanan lead non-hot dengan HTTP 422',
+    method: 'UI',
+    path: '/booking',
+    actualStatus: null,
+    actualBody: 'modal "Buat Booking Unit" memiliki 50 opsi [name=lead_id] = placeholder "Pilih konsumen berstatus Hot" + 49 lead hot, contoh '
+      + '"Konsumen Tambahan Wajib 669758 — 081241669758", "Lead Hangat 669758 — 081239669758"; lead cold/warm tidak ada dalam daftar; '
+      + 'POST /api/bookings untuk lead berstatus warm = HTTP 422 dengan pesan "Pemesanan hanya dapat dibuat untuk calon konsumen berstatus hot."',
+    status: 'Pass',
+    catatan: 'Fungsi bookingLeadOptions() kini memfilter melalui bookingLeadsHot() (public/../resources/views/app/booking.blade.php); aturan yang sama ditegakkan di '
+      + 'BookingController::store sehingga klien yang memanipulasi permintaan tetap tertolak. Diuji pada TC-R16.',
+    kebutuhan: 'Revisi 20 (pilihan konsumen pada booking hanya yang berstatus hot)',
+  },
+  {
+    id: 'FF-R21',
+    nama: 'Saklar permintaan tambahan bangunan',
+    skenario: 'Revisi 21 — memilih ada/tidaknya permintaan tambahan',
+    deskripsi: 'Form booking menanyakan lebih dahulu apakah ada permintaan tambahan bangunan; isian keterangan dan biaya tambahan hanya muncul bila sales memilih "ada".',
+    langkah: '1. Masuk sebagai sales 2. Buka /booking dan klik "Buat Booking" 3. Baca label isian dan status keterlihatan Tambahan Unit (Keterangan) serta Biaya Tambahan Konstruksi pada keadaan awal 4. '
+      + 'Ubah Permintaan Tambahan Bangunan menjadi "Ada permintaan tambahan bangunan" 5. Isi konsumen, unit, dan skema lalu klik Simpan tanpa mengisi keterangan',
+    dataUji: 'peran=sales, 18 booking tercatat, keadaan awal "Tidak ada permintaan tambahan"',
+    ekspektasi: 'Kedua isian tambahan tersembunyi pada keadaan awal dan terlihat setelah dipilih "ada"; menyimpan tanpa keterangan ditolak dengan pesan yang meminta keterangan, '
+      + 'jumlah booking tidak bertambah, dan API menolak biaya tambahan tanpa keterangan dengan HTTP 422',
+    method: 'UI',
+    path: '/booking',
+    actualStatus: null,
+    actualBody: 'label modal berurutan = ["Konsumen *","Proyek *","Unit Yang Dipesan *","Skema Pembayaran *","Tanggal Booking *","Permintaan Tambahan Bangunan *", '
+      + '"Tambahan Unit (Keterangan)","Biaya Tambahan Konstruksi (Rp)","Catat Pembayaran Sekarang","Kategori Pembayaran","Nominal Pembayaran (Rp)","Tanggal Pembayaran","Metode Pembayaran","Catatan Booking"]; '
+      + 'nilai awal addition_requested = "tidak" dengan label addition_description dan '
+      + 'addition_cost berkelas hidden (bookingToggleTambahan); setelah dipilih "ya" kedua label kehilangan kelas hidden; menyimpan dengan "ya" dan keterangan kosong memunculkan toast '
+      + '"Keterangan tambahan bangunan wajib diisi bila ada permintaan tambahan." sementara #booking-count tetap "18 booking ditampilkan dari 18 data booking."; '
+      + 'empat label pembayaran (initial_category, initial_amount, initial_date, initial_method) ikut hidden/terlihat mengikuti saklar Catat Pembayaran Sekarang sejak revisi 43',
+    status: 'Pass',
+    catatan: 'Bila "tidak" dipilih, nilai addition_cost dikirim sebagai 0 dan addition_description sebagai null sehingga tidak ada biaya bayangan; penjagaan yang sama ada di sisi API '
+      + '(tolakTambahanTanpaKeterangan) dan diuji pada TC-R18 beserta TC-R14 untuk besaran biaya. Urutan label ikut berubah karena revisi 42 menyisipkan pemilih Proyek '
+      + 'setelah Konsumen dan revisi 43 menambahkan blok pembayaran pertama setelah biaya tambahan (bukti per butir: FF-R41 dan FF-R42).',
+    kebutuhan: 'Revisi 21 (pilihan ada/tidak ada permintaan tambahan beserta keterangan dan biayanya)',
+  },
+  {
+    id: 'FF-R22',
+    nama: 'Tombol Tambah Konsumen hilang dari menu Konsumen',
+    skenario: 'Revisi 22 — data konsumen terisi otomatis',
+    deskripsi: 'Sales tidak lagi menambah data konsumen pada menu Konsumen karena daftar itu terisi otomatis setelah pembayaran diverifikasi; '
+      + 'tombol penambahan hanya tersedia pada Database Konsumen.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=konsumen dan periksa tombol #btn-add-lead beserta catatan halaman 3. Buka /data-konsumen?kategori=prospek dan periksa tombol yang sama 4. '
+      + 'Ulangi pembacaan sebagai super_admin pada /data-konsumen',
+    dataUji: 'peran=sales (16 konsumen, 91 calon) dan peran=super_admin (137 lead)',
+    ekspektasi: 'Pada daftar Konsumen tombol Tambah Konsumen tersembunyi sedangkan pada Database Konsumen tetap terlihat; super_admin tetap dapat menambah dari halaman gabungan; '
+      + 'Admin Sales tidak melihat tombol tulis sama sekali',
+    method: 'UI',
+    path: '/data-konsumen?kategori=konsumen',
+    actualStatus: null,
+    actualBody: '#btn-add-lead berlabel "Tambah Konsumen" dan berkelas hidden pada kategori=konsumen (16 baris) maupun pada tautan halaman; pada kategori=prospek tombol yang sama terlihat; '
+      + 'sebagai super_admin pada /data-konsumen tombol terlihat dengan 137 baris ("137 konsumen ditampilkan dari 137 data konsumen."); catatan halaman berbunyi '
+      + '"… Data konsumen ditambah pada menu Database Konsumen; daftar Konsumen terisi otomatis begitu pembayaran pemesanan seorang calon konsumen disetujui super admin. '
+      + 'Pembatalan dilakukan melalui tombol Batal pada kolom Aksi dan memindahkan konsumen ke kategori Dibatalkan pada penapis Kategori."; aksi halaman hanya menyisakan tautan "Booking Unit -> /booking"',
+    status: 'Pass',
+    catatan: 'Penyembunyian diatur leadPaintActions() yang hanya mengizinkan tombol pada peran selain Sales atau pada kategori kosong/prospek; alur pengisian otomatis dibuktikan TC-R12 '
+      + 'dan FF-R15, sedangkan penolakan tulis untuk Admin Sales tetap dijaga rute (TC-L02).',
+    kebutuhan: 'Revisi 22 (tombol tambah data konsumen pada menu Data Konsumen dihilangkan)',
+  },
+  {
+    id: 'FF-R23',
+    nama: 'Tombol Batal pada kolom Aksi memindahkan konsumen ke kategori Dibatalkan',
+    skenario: 'Revisi 23 dan 25 — pembatalan transaksi oleh sales dengan alasan dan tanggal',
+    deskripsi: 'Konsumen yang sudah membayar atau menempati unit dapat membatalkan lewat tombol Batal pada kolom Aksi Data Konsumen; '
+      + 'modalnya meminta alasan dan tanggal pembatalan, lalu barisnya berpindah ke kategori Dibatalkan dan hilang dari daftar konsumen.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=konsumen 3. Klik Batal pada baris "Consumer Uji" dan baca isi modal 4. '
+      + 'Isi alasan dan tanggal 2026-11-19 lalu simpan 5. Baca toast dan jumlah baris 6. Pilih Kategori = Dibatalkan, cocokkan barisnya, lalu buka detail konsumen',
+    dataUji: 'peran=sales, lead "Consumer Uji" 081233182858 dengan booking BK2026110075 dan pembayaran terverifikasi',
+    ekspektasi: 'Modal berisi Alasan Pembatalan (wajib) dan Tanggal Pembatalan (wajib, default hari ini); setelah disimpan konsumen keluar dari daftar Konsumen, '
+      + 'unit kembali tersedia, dan barisnya muncul pada kategori Dibatalkan dengan tanggal serta alasan yang terbaca pada detail konsumen',
+    method: 'UI',
+    path: '/data-konsumen?kategori=konsumen',
+    actualStatus: null,
+    actualBody: '16 baris konsumen memiliki pasangan tombol [data-lead-action] = "Batal" dan "Hapus"; modal "Batalkan Pemesanan — Consumer Uji" berdeskripsi '
+      + '"Seluruh pemesanan aktif konsumen ini dibatalkan. Unit kembali tersedia dan konsumen keluar dari daftar Konsumen menjadi kategori Dibatalkan; riwayat pembayaran yang sudah disetujui tetap tersimpan." '
+      + 'dengan isian reason (textarea, wajib) dan cancelled_at (date, default 2026-11-21); setelah pengisian alasan dan tanggal 2026-11-19 muncul toast '
+      + '"1 pemesanan atas nama Consumer Uji berhasil dibatalkan. Data konsumen dipindahkan ke kategori Dibatalkan beserta riwayat pembeliannya." dan #lead-count menyusut dari '
+      + '"16 konsumen ditampilkan dari 116 data konsumen." menjadi "15 konsumen ditampilkan dari 116 data konsumen."; kartu ringkasan berubah menjadi Konsumen 15 dan Konsumen Dibatalkan 10; '
+      + 'pada Kategori = Dibatalkan barisnya terbaca "Consumer Uji | uji@consumer.com | 081233182858 | Dibatalkan | Hot | Budi Sales Utama | - | - | Detail | Hapus" dan tautan Detail '
+      + '/data-konsumen/160 menampilkan blok Pembatalan "BK2026110075 | 21 Okt 2026 | Rp 815.000.000 | Rp 0 | Rp 244.500.000 | Rp 15.847.222 | Dibatalkan | Belum Proses | '
+      + 'Konsumen mengundurkan diri lewat tombol Batal di antarmuka (verifikasi revisi 25) | 19 Nov 2026, 07.00"',
+    status: 'Pass',
+    catatan: 'Tombol Batal hanya dirender bila barisnya punya Booking aktif (kolom baru punya_booking_aktif pada GET /customer-leads). Pembatalan memanggil '
+      + 'POST /api/customer-leads/{id}/batalkan (HTTP 200) yang memakai model Booking::batalkan() sehingga unit kembali available dan pembayaran terverifikasi tetap tercatat; '
+      + 'pembatalan kedua pada konsumen yang sama ditolak HTTP 422. Diuji pada TC-R17 dan TC-R19.',
+    kebutuhan: 'Revisi 23 (tombol batal berisi alasan dan tanggal) + Revisi 25 (hasil pembatalan dibaca lewat kategori Dibatalkan, bukan menu History)',
+  },
+  {
+    id: 'FF-R24',
+    nama: 'Penapis Status dan Kategori mengikuti menu sales',
+    skenario: 'Revisi 26 dan 27 — penapis yang tidak relevan disembunyikan',
+    deskripsi: 'Pada menu Konsumen penapis Status (Cold/Warm/Hot) dihilangkan karena status hanya dimiliki calon konsumen, sedangkan pada menu Database '
+      + 'Konsumen penapis Kategori dihilangkan karena halamannya sudah tetap pada kategori calon konsumen.',
+    langkah: '1. Masuk sebagai sales 2. Buka /data-konsumen?kategori=konsumen dan periksa kelas hidden pada #lead-label-status serta #lead-label-category 3. '
+      + 'Buka /data-konsumen?kategori=prospek dan periksa kedua label itu lagi 4. Ubah penapis Kategori menjadi Dibatalkan, Calon Konsumen, lalu Konsumen sambil membaca judul dan jumlah baris 5. '
+      + 'Ulangi pembacaan sebagai super_admin pada /data-konsumen',
+    dataUji: 'peran=sales pada 35 lead (4 konsumen, 28 calon, 3 dibatalkan) dan peran=super_admin pada 41 lead',
+    ekspektasi: 'Status tersembunyi pada kategori konsumen dan dibatalkan, Kategori tersembunyi pada kategori prospek, nilai Status ikut dikosongkan saat labelnya '
+      + 'disembunyikan, dan super_admin tetap melihat penapis Status, Kategori, serta Sales Penanganan pada halaman gabungan',
+    method: 'UI',
+    path: '/data-konsumen?kategori=konsumen',
+    actualStatus: null,
+    actualBody: 'kategori=konsumen → #lead-label-status berkelas hidden (value "") dan #lead-label-category terlihat dengan opsi '
+      + '["Semua Kategori","Konsumen (pembayaran terverifikasi)","Calon Konsumen","Dibatalkan"] di mana "Calon Konsumen" dilaporkan hidden=true (revisi 39), '
+      + 'judul "Konsumen", "4 konsumen ditampilkan dari 35 data konsumen."; #lead-label-sales berkelas hidden; header tabel '
+      + '[Konsumen, No. Telepon, Kategori, Sales, Unit Ditempati, Pesanan Tambahan, Chat Awal, Follow Up Terakhir, Aksi]. '
+      + 'kategori=prospek → #lead-label-category berkelas hidden (value tetap "prospek") dan #lead-label-status terlihat dengan opsi '
+      + '["Semua Status","Cold","Warm","Hot"], judul "Database Konsumen", "28 konsumen ditampilkan dari 35 data konsumen.", penapis Sales tetap tersembunyi. '
+      + 'perubahan penapis di dalam halaman: Dibatalkan → judul "Konsumen Dibatalkan", Status hidden, "3 konsumen ditampilkan dari 35 data konsumen."; '
+      + 'Calon Konsumen → Kategori hidden, Status terlihat; Konsumen → Status hidden, Kategori terlihat. Sebagai super_admin pada /data-konsumen ketiga label terlihat '
+      + '(judul "Data Konsumen", "41 konsumen ditampilkan dari 41 data konsumen."), #btn-add-lead tetap terlihat, dan penapis Sales Penanganan berupa '
+      + 'input pencarian dengan datalist 9 nama sales (bukan pemilih "Semua Sales")',
+    status: 'Pass',
+    catatan: 'Penyembunyian ditangani leadPaintFilterVisibility() dan jumlah kolom ditangani leadPakaiStatus() + leadKolom(); nilai Status dikosongkan '
+      + 'agar baris tidak tersembunyi di balik penapis yang tidak terlihat. Revisi 39 menambahkan dua aturan baru pada fungsi yang sama: label Sales disembunyikan '
+      + 'untuk role sales dan opsi Calon Konsumen memakai attribute hidden sehingga tautan menu Database Konsumen (?)kategori=prospek) tetap berfungsi. '
+      + 'Aturan status per lead tetap dijaga server (TC-R01 dan TC-R16); kolom dibuktikan pada TC-R32.',
+    kebutuhan: 'Revisi 26 (penapis Status hanya pada calon konsumen) + Revisi 27 (penapis Kategori dihapus dari Database Konsumen)',
+  },
+  {
+    id: 'FF-A20',
+    nama: 'Halaman Data Proyek lengkap',
+    skenario: 'Pengelolaan proyek',
+    deskripsi: 'Super admin memiliki halaman khusus proyek berisi ringkasan, penapis, dan aksi ubah/arsipkan/hapus; kolom Peta dan penapis Perumahan sudah dilepas (revisi 31).',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /data-proyek 3. Baca kartu ringkasan, label penapis, kolom tabel, dan tombol aksi per baris',
+    dataUji: 'peran=super_admin, basis data uji berisi 24 proyek dan 30 unit',
+    ekspektasi: 'Tabel memuat nama proyek, perumahan, alamat, jumlah unit, status, deskripsi, dan aksi — tanpa kolom peta; penapis hanya pencarian proyek dan status; setiap baris punya aksi Ubah, Arsipkan, Hapus; tombol Tambah Proyek terlihat',
+    method: 'UI',
+    path: '/data-proyek',
+    actualStatus: null,
+    actualBody: 'judul "Pengelolaan Proyek"; ringkasan "TOTAL PROYEK 24 (seluruh proyek termasuk arsip) / PROYEK AKTIF 24 (muncul pada formulir unit) / PROYEK ARSIP 0 (ditutup dari formulir unit) / '
+      + 'UNIT TERDAFTAR 30 (unit yang menempati proyek)"; penapis = label "Cari Proyek" (#proyek-search, tipe search) dan "Status" (#proyek-status: Semua Status/Aktif/Diarsipkan) — '
+      + 'tidak ada #proyek-project maupun label "Cari Perumahan" pada DOM; header = [Proyek, Perumahan, Alamat, Jumlah Unit, Status, Deskripsi, Aksi]; '
+      + 'baris pertama = [Cluster Asena, Perumahan Lumin Park Semarang, "Jl. Uji Revisi 089407, Padang", 3, Aktif, "Cluster depan dengan akses langsung ke fasilitas utama.", Ubah·Arsipkan·Hapus]; '
+      + 'aksi baris = ["Ubah","Arsipkan","Hapus"]; #proyek-add terlihat dengan label "Tambah Proyek"; "24 dari 24 proyek ditampilkan"',
+    status: 'Pass',
+    catatan: 'Aksi Arsipkan memakai PATCH /clusters/{id}/arsipkan dan Hapus memakai DELETE (konfirmasi dulu). Isian latitude/longitude tetap ada pada formulir Ubah karena koordinat itu '
+      + 'dipakai penanda peta pada beranda publik (revisi 12) — hanya kolom Peta pada tabel yang dihapus. Observasi pada port 8081, 21 November 2026.',
+    kebutuhan: 'Kebutuhan b.1 (kelola cluster/proyek) + batasan D-6 + revisi 4 + revisi 31',
+  },
+  {
+    id: 'FF-A21',
+    nama: 'Penghitung waktu sesi dan perpanjangan',
+    skenario: 'Sesi login',
+    deskripsi: 'Header menampilkan sisa waktu sesi, memberi peringatan sebelum kedaluwarsa, dan logout otomatis ketika habis.',
+    langkah: '1. Masuk sebagai superadmin 2. Baca chip #lp-session 3. Perpendek masa berlaku token di basis data menjadi 100 detik 4. Muat ulang dan klik Perpanjang 5. Biarkan token kedaluwarsa',
+    dataUji: 'session_timeout_minutes=1440; token diatur ulang lewat MySQL (UTC_TIMESTAMP)',
+    ekspektasi: 'Chip menghitung mundur; kuning + tombol Perpanjang muncul di bawah 5 menit; perpanjangan mengembalikan hitungan; kedaluwarsa mengirim pengguna ke /login',
+    method: 'UI',
+    path: '/dashboard',
+    actualStatus: null,
+    actualBody: 'normal: "Sesi 23:59:44" (tanpa tombol); peringatan: kelas border-amber-300/bg-amber-50 + "Sesi 01:23 Perpanjang"; '
+      + 'setelah klik: token fc2674 -> 5362db, "Sesi 23:59:56", kelas amber hilang, toast "Sesi berhasil diperpanjang."; '
+      + 'kedaluwarsa: location = /login dan localStorage luminpark_token = null, lalu /login?sesi=berakhir diarahkan bersih ke /login',
+    status: 'Pass',
+    catatan: 'Peringatan pada 300 detik (PERINGATAN_SESI_DETIK). Perpanjangan memanggil POST /session/refresh yang mengganti token, '
+      + 'sedangkan token lama langsung tidak berlaku (TC-P02, TC-P03).',
+    kebutuhan: 'Butir a.4 + batasan D-7 (peringatan sesi)',
+  },
+  {
+    id: 'FF-A22',
+    nama: 'Lembar cetak laporan berpengesahan',
+    skenario: 'Laporan',
+    deskripsi: 'Tombol Ekspor PDF / Cetak menyusun lembar A4 berisi kop perumahan, periode, identitas pencetak, dan kolom tanda tangan dua pihak.',
+    langkah: '1. Buka /laporan (super admin) dan /laporan-sales (sales) 2. Stub window.print 3. Klik tombol cetak 4. Baca isi #lp-print-kop dan #lp-print-sign',
+    dataUji: 'periode default 30 hari; pengaturan estate_* aktif',
+    ekspektasi: 'Kop memuat nama/alamat/kontak perumahan, judul laporan, periode, dan waktu cetak; blok pengesahan memuat "Dibuat oleh" dan "Mengetahui, Pimpinan / Atasan langsung"',
+    method: 'UI',
+    path: '/laporan + /laporan-sales',
+    actualStatus: null,
+    actualBody: '/laporan: "Perumahan Lumin Park Padang / Jalan Lubuk Minturun, ... Sumatera Barat / (0751) 550100 · info@luminpark.co.id / '
+      + 'Laporan Penjualan / Periode: 15 Okt 2026 s/d 14 Nov 2026 · Dicetak: 14 Nov 2026, 21.52"; '
+      + 'pengesahan: "Dibuat oleh, Super Admin" + nama pengguna, "Mengetahui, Pimpinan / Atasan langsung" + garis titik-titik, '
+      + 'penutup "Perumahan Lumin Park Padang, 14 Nov 2026. Tanda tangan digital dapat ditempelkan pada kolom di atas sebelum dokumen diedarkan."; '
+      + '/laporan-sales: judul "Laporan Penjualan Sales", window.print terpanggil 1x, blok lp-print-only ada',
+    status: 'Pass',
+    catatan: 'Lembar hanya tampil pada media print (.lp-print-only) dan memakai @page A4 portrait; header, sidebar, dan lonceng notifikasi '
+      + 'disembunyikan lewat .lp-no-print sehingga "Simpan sebagai PDF" pada dialog cetak menghasilkan dokumen bersih.',
+    kebutuhan: 'Kebutuhan f.4 + batasan D-3 (ekspor PDF dan tanda tangan)',
+  },
+  {
+    id: 'FF-A23',
+    nama: 'Log Aktivitas dua sumber',
+    skenario: 'Jejak audit',
+    deskripsi: 'Halaman Log Aktivitas memisahkan jejak audit data (activity_logs sesuai ERD) dan aktivitas sistem/login (system_logs).',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /log-aktivitas 3. Baca tab dan baris tabel 4. Tukar tab',
+    dataUji: 'peran=super_admin setelah suite backend dan frontend berjalan (revisi 30)',
+    ekspektasi: 'Tab "Jejak audit data" menampilkan aksi, pelaku, keterangan, dan IP; tab "Aktivitas sistem & login" menampilkan log sistem',
+    method: 'UI',
+    path: '/log-aktivitas',
+    actualStatus: null,
+    actualBody: 'tab = ["Jejak audit data","Aktivitas sistem & login"]; tab audit "100 dari 100 log ditampilkan" dengan header [Waktu, Pengguna, Modul & aksi, Keterangan, Alamat IP, Perangkat]; '
+      + 'contoh baris ["21 Nov 2026, 13.40","Budi Sales Utama · Sales","deleted calon konsumen","Menghapus calon konsumen Konsumen Notifikasi 089407","127.0.0.1","-"]; '
+      + 'pemilih pengguna #log-user 4 opsi; tab sistem termuat saat ditukar dan pencarian "Cari Aktivitas" menyaring kedua tab',
+    status: 'Pass',
+    catatan: 'Jejak audit ditulis AuditObserver untuk model yang dipantau (AppServiceProvider::AUDITABLE); label model kini mengikuti revisi 4 '
+      + '(cluster → proyek, project → perumahan) sehingga keterangan terbaca berbahasa Indonesia. Dibaca dari GET /activity-logs yang sejak revisi 30 dikhususkan bagi Super Admin.',
+    kebutuhan: 'Kebutuhan non-fungsional (audit trail) + batasan D-5 + revisi 9 + revisi 30',
+  },
+  {
+    id: 'FF-B09',
+    nama: 'Data Proyek hanya-lihat untuk Monitoring Manajemen',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Peran Monitoring Manajemen (admin sales) dapat membaca daftar proyek tetapi tidak mendapat kendali tulis apa pun.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /data-proyek 3. Periksa #proyek-add dan tombol aksi baris',
+    dataUji: 'peran=admin_sales',
+    ekspektasi: 'Daftar proyek terbaca, tombol Tambah Proyek tersembunyi, dan baris tidak punya aksi Ubah/Arsipkan/Hapus',
+    method: 'UI',
+    path: '/data-proyek',
+    actualStatus: null,
+    actualBody: 'judul "Pengelolaan Proyek"; #proyek-add tidak terlihat; 8 baris terbaca; header tabel = [Proyek, Perumahan, Alamat, Peta, Jumlah Unit, Status, Deskripsi] '
+      + '(kolom Aksi tidak dirender sehingga 7 sel per baris); elemen [data-aksi] di badan tabel = 0; ringkasan tetap tampil (Total Proyek 8 / Unit Terdaftar 14)',
+    status: 'Pass',
+    catatan: 'Penjagaan sebenarnya tetap di middleware: POST/PUT/PATCH/DELETE /clusters menghasilkan 403 (TC-M11, TC-B17).',
+    kebutuhan: 'Keputusan RBAC: Monitoring Manajemen hanya-lihat + batasan D-6 + revisi 4',
+  },
+  {
+    id: 'FF-C07',
+    nama: 'Sales ditolak pada halaman Data Proyek',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Peran sales tidak berhak atas modul proyek sehingga URL langsung menampilkan penolakan.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Ketik /data-proyek 3. Baca isi #app-shell',
+    dataUji: 'peran=sales',
+    ekspektasi: 'Panel penolakan tampil, bukan daftar proyek',
+    method: 'UI',
+    path: '/data-proyek',
+    actualStatus: null,
+    actualBody: '#app-shell = "Halaman belum tersedia untuk peran Anda — Peran Sales tidak memiliki hak akses ke modul ini — Kembali ke Dashboard"; '
+      + 'sidebar tidak dirender (#lp-nav kosong, tabel #proyek-table tidak ada); GET /clusters dengan token sales = 403 (TC-M11)',
+    status: 'Pass',
+    catatan: 'LP.guard([\'super_admin\',\'admin_sales\']) pada halaman Data Proyek.',
+    kebutuhan: 'Kebutuhan a.2 + batasan D-6 + revisi 4',
+  },
+  {
+    id: 'FF-B10',
+    nama: 'Detail unit hanya-baca untuk Monitoring Manajemen',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Permintaan pengguna 16 November 2026: pada halaman detail unit peran Monitoring Manajemen hanya melihat, jadi kata "Ubah" dihapus dari judul dan seluruh kontrol tulis tidak dirender.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /data-unit/14 3. Baca judul seksi, status isian, tombol, dan pemilih foto',
+    dataUji: 'peran=admin_sales, unit B.24 NC (id 14) pada basis data kerja port 8000',
+    ekspektasi: 'Judul "Data Unit" tanpa kata Ubah; seluruh isian disabled; tidak ada tombol Simpan Perubahan; tidak ada pemilih berkas Ganti Foto; catatan hanya-baca tampil',
+    method: 'UI',
+    path: '/data-unit/14',
+    actualStatus: null,
+    actualBody: 'judul seksi = ["Data Unit","B.24 NC","Foto Unit","Riwayat Pemesanan"] (tanpa "Ubah Data Unit"); isian=8, enabled=0; '
+      + '#du-save tidak ada; #du-image tidak ada dan teks "Ganti Foto" tidak ditemukan; catatan "Halaman ini hanya dibaca. '
+      + 'Hanya Super Admin yang dapat mengubah data dan foto unit." tampil; tidak ada galat SQL maupun "Data gagal dimuat."',
+    status: 'Pass',
+    catatan: 'Penolakan tulis tetap ditegakkan di backend: PUT/DELETE /units khusus role:super_admin sehingga peran pembaca memperoleh 403 (TC-B09, TC-E05). '
+      + 'Sebagai super admin halaman yang sama tetap menampilkan "Ubah Data Unit", 9 isian aktif, tombol Simpan Perubahan, dan pemilih Ganti Foto (FF-A05).',
+    kebutuhan: 'Kebutuhan b.1 + keputusan pengguna (Monitoring Manajemen hanya-lihat)',
+  },
+  {
+    id: 'FF-B11',
+    nama: 'Tombol Kelola Proyek dan aksi tulis hilang untuk Monitoring Manajemen',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Permintaan pengguna 16 November 2026 (diperbarui menyusul revisi 4): tautan Kelola Proyek, Tambah Unit, dan Tambah Proyek tidak diberikan pada peran yang tidak berhak mengelolanya.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /data-unit 3. Periksa tautan #btn-kelola-proyek, tombol tambah, dan isi kolom Aksi baris tabel',
+    dataUji: 'peran=admin_sales pada basis data kerja port 8000 (12 unit)',
+    ekspektasi: 'Tautan Kelola Proyek tidak terlihat, Tambah Unit dan Tambah Proyek tersembunyi, kolom Aksi hanya berisi Detail',
+    method: 'UI',
+    path: '/data-unit',
+    actualStatus: null,
+    actualBody: '#btn-kelola-proyek ada di DOM tetapi ber-kelas hidden (offsetParent = null); #btn-add-unit hidden; #btn-add-proyek hidden; '
+      + 'baris tabel = 12; aksi baris pertama = ["Detail"] saja; deskripsi halaman "Telusuri dan saring unit; buka Detail untuk melihat '
+      + 'informasi unit beserta riwayat pemesanannya." (tanpa kata ubah). Sebagai super admin: Kelola Proyek, Tambah Unit, Tambah Proyek tampil '
+      + '(label "Kelola Proyek" dan "Tambah Proyek" terverifikasi 19 November 2026) dan aksi baris = ["Detail","Hapus"]',
+    status: 'Pass',
+    catatan: 'Sama seperti tombol lain, penyembunyian hanya lapisan antarmuka; rute tulis unit dan proyek tetap dijaga middleware role:super_admin.',
+    kebutuhan: 'Kebutuhan b.1 + keputusan pengguna (Monitoring Manajemen hanya-lihat) + revisi 4',
+  },
+  {
+    id: 'FF-D08',
+    nama: 'Halaman kontak publik tanpa form konsumen',
+    skenario: 'Halaman publik konsumen',
+    deskripsi: 'Keputusan pengguna 16 November 2026: calon konsumen tidak lagi diisi lewat situs publik; halaman kontak hanya menampilkan narahubung sales.',
+    langkah: '1. Tanpa login buka /kontak 2. Hitung elemen form, input, dan tombol 3. Tunggu daftar sales terisi 4. Baca tautan WhatsApp dan tautan daftar unit 5. Probe POST /api/public/contact',
+    dataUji: 'tanpa sesi login; basis data uji luminpark_test pada port 8081',
+    ekspektasi: 'Tidak ada elemen form/input/textarea dan tidak ada tombol kirim; kartu "Informasi Pemasaran" dan "Sales Kami" tampil dengan tautan wa.me; POST /api/public/contact ditolak',
+    method: 'UI',
+    path: '/kontak',
+    actualStatus: 404,
+    actualBody: 'form=0, input/textarea/select=0, tombol=[] (satu elemen tanpa label); kartu = "Informasi Pemasaran" + "Sales Kami"; '
+      + '3 tautan https://wa.me/62812345678101, ...102, ...103; tautan "Lihat Daftar Unit" -> /unit; teks "Kirim"/"Kirim Pertanyaan" tidak ada; '
+      + 'POST /api/public/contact -> HTTP 404 "Alamat tujuan tidak ditemukan."; di beranda tombol CTA "Hubungi Kami" -> /kontak',
+    status: 'Pass',
+    catatan: 'Skrip halaman hanya memanggil GET /public/sales-contacts dan GET /public/settings sehingga tidak ada lagi jalur tulis tanpa login pada situs publik. '
+      + 'Konsol peramban bersih (hanya peringatan CDN Tailwind). Data calon konsumen kini dibuat sales dari /data-konsumen.',
+    kebutuhan: 'Kebutuhan g.4 + keputusan pengguna (form lead publik dihapus)',
+  },
+  {
+    id: 'FF-R25',
+    nama: 'Berkas History benar-benar hilang dan sensus berkas warisan diperbarui',
+    skenario: 'Revisi 28 — berkas tak berujuk rute',
+    deskripsi: 'Berkas resources/views/app/history.blade.php dihapus beserta seluruh rujukannya, dan daftar berkas Blade yang tidak dirujuk rute '
+      + 'mana pun sensus ulang sehingga laporan tidak lagi menyebut berkas yang sudah mati.',
+    langkah: '1. GET /history dan /pembatalan-konsumen pada servers uji 2. Telusuri kata history di routes/, app/, public/js, resources/views 3. Sensus 37 berkas Blade terhadap rujukan rute 4. Buka sidebar peran Sales dan Super Admin',
+    dataUji: 'tanpa login dan peran login; basis data uji luminpark_test port 8081',
+    ekspektasi: 'Kedua alamat lama berbalas HTTP 404; tidak ada rujukan app.history; daftar berkas warisan pada laporan sesuai sensus dan history.blade.php tidak ada di pohon berkas',
+    method: 'UI',
+    path: '/history',
+    actualStatus: 404,
+    actualBody: 'GET /history = HTTP 404 dan GET /pembatalan-konsumen = HTTP 404; berkas resources/views/app/history.blade.php tidak ditemukan pada pohon berkas; '
+      + 'rujukan "/history" hanya tersisa sebagai history.replaceState() pada auth/login, auth/reset-password, dan app/profil (API peramban, bukan rute aplikasi); '
+      + 'sensus: 30 dari 37 berkas Blade terpetakan rute, tujuh berkas warisan tanpa rute = welcome.blade.php, dashboard/index.blade.php, sales/index.blade.php, '
+      + 'super-admin/dashboard.blade.php, super-admin/dataunit_perumahan.blade.php, activity-log/index.blade.php, layouts/dashboard.blade.php',
+    status: 'Pass',
+    catatan: 'ActivityLogController varian web (app/Http/Controllers/ActivityLogController.php:13) ikut masuk daftar mati karena routes/api.php:146 hanya memakai varian Api\\; '
+      + 'daftar ini ditulis ulang pada baris risiko BAB V Laporan Uji Sistem. Sensus dilakukan skrip Python di dalam tests/ terhadap routes, app, config, database, public/js, dan tests.',
+    kebutuhan: 'Revisi 28 (hapus history.blade.php dan perbarui daftar file yang tidak dirujuk rute)',
+  },
+  {
+    id: 'FF-R26',
+    nama: 'Lonceng Admin Sales bersih dari siaran booking dan pembayaran',
+    skenario: 'Revisi 29 — arah notifikasi',
+    deskripsi: 'Pemberitahuan booking baru, pembatalan, pembayaran, dan hasil verifikasi tidak lagi diterima peran Monitoring Manajemen, termasuk baris '
+      + 'lama yang tercetak sebelum perubahannya.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /notifikasi dan baca daftar serta penghitung lonceng 3. GET /api/notifications dan /api/notifications/unread-count dengan token yang sama 4. Ulangi dengan token superadmin dan sales',
+    dataUji: 'peran=admin_sales, super_admin, sales; basis data uji masih berisi 343 baris notifications milik admin_sales',
+    ekspektasi: 'Daftar dan halaman Notifikasi Admin Sales kosong serta unread_count=0; Super Admin dan sales pemilik transaksi tetap menerima notifikasi booking/payment',
+    method: 'UI',
+    path: '/notifikasi',
+    actualStatus: 200,
+    actualBody: 'admin_sales: /notifikasi menampilkan "Notifikasi — Pemberitahuan terkait pembayaran, booking, dan aktivitas akun Anda" lalu keadaan kosong '
+      + '"Belum ada notifikasi." dan "Tidak ada notifikasi — Pemberitahuan pembayaran dan booking akan muncul di halaman ini."; GET /api/notifications = 200 dengan 0 baris '
+      + '(0 tipe booking/payment) dan unread_count=0. super_admin: GET /api/notifications = 200 dengan 50 baris (25 booking + 25 payment) dan unread_count=391. '
+      + 'sales pemilik transaksi menerima notifikasi hasil verifikasi (TC-R20).',
+    status: 'Pass',
+    catatan: 'Dua lapis: NotifiesOperationalUsers hanya memilih role super_admin saat menulis notifikasi, dan NotificationController::milikPengguna() mengecualikan type '
+      + 'booking/payment pada pembacaan bagi admin_sales sehingga baris warisan tidak muncul tanpa menghapus data. Dibuktikan TC-R20.',
+    kebutuhan: 'Revisi 29 (notifikasi pembayaran dan verifikasi super admin ke sales tidak muncul juga ke admin sales)',
+  },
+  {
+    id: 'FF-R27',
+    nama: 'Menu Log Aktivitas berpindah ke Super Admin',
+    skenario: 'Revisi 30 — log aktivitas dihapus dari Admin Sales',
+    deskripsi: 'Tautan Log Aktivitas hilang dari sidebar Monitoring Manajemen dan berpindah ke Super Admin; halaman serta API-nya mengikutinya.',
+    langkah: '1. Masuk sebagai admin.sales lalu baca daftar tautan sidebar dan buka /log-aktivitas 2. Masuk sebagai superadmin lalu buka /log-aktivitas dan tukar tab 3. GET /api/activity-logs dan /api/system-logs dengan kedua token',
+    dataUji: 'peran=admin_sales dan super_admin pada port 8081',
+    ekspektasi: 'Sidebar Admin Sales delapan tautan tanpa /log-aktivitas dan halaman menampilkan panel penolakan; sidebar Super Admin sembilan tautan termasuk Log Aktivitas dengan kedua tab terisi; API menolak 403 bagi Admin Sales',
+    method: 'UI',
+    path: '/log-aktivitas',
+    actualStatus: 200,
+    actualBody: 'admin_sales: sidebar = ["/dashboard","/data-unit","/data-proyek","/data-sales","/data-konsumen","/booking","/pembayaran","/laporan"] (tanpa /log-aktivitas); '
+      + 'mengunjungi /log-aktivitas menghasilkan #app-shell "Halaman belum tersedia untuk peran Anda — Peran Monitoring Manajemen tidak memiliki hak akses ke modul ini — Kembali ke Dashboard". '
+      + 'super_admin: sidebar memuat "/log-aktivitas|Log Aktivitas" sebagai tautan kesembilan; halaman membuka tab "Jejak audit data" (100 dari 100 log ditampilkan) dan '
+      + '"Aktivitas sistem & login", header [Waktu, Pengguna, Modul & aksi, Keterangan, Alamat IP, Perangkat], #log-user 4 opsi.',
+    status: 'Pass',
+    catatan: 'ENAV NAV roles=["super_admin"] pada public/js/luminpark.js:627, guard LP.guard([\'super_admin\']) pada resources/views/app/log-aktivitas.blade.php:146, dan '
+      + 'role:super_admin pada routes/api.php:146. Bukti API: TC-R21, TC-L04, TC-O03, TC-I05.',
+    kebutuhan: 'Revisi 30 (log aktivitas dihapus dari Admin Sales)',
+  },
+  {
+    id: 'FF-R28',
+    nama: 'Tabel Data Proyek tanpa kolom Peta dan tanpa penapis Perumahan',
+    skenario: 'Revisi 31 — penyederhanaan Data Proyek',
+    deskripsi: 'Kolom Peta dihapus dari tabel proyek dan pencarian bar perumahan digantikan pencarian proyek, sehingga penapis menyisakan dua kendali.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /data-proyek 3. Baca label penapis, id kendali, header tabel, dan jumlah baris 4. Telusuri kata "Peta" pada DOM tabel 5. Pastikan peta beranda publik tetap hidup',
+    dataUji: 'peran=super_admin, 24 proyek dan 30 unit pada basis data uji',
+    ekspektasi: 'Header tabel=[Proyek, Perumahan, Alamat, Jumlah Unit, Status, Deskripsi, Aksi] tanpa Peta; penapis hanya #proyek-search "Cari Proyek" dan #proyek-status; #proyek-project hilang; GET /api/public/project-locations tetap 200',
+    method: 'UI',
+    path: '/data-proyek',
+    actualStatus: 200,
+    actualBody: 'label = ["Cari Proyek", "Status Semua Status Aktif Diarsipkan"] dan kendali = #proyek-search (type search) + #proyek-status (select) — tidak ada #proyek-project; '
+      + 'header = [Proyek, Perumahan, Alamat, Jumlah Unit, Status, Deskripsi, Aksi]; baris pertama = ["Cluster Asena","Perumahan Lumin Park Semarang","Jl. Uji Revisi 089407, Padang","3","Aktif",'
+      + '"Cluster depan dengan akses langsung ke fasilitas utama.","UbahArsipkanHapus"]; "24 dari 24 proyek ditampilkan". Kata "peta" hanya tinggal pada teks petunjuk '
+      + '"Alamat serta koordinat lokasi dipakai peta pada halaman beranda…" dan hint latitude/longitude pada modal Ubah.',
+    status: 'Pass',
+    catatan: 'Kolom Perumahan pada baris tetap ditampilkan karena ia data proyek, bukan penapis. Peta beranda (revisi 12) tidak terpengaruh: rute /public/project-locations '
+      + 'tetap mengembalikan titik koordinat dan diuji pada TC-R06.',
+    kebutuhan: 'Revisi 31 (hapus kolom peta dan search bar perumahan pada menu data proyek)',
+  },
+  {
+    id: 'FF-R29',
+    nama: 'Dashboard Super Admin dan Admin Sales memakai rincian per proyek',
+    skenario: 'Revisi 32 — data per proyek, bukan gabungan',
+    deskripsi: 'Kedua peran manajemen membaca satu baris per proyek pada dashboard; kartu angka gabungan seluruh proyek dihapus dari antarmuka.',
+    langkah: '1. Masuk sebagai superadmin lalu buka /dashboard dan baca judul seksi, header, jumlah baris, serta contoh baris 2. Klik satu baris proyek 3. Ulangi pembacaan sebagai admin.sales@luminpark.com 4. Pilih satu proyek pada #dash-proyek',
+    dataUji: 'peran=super_admin dan admin_sales; 25 baris = 24 proyek aktif + satu ember "(belum ada proyek)"',
+    ekspektasi: 'Seksi "Ringkasan per Proyek" dengan lima belas kolom dan satu baris per proyek tampil pada kedua peran; tidak ada kartu Total Unit/Total Pendapatan gabungan; baris dapat diklik sebagai pintasan penyaringan',
+    method: 'UI',
+    path: '/dashboard',
+    actualStatus: 200,
+    actualBody: 'super_admin: subjudul halaman "Rincian unit, kinerja penjualan, dan aktivitas pemesanan terbaru per proyek sesuai peran Anda"; teks petunjuk '
+      + '"Setiap baris adalah satu proyek. Klik baris proyek untuk mempersempit grafik dan booking terbaru; baris (belum ada proyek) berisi konsumen yang belum menautkan unit."; '
+      + 'tabel RINGKASAN PER PROYEK header [Proyek, Total Unit, Tersedia, Unit di Booking, Unit Terjual, Booking, Booking Aktif, Booking Dibatalkan, Belum Serah Terima, Bayar Pending, Sales, Prospek, Konsumen, Konsumen Dibatalkan, Pendapatan] dengan 25 baris, '
+      + 'contoh ["Cluster Asena","3","1","0","2","14","2","12","1","0","2","0","2","12","Rp 2.393.122.222"]. admin_sales: tabel yang sama dengan 25 baris ditambah rekap per sales (37 baris) dan booking terbaru (5 baris).',
+    status: 'Pass',
+    catatan: 'Kecocokan angka per baris terhadap kunci gabungan lama diuji pada API (TC-R23); penyaringan cluster_id menghasilkan satu baris yang sama dengan totalnya (TC-R05, TC-R22).',
+    kebutuhan: 'Revisi 32 (laporan dan dashboard menampilkan data masing-masing proyek, bukan keseluruhan)',
+  },
+  {
+    id: 'FF-R30',
+    nama: 'Empat tab laporan menampilkan ringkasan per proyek',
+    skenario: 'Revisi 32 — laporan per proyek',
+    deskripsi: 'Setiap tab laporan membuka dengan tabel ringkasan per proyek sebelum tabel rincian, dan berkas ekspor membawa kolom Proyek.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /laporan 3. Tukar tab Penjualan, Pelunasan, Kinerja Sales, dan Konsumen sambil membaca header tabel pertama 4. Saring satu proyek pada pemilih PROYEK 5. Unduh Ekspor Excel (CSV)',
+    dataUji: 'peran=super_admin, periode default 22 Okt 2026 - 21 Nov 2026, 24 proyek',
+    ekspektasi: 'Empat tab masing-masing memiliki tabel per-proyek di urutan pertama dengan baris bernilai per proyek; penapis proyek mempersempit menjadi satu baris; CSV berkepaskan kolom Proyek',
+    method: 'UI',
+    path: '/laporan',
+    actualStatus: 200,
+    actualBody: 'subjudul "Laporan penjualan, pelunasan, kinerja sales, dan konsumen untuk periode terpilih — dirinci per proyek."; tab Penjualan → tabel pertama header '
+      + '[Proyek, Transaksi, Dibatalkan, Nilai Penjualan, Sisa Pembayaran] dengan ["Cluster Asena","13","12","Rp 750.000.000","Rp 0"] di atas rincian 13 booking; '
+      + 'Pelunasan → [Proyek, Transaksi, Dana Masuk] 15 baris, contoh ["Cluster Asena","6","Rp 2.393.122.222"], di atas rekap konsumen/unit/jenis dan 91 baris rincian; '
+      + 'Kinerja Sales → [Proyek, Booking Periode, Unit Terjual, Pendapatan Lunas, Sales Bekerja] dengan ["Cluster Asena","13","1","Rp 750.000.000","2"] di atas tabel 37 sales; '
+      + 'Konsumen → [Proyek, Total, Cold, Warm, Hot, Prospek, Konsumen, Dibatalkan] 15 baris, contoh ["Cluster Asena","14","0","0","0","0","2","12"], di atas 170 baris konsumen. '
+      + 'Pemilih proyek #lap-proyek berisi 25 opsi ("Semua Proyek" + 24 proyek, value "" saat seluruh proyek) dan #lap-status menyediakan [Semua status, Cold, Warm, Hot, Dibatalkan]; '
+      + 'tombol Ekspor Excel (CSV) dan Ekspor PDF / Cetak tetap tersedia.',
+    status: 'Pass',
+    catatan: 'Kolom Proyek pada CSV diverifikasi berpisah pada TC-R22, begitu pula penjumlahan per_project yang harus sama dengan total laporan.',
+    kebutuhan: 'Revisi 32 (laporan menampilkan data masing-masing proyek, bukan keseluruhan)',
+  },
+  {
+    id: 'FF-R31',
+    nama: 'Ember "(belum ada proyek)" menjaga angka tidak hilang',
+    skenario: 'Revisi 32 — lead tanpa proyek',
+    deskripsi: 'Lead yang belum menautkan unit maupun pemesanan tidak dibuang, melainkan dihitung pada baris khusus sehingga penjumlahan per proyek tetap sama dengan total.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /dashboard 3. Baca baris "(belum ada proyek)" beserta kolom Prospek 4. Jumlahkan seluruh baris Prospek dan bandingkan dengan counters.total_prospects 5. Buka /laporan tab Konsumen dan bandingkan baris yang sama',
+    dataUji: 'peran=super_admin; 159 lead hidup yang seluruhnya belum mengisi unit_id',
+    ekspektasi: 'Baris berlabel "(belum ada proyek)" selalu ada dengan cluster_id null, angka prospek/konsumen di dalamnya ikut dihitung, dan tidak ada baris tanpa label',
+    method: 'UI',
+    path: '/dashboard',
+    actualStatus: 200,
+    actualBody: 'baris pertama tabel "Ringkasan per Proyek" = ["(belum ada proyek)","0","0","0","0","0","0","0","0","0","0","137","0","0","Rp 0"] — Prospek 137, kolom unit dan booking kosong '
+      + 'karena lead belum memilih unit; penjumlahan Prospek seluruh 25 baris = 137 dan sama dengan counters.total_prospects, sementara jumlah baris = 24 proyek aktif + 1 ember. '
+      + 'Tabel Konsumen pada /laporan menampilkan baris ember yang sama ["(belum ada proyek)","137","22","41","74","137","0","0"]; klik baris "(belum ada proyek)" di dashboard sengaja diabaikan agar tidak mengirim cluster_id=0.',
+    status: 'Pass',
+    catatan: 'Sumbernya DashboardController::metrikLeadPerProyek() (proyekDariLead() lalu kunci 0) dan pengelompokan COALESCE(cluster_id,0) + groupByRaw pada rekapPerProyek(); '
+      + 'TC-R23 memastikan penjumlahan per baris sama persis dengan counters gabungan.',
+    kebutuhan: 'Revisi 32 (rincian per proyek harus tetap menutup total)',
+  },
+  {
+    id: 'FF-R32',
+    nama: 'Blok konfigurasi Google dilepas dari halaman Pengaturan',
+    skenario: 'Revisi 33 — hapus tampilan blok status dan integrasi login Google',
+    deskripsi: 'Super admin tidak lagi melihat seksi status masuk Google maupun grup integrasi berisi Client ID/Secret; keduanya dihapus dari antarmuka sementara '
+      + 'kredensial yang sudah tersimpan tetap dipakai proses login Google.',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /pengaturan 3. Baca judul seksi dan seluruh label isian yang dirender 4. Cari kata Google pada daftar kunci form 5. Buka /login dan periksa tombol Google 6. Baca GET /api/settings sebagai pembanding',
+    dataUji: 'peran=super_admin; baris google_login_enabled, google_client_id, google_client_secret masih ada di tabel settings',
+    ekspektasi: 'Seksi "Status Masuk dengan Google" dan grup "Integrasi Login Google" hilang; tidak ada isian google_* pada form; tombol Google pada halaman masuk tetap tampil; '
+      + 'sisi API tidak berubah sehingga nilai lama tetap terbaca saat login Google',
+    method: 'UI',
+    path: '/pengaturan',
+    actualStatus: 200,
+    actualBody: 'judul seksi = ["Identitas Perumahan","Penjualan & Pembayaran","Sistem & Sesi Login"] (grup integrasi tidak ada); #google-status = null; '
+      + 'kunci isian = [about_text, estate_address, estate_email, estate_hours, estate_name, estate_phone, booking_validity_days, min_dp_percent, login_lockout_minutes, session_timeout_minutes] — '
+      + 'tidak satu pun google_* (pemilih #set-google_client_id = null); kata "google" hanya tersisa pada komentar/regex filter skrip internal, bukan teks yang terlihat; '
+      + 'subjudul halaman berubah menjadi "…parameter penjualan, dan kebijakan keamanan login."; GET /api/settings tetap 200 dengan google_login_enabled ada pada editable dan blok google terisi; '
+      + 'halaman /login tetap memuat id="google-btn" sehingga tombol Masuk dengan Google masih menyala bila status aktif.',
+    status: 'Pass',
+    catatan: 'Keputusan revisi: yang dihapus hanya tampilannya (resources/views/app/pengaturan.blade.php) — fungsi renderGoogleStatus() ikut dilepas dan kunci google_* disaring lewat '
+      + 'helper terselubung /^(public_|google_)/ bersama public_*. Kontrak API sengaja tidak diubah agar login Google yang sudah berjalan tidak rusak. Diuji pada TC-R25.',
+    kebutuhan: 'Revisi 33 (hapus blok status masuk Google dan blok integrasi login Google pada role super admin)',
+  },
+  {
+    id: 'FF-R33',
+    nama: 'Tiga kali gagal login mengunci akun sesuai durasi pengaturan',
+    skenario: 'Revisi 34 — penguncian akun setelah tiga percobaan gagal',
+    deskripsi: 'Percobaan masuk keempat untuk email dan alamat IP yang sama ditolak dengan pesan penguncian berbahasa Indonesia; lama kunci ditentukan super admin pada seksi Sistem & Sesi Login.',
+    langkah: '1. Buka /login tanpa sesi 2. Kirim email benar dengan sandi salah tiga kali dan baca toast tiap percobaan 3. Kirim percobaan keempat 4. Bandingkan dengan email lain yang belum dicoba 5. Buka /pengaturan dan baca isian Durasi Penguncian Login',
+    dataUji: 'email=superadmin@gmail.com, sandi salah 3x, lalu percobaan keempat; email pembanding admin.sales@luminpark.com; login_lockout_minutes=5',
+    ekspektasi: 'Tiga percobaan pertama menjawab 401 "Email atau password salah"; percobaan keempat ditahan dengan pesan bahwa akun dikunci dan sisa waktu tunggu; '
+      + 'email lain tetap dapat masuk; durasi kunci dapat diatur super admin',
+    method: 'UI',
+    path: '/login',
+    actualStatus: 200,
+    actualBody: 'toast berturut-turut = "Email atau password salah" ×3, lalu "Akun dikunci 5 menit karena 3 kali percobaan login gagal. Coba lagi dalam 5 menit." '
+      + '— form tetap tertahan dan tidak ada token baru yang tersimpan di localStorage. Isian "Durasi Penguncian Login (menit)" pada /pengaturan = 5 dengan rentang min 1 / max 120 dan petunjuk '
+      + '"Tiga kali percobaan login gagal pada satu email menahan akun ini selama durasi di atas."; respons API pada percobaan keempat = HTTP 429 dengan retry_after dan locked_until (TC-R24, TC-Q02).',
+    status: 'Pass',
+    catatan: 'Batas lama 5 percobaan/menit (LoginThrottle::ATTEMPTS) kini 3 dan jendela hitung dimulai ulang tiap kegagalan dengan decay sama dengan login_lockout_minutes × 60, '
+      + 'sehingga perubahan durasi pada pengaturan langsung berlaku tanpa perubahan skema. Kunci laju berbentuk login|<email>|<ip> dan memakai cache file.',
+    kebutuhan: 'Revisi 34 (tiga kali gagal login memberi masa tunggu yang diatur super admin pada pengaturan sistem)',
+  },
+  {
+    id: 'FF-R34',
+    nama: 'Keluar otomatis karena tidak ada aktivitas dan perpanjangan senyap saat layar dipakai',
+    skenario: 'Revisi 35 — sesi berbasis aktivitas',
+    deskripsi: 'Chip sesi menghitung batas waktu tanpa aktivitas; layar yang ditinggalkan keluar sendiri, sedangkan layar yang masih dipakai diperpanjang diam-diam sebelum token habis.',
+    langkah: '1. Masuk sebagai superadmin dan buka /pengaturan 2. Baca atribut title dan nilai #lp-session-left 3. Catat pointerdown/keydown/wheel/touchstart lalu majukan jam tanpa aktivitas hingga melewati batas 4. Ulangi dengan sisa di bawah satu menit sambil memberi aktivitas pointerdown 5. Periksa entri jaringan dan isi localStorage',
+    dataUji: 'session_timeout_minutes=1440 (24 jam); jam halaman dimajukan lewat pemalsuan Date.now dengan selisih 1441 menit (tanpa aktivitas) dan 00:12 sisa dengan satu aktivitas',
+    ekspektasi: 'Tanpa aktivitas sampai melewati batas, pengguna keluar dan diarahkan ke /login dengan token kosong; dengan aktivitas, hitungan dipulihkan otomatis tanpa toast dan tanpa meninggalkan halaman',
+    method: 'UI',
+    path: '/pengaturan',
+    actualStatus: 200,
+    actualBody: 'title chip = "Sisa waktu sebelum sistem keluar otomatis karena tidak ada aktivitas" dengan nilai 23:59:46. Tanpa aktivitas (jam dimajukan 1441 menit): '
+      + 'toast "Tidak ada aktivitas selama 24:01:07. Silakan masuk kembali." lalu url = /login dan localStorage luminpark_token kosong. '
+      + 'Dengan aktivitas pointerdown saat sisa tersisa 00:12: tercatat POST /api/session/refresh = 200 dan GET /api/session/status = 200, token berganti, chip kembali menjadi 23:59:53, '
+      + 'daftar toast kosong, dan halaman tetap /pengaturan.',
+    status: 'Pass',
+    catatan: 'Batas idle dibaca dari fields session_timeout_minutes pada /session/status (mulaiPenghitungSesi menetapkan sesiBatasIdleDetik). Perpanjangan otomatis memakai mode hening '
+      + 'perpanjangSesi(true) sehingga tidak memunculkan toast "Sesi berhasil diperpanjang"; tombol Perpanjang manual tetap ada untuk keadaan darurat. Pesan pada /login?sesi=berakhir '
+      + 'turut diubah menjadi "Sesi Anda berakhir karena tidak ada aktivitas…". Kontrak API diperiksa pada TC-R26.',
+    kebutuhan: 'Revisi 35 (sistem keluar otomatis bila tidak ada aktivitas)',
+  },
+  {
+    id: 'FF-R35',
+    nama: 'Foto sales penuh pada kartu narahubung dan unggahnya dari Detail Sales',
+    skenario: 'Revisi 36 — foto sales pada halaman publik',
+    deskripsi: 'Kartu narahubung di halaman kontak menampilkan foto sales berukuran besar; foto tersebut dikelola super admin lewat seksi "Foto Sales" pada halaman Detail Sales.',
+    langkah: '1. Tanpa login buka /kontak lalu baca kartu sales 2. Masuk sebagai superadmin dan buka /data-sales/4 3. Baca judul seksi, placeholder, dan atribut isian berkas 4. Pilih berkas PNG lalu klik Simpan Perubahan 5. Muat ulang /kontak dan baca kembali kartu',
+    dataUji: 'peran=tanpa login lalu super_admin; SL-001 sudah ber-avatar, SL-002 "Sari Sales Timur" belum, SL-003 belum',
+    ekspektasi: 'Tanpa avatar kartu memakai lingkaran inisial; setelah unggah dari Detail Sales, GET /public/sales-contacts mengembalikan avatar_url baru dan kartu menampilkan <img> dengan alt "Foto <nama>"; isian berkas hanya menerima JPG/PNG',
+    method: 'UI',
+    path: '/kontak + /data-sales/4',
+    actualStatus: 200,
+    actualBody: 'sebelum unggah: 3 kartu, satu <img class="h-20 w-20 shrink-0 rounded-full object-cover" alt="Foto Budi Sales Utama"> terukur 80×80 px (GET berkas avatar = HTTP 200) dan dua lingkaran inisial "S" serta "A"; '
+      + 'sisi pengelola /data-sales/4: judul seksi = ["Foto Sales","Ubah Data Sales","Akses Akun","Kinerja Sales","Riwayat Pemesanan"], placeholder "Belum ada foto sales", #ds-avatar accept="image/jpeg,image/png" '
+      + 'berlabel "Ganti Foto" dengan petunjuk "Format JPG, JPEG, atau PNG. Ukuran maksimal 2 MB." dan catatan "Foto yang disimpan di sini langsung tampil pada kartu narahubung sales di halaman publik, termasuk halaman Kontak dan detail unit."; '
+      + 'sesudah memilih berkas lalu klik Simpan Perubahan: toast "Data sales berhasil diperbarui" dan pratinjau <img alt="Foto sales Sari Sales Timur" src="http://127.0.0.1:8081/storage/avatars/AnRu6Rfk….png"> terukur 128 px; '
+      + '/kontak setelah muat ulang: SL-001 dan SL-002 memakai <img> 80×80 px, SL-003 tetap inisial "A"; jumlah form/input/textarea pada halaman tetap nol.',
+    status: 'Pass',
+    catatan: 'Unggahan diproses SalesController::update() (app/Http/Controllers/Api/SalesController.php:173) dengan aturan image|mimes:jpg,jpeg,png|max:2048; berkas lama lebih dulu dihapus dari disk public sebelum berkas baru disimpan ke folder avatars. '
+      + 'Kartu publik memakai LP.fotoSales() pada resources/views/public/kontak.blade.php:67 dan seksi pengelola dibuat pada resources/views/app/detail-sales.blade.php:107. Kontrak API diuji pada TC-R27 '
+      + '(unggah 200, avatar_url terbaca kembali pada /public/sales-contacts, dan berkas PDF ditolak 422). Pada basis data kerja (port 8000) seluruh avatar sales masih kosong sehingga kartu menampilkan inisial '
+      + 'sampai pengelola mengunggah foto lewat halaman ini.',
+    kebutuhan: 'Revisi 36 (kontak sales langsung menampilkan foto sales tersebut)',
+  },
+  {
+    id: 'FF-R36',
+    nama: 'Detail jalan dan rute menuju proyek pada peta beranda',
+    skenario: 'Revisi 37 — peta dapat dilihat detail jalan menuju proyek',
+    deskripsi: 'Penanda pada peta beranda memperbesar sampai zoom jalan, popup maupun kartu lokasi menyediakan tautan rute Google Maps, dan tombol rute menggambar lintasan sesungguhnya dari posisi pengguna.',
+    langkah: '1. Tanpa login buka / 2. Tunggu GET /public/project-locations dan baca kendali di bawah peta 3. Klik penanda proyek pertama lalu baca zoom dan isi popup 4. Simulasikan izin lokasi lalu klik "Gambar rute dari lokasi saya" 5. Periksa garis rute pada peta dan teks informasinya',
+    dataUji: 'peran=tanpa login; 3 proyek berkoordinat di Padang; posisi pengguna disimulasikan -0.83, 100.36; tile OpenStreetMap sebelum=z11 sesudah=z17',
+    ekspektasi: 'Peta dapat membuka sampai zoom detail jalan (ZOOM_JALAN 17, maxZoom 19); popup memuat tautan "Lihat unit proyek ini" dan "Rute menuju lokasi"; tombol rute menghasilkan polyline jalan di peta, penanda "Posisi Anda", serta jarak dan estimasi waktu; ketika izin lokasi ditolak ditampilkan pesan fallback berbahasa Indonesia',
+    method: 'UI',
+    path: '/',
+    actualStatus: 200,
+    actualBody: 'kontrol #beranda-rute = [BUTTON#beranda-rute-saya "Gambar rute dari lokasi saya ke Proyek Asena", A#beranda-rute-buka, P#beranda-rute-info]; 3 penanda dan 3 kartu lokasi, tiap kartu bertautan '
+      + '/unit?proyek=<nama> serta https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=-0.947,100.417; klik penanda pertama → zoom 17 dengan popup "Proyek Asena · Jl. Uji Revisi 881534, Padang · 2 unit tersedia · '
+      + 'Lihat unit proyek ini · Rute menuju lokasi" (tautan rute target="_blank"); tingkat tile berubah dari z=11 menjadi z=17 sehingga grid dan nama jalan terlihat, maxZoom peta 19; rute OSRM menghasilkan 2 path SVG '
+      + '(garis rute #1d4ed8 dan penanda posisi #0f766e) dengan teks "Rute ke Proyek Asena: 18.2 km, estimasi 18 menit berkendara melalui jalan umum."; saat peramban menolak geolocation, #beranda-rute-info berubah menjadi '
+      + '"Izin lokasi tidak diberikan, sehingga rute dari posisi Anda tidak dapat dibuat. Tetap bisa dibuka lewat tombol Google Maps di samping."',
+    status: 'Pass',
+    catatan: 'Subjudul seksi diganti menjadi "Klik penanda pada peta untuk melihat detail jalan di sekitar proyek, lalu gunakan tombol rute untuk mengetahui cara menuju lokasinya." Konstanta ZOOM_JALAN = 17 dan LAYANAN_RUTE '
+      + 'didefinisikan pada resources/views/public/beranda.blade.php:223-224; zoom jalan dipakai oleh flyTo penanda (baris 337) dan fitBounds rute (baris 302), sedangkan polyline digambar dari geometri GeoJSON layanan publik OSRM (baris 287). '
+      + 'Tautan Google Maps dipertahankan supaya pengguna dapat melanjutkan navigasi di aplikasi peta perangkatnya. Sumber data koordinat dan kelengkapan kolom diuji pada TC-R06 dan TC-R28.',
+    kebutuhan: 'Revisi 37 (peta menampilkan detail jalan menuju proyek)',
+  },
+  {
+    id: 'FF-R37',
+    nama: 'Kotak pencarian kode/tipe unit dihapus dari halaman publik',
+    skenario: 'Revisi 38 — hapus cari kode unit atau tipe rumah',
+    deskripsi: 'Halaman Daftar Unit hanya menyisakan penapis proyek dan urutan harga; kotak pencarian beserta pencariannya pada hero beranda dihapus dan diganti dua tombol tautan.',
+    langkah: '1. Tanpa login buka /unit 2. Baca label, id kendali, dan jumlah kartu 3. Saring satu proyek lalu tukar urutan harga 4. Buka / dan periksa bagian hero 5. Telusuri sisa kata cari pada DOM',
+    dataUji: 'peran=tanpa login; 8 unit tersedia di 4 proyek pada basis data uji',
+    ekspektasi: 'Tidak ada kendali #cari maupun teks "Kode unit atau tipe rumah"; penapis tinggal #cluster (Proyek) dan #sort (Urutkan harga) dan keduanya tetap bekerja; hero beranda tidak lagi mengirim tautan /unit?cari=',
+    method: 'UI',
+    path: '/unit',
+    actualStatus: 200,
+    actualBody: '#cari = null, label = ["Proyek","Urutkan harga"], opsi proyek = ["Semua proyek","Cluster Uji Sistem 881534","Proyek Asena","Proyek Bruna","Proyek Cendana"], opsi harga = ["Tanpa urutan","Termurah dulu","Termahal dulu"]; '
+      + '"8 unit ditemukan." → pilih "Proyek Asena" menghasilkan "2 unit ditemukan."; "Termurah dulu" menyusun harga Rp 350.000.000 → Rp 750.000.000 → Rp 815.000.000 → Rp 1.050.000.000; frasa "Kode unit atau tipe rumah" dan pembacaan '
+      + "params.get('cari') tidak lagi ditemukan pada DOM; subjudul menjadi \"Saring unit melalui pilihan proyek dan urutan harga untuk menemukan rumah yang sesuai.\" dan pesan kosong menjadi \"Tidak ada unit pada proyek ini…\"; "
+      + 'beranda: #hero-search = null dan tidak ada tautan /unit?cari=, gantinya tombol "Lihat Daftar Unit" → /unit dan "Hubungi Sales" → /kontak.',
+    status: 'Pass',
+    catatan: 'Penapis ?proyek= yang dipakai kartu lokasi tetap dipertahankan (lihat FF-R36) sehingga tautan "Lihat unit" dari peta masih menyaring satu proyek. Pencarian Blok/Status/Proyek pada modul internal Data Unit (revisi 11, FF-A04 dan FF-R11) '
+      + 'tidak berubah karena berada di halaman aplikasi, bukan situs publik. Penanggalan penghapusan ditandai pada resources/views/public/daftar-unit.blade.php:14 dan resources/views/public/beranda.blade.php:17; dibuktikan pada TC-R29.',
+    kebutuhan: 'Revisi 38 (hapus kotak cari kode unit atau tipe rumah pada halaman publik)',
+  },
+  {
+    id: 'FF-R38',
+    nama: 'Kolom Status, pilihan Calon Konsumen, dan penapis Sales dilepas dari role sales',
+    skenario: 'Revisi 39 — pembersihan tampilan halaman Data Konsumen untuk role sales',
+    deskripsi: 'Role sales tidak lagi melihat kolom Status pada daftar konsumen mana pun, tidak dapat memilih Calon Konsumen pada penapis Kategori, dan tidak menampilkan penapis Sales Penanganan karena sales hanya menangani konsumennya sendiri.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Buka /data-konsumen?kategori=konsumen lalu baca header tabel dan kelas hidden pada ketiga label penapis 3. '
+      + 'Buka /data-konsumen?kategori=prospek dan baca header tabel, opsi #lead-category beserta property hidden tiap opsi, serta value-nya 4. '
+      + 'Ubah penapis Kategori ke Dibatalkan lalu kembali ke Konsumen sambil membaca header tabel 5. Ulangi pembacaan sebagai super_admin',
+    dataUji: 'peran=sales pada 35 lead (4 konsumen, 28 calon, 3 dibatalkan) dan peran=super_admin pada 41 lead',
+    ekspektasi: 'Tidak ada header "Status" pada semua kategori versi sales; label Sales Penanganan berkelas hidden; opsi "Calon Konsumen" dilaporkan hidden=true '
+      + 'tetapi #lead-category tetap bernilai "prospek" ketika halaman dibuka dari menu Database Konsumen; judul "Database Konsumen" dan jumlah barisnya tidak berubah; '
+      + 'super_admin tetap melihat kolom Status pada halaman gabungan',
+    method: 'UI',
+    path: '/data-konsumen?kategori=konsumen',
+    actualStatus: null,
+    actualBody: 'sales kategori=konsumen → header = [Konsumen, No. Telepon, Kategori, Sales, Unit Ditempati, Pesanan Tambahan, Chat Awal, Follow Up Terakhir, Aksi] (9 kolom, tanpa Status), '
+      + '#lead-label-status hidden, #lead-label-sales hidden, #lead-label-category terlihat; judul "Konsumen", "4 konsumen ditampilkan dari 35 data konsumen."; '
+      + 'kategori=dibatalkan → judul "Konsumen Dibatalkan" dan 9 kolom yang sama, "3 konsumen ditampilkan dari 35 data konsumen."; '
+      + 'kategori=prospek → judul "Database Konsumen", header = [Konsumen, No. Telepon, Kategori, Sales, Unit Diminati, Chat Awal, Follow Up Terakhir, Aksi] (8 kolom, tetap tanpa Status), '
+      + '#lead-label-status terlihat dengan opsi ["Semua Status","Cold","Warm","Hot"], #lead-label-category hidden dengan value tetap "prospek", opsi Kategori = '
+      + '[Semua Kategori, Konsumen (pembayaran terverifikasi), Calon Konsumen(hidden=true), Dibatalkan], "28 konsumen ditampilkan dari 35 data konsumen.", tombol Tambah Konsumen tetap tampil; '
+      + 'super_admin pada /data-konsumen?kategori=konsumen → header 9 kolom tanpa Status, penapis Sales terlihat (input pencarian dengan datalist 9 nama), '
+      + '"6 konsumen ditampilkan dari 41 data konsumen."; pada /data-konsumen gabungan tanpa kategori, header 10 kolom dan kolom Status kembali ada',
+    status: 'Pass',
+    catatan: 'Keputusan peran dibaca dari leadIsSales() dan dipakai dua tempat: leadPakaiStatus() (resources/views/app/data-konsumen.blade.php:187) yang menahan kolom Status '
+      + 'pada leadKolom() baris 258, serta leadPaintFilterVisibility() yang menyembunyikan label Sales (baris 462) dan menyetel opsiCalon.hidden (baris 467). '
+      + 'Opsi "Calon Konsumen" dipilih tetap ada di DOM (hidden) alih-alih dihapus supaya tautan menu Database Konsumen (?)kategori=prospek) masih dapat menyetel select.value; '
+      + 'perilaku ini terukur pada langkah 3. Penapis Status Cold/Warm/Hot sengaja dipertahankan untuk sales pada kategori prospek karena status masih dimiliki calon konsumen '
+      + 'dan hanya kolomnya yang diminta dihapus. Sisi API tidak berubah: GET /api/customer-leads tetap mengirim nilai status (dibuktikan FF-R24 dan TC-R16), dan '
+      + 'penapisan kategori sales tetap dipangkas per sales sesuai revisi 6-7.',
+    kebutuhan: 'Revisi 39 (hapus kolom Status, pilihan Calon Konsumen, dan penapis Sales Penanganan pada role sales)',
+  },
+  {
+    id: 'FF-R39',
+    nama: 'Penapis Sales Penanganan berupa pencarian dengan daftar seluruh nama sales',
+    skenario: 'Revisi 40 — pencarian sales menampilkan seluruh nama, opsi Semua Sales dihapus',
+    deskripsi: 'Pada peran Admin Sales dan Super Admin, kendali Sales Penanganan menjadi kotak pencarian dengan saran seluruh nama sales terdaftar; opsi "Semua Sales" dihapus sehingga isian kosong berarti semua data konsumen ditampilkan.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /data-konsumen 3. Baca tag, tipe, atribut list, dan placeholder #lead-sales serta isi #lead-sales-list 4. '
+      + 'Ketik "Budi" lalu baca jumlah baris, kosongkan isian, kemudian ketik kode "SL-002" 5. Telusuri frasa "Semua Sales" pada teks halaman 6. Ulangi sebagai super_admin dan sales',
+    dataUji: 'peran=admin_sales dan super_admin pada 41 lead; 9 sales aktif; kode sales SL-001/SL-002/SL-003',
+    ekspektasi: '#lead-sales adalah <input type="search"> dengan list="lead-sales-list" dan placeholder berbahasa Indonesia; datalist memuat seluruh nama sales (bukan satu opsi "Semua Sales"); '
+      + 'mengetik satu nama mempersempit baris, isian kosong mengembalikan seluruh baris, dan kode sales juga dikenali; frasa "Semua Sales" tidak lagi muncul di halaman; '
+      + 'role sales tidak menampilkan kendali ini sama sekali',
+    method: 'UI',
+    path: '/data-konsumen',
+    actualStatus: null,
+    actualBody: 'admin_sales: #lead-sales = INPUT/search dengan list="lead-sales-list" dan placeholder "ketik atau pilih nama sales", '
+      + '#lead-sales-list berisi 9 nama = ["Andi Sales Barat","Budi Sales Utama","Sales Lupa Sandi 172783","Sales Lupa Sandi 465138","Sales Lupa Sandi 881534",'
+      + '"Sales Revisi 172783","Sales Revisi 465138","Sales Revisi 881534","Sari Sales Timur"]; jumlah baris "41 konsumen ditampilkan dari 41 data konsumen." → ketik "Budi" → '
+      + '"35 konsumen ditampilkan dari 41 data konsumen." (35 baris) → dikosongkan → kembali 41 → ketik "SL-002" → "4 konsumen ditampilkan dari 41 data konsumen."; '
+      + 'document.body.innerText memuat "Semua Sales" = false dan label tetap berbunyi "Sales Penanganan"; header 10 kolom termasuk Status, Unit Ditempati, Pesanan Tambahan. '
+      + 'super_admin menghasilkan 9 nama yang sama dan kendali yang terlihat; sales: #lead-label-sales berkelas hidden sehingga kendali tidak dipakai (bukti pada FF-R38) dan '
+      + '#lead-sales-list tetap kosong (0 opsi) karena GET /api/sales dilewati untuk role sales. Sebelumnya pemanggilan /sales berada di dalam blok leadBolehKelola() '
+      + '(super_admin + sales) sehingga Admin Sales tidak pernah menerima daftar nama; setelah dipindah ke leadMuatPilihan() datalist admin_sales langsung terisi 9 nama',
+    status: 'Pass',
+    catatan: 'Pencocokan dilakukan leadSalesCocok() (resources/views/app/data-konsumen.blade.php:171) terhadap gabungan nama dan sales_code, sehingga isian "SL-002" '
+      + 'juga menghasilkan baris; isian kosong otomatis mengembalikan semua baris karena fungsi tersebut mengembalikan true. Datalist diisi leadPaintFilters() (baris 446) dari '
+      + 'leadSalesNames yang dibangun pada leadMuatPilihan() (baris 491) — pemanggilan GET /sales kini berada di luar gerbang leadBolehKelola() dan hanya dilewati untuk role sales. '
+      + ' Kendali dipantau lewat event "input" dengan renderDebounced sehingga hasil menyaring muncul tanpa menekan Enter. Rute GET /api/sales sendiri tetap diizinkan untuk '
+      + 'super_admin dan admin_sales (routes/api.php:107-109) dan ditolak untuk sales; pengecekan sumbernya dibuktikan TC-R31.',
+    kebutuhan: 'Revisi 40 (penapis Sales Penanganan menampilkan seluruh nama sales dan menghapus opsi Semua Sales)',
+  },
+  {
+    id: 'FF-R40',
+    nama: 'Kolom Unit Ditempati dan Pesanan Tambahan pada konsumen serta Biaya Tambahan pada pembayaran',
+    skenario: 'Revisi 41 — penyesuaian kolom daftar konsumen dan data pembayaran',
+    deskripsi: 'Judul kolom "Unit Diminati" menjadi "Unit Ditempati" dan bertambah kolom "Pesanan Tambahan" pada seluruh kategori konsumen kecuali Calon Konsumen; halaman Data Pembayaran ikut menampilkan kolom "Pesanan Tambahan" dan "Biaya Tambahan".',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /data-konsumen?kategori=konsumen lalu baca header tabel dan isi kolom baru pada baris fixture 3. '
+      + 'Buka /data-konsumen?kategori=prospek dan pastikan judul kolomnya tetap "Unit Diminati" serta tidak ada kolom Pesanan Tambahan 4. Baca nilai unit_ditempati dan pesanan_tambahan pada GET /api/customer-leads 5. '
+      + 'Buka /pembayaran dan baca header tabel serta baris BK2026110039',
+    dataUji: 'peran=super_admin; fixture "Konsumen Tampilan 791857" (081244791857) memegang booking BK2026110039 unit R15-465138-9 dengan permintaan tambahan "Menaikkan plafon dan kanopi carport" dan biaya tambahan Rp 18.000.000; pembayaran Rp 2.000.000 sudah terverifikasi',
+    ekspektasi: 'Header kategori konsumen = [Konsumen, No. Telepon, Kategori, Sales, Unit Ditempati, Pesanan Tambahan, Chat Awal, Follow Up Terakhir, Aksi] dengan nilai unit dan permintaan '
+      + 'tambahan terisi dari booking aktif; kategori prospek tetap memakai label "Unit Diminati" tanpa kolom Pesanan Tambahan; baris tanpa permintaan tambahan menampilkan "Tidak ada" dan '
+      + 'biaya "Rp 0"; tabel pembayaran memuat kolom Pesanan Tambahan dan Biaya Tambahan tepat setelah kolom Konsumen',
+    method: 'UI',
+    path: '/data-konsumen?kategori=konsumen',
+    actualStatus: null,
+    actualBody: 'super_admin kategori=konsumen → header 9 kolom [Konsumen, No. Telepon, Kategori, Sales, Unit Ditempati, Pesanan Tambahan, Chat Awal, Follow Up Terakhir, Aksi] dan "6 konsumen ditampilkan dari 41 data konsumen."; '
+      + 'baris fixture terbaca "Konsumen Tampilan 791857 · 081244791857 · Konsumen · Budi Sales Utama · R15-465138-9 · Menaikkan plafon dan kanopi carport", baris lainnya "Consumer Uji · LT-006 · Tidak ada"; '
+      + 'kategori=dibatalkan tetap memakai label Unit Ditempati, contoh "Konsumen Revisi 465138 · Dibatalkan · Budi Sales Utama · LT-003 · Tidak ada"; '
+      + 'kategori=prospek (super_admin) → judul "Data Konsumen", header 9 kolom [Konsumen, No. Telepon, Kategori, Status, Sales, Unit Diminati, Chat Awal, Follow Up Terakhir, Aksi] '
+      + '(tetap memakai label "Unit Diminati" dan tanpa kolom Pesanan Tambahan), "32 konsumen ditampilkan dari 41 data konsumen."; '
+      + 'GET /api/customer-leads mengirim unit_ditempati + pesanan_tambahan (lead 10 → LT-003 dan fixture → R15-465138-9 dengan keterangan di atas); '
+      + '/pembayaran → header 13 kolom [Tanggal, Kode Booking, Konsumen, Pesanan Tambahan, Biaya Tambahan, Jenis, Kategori, Metode, Nominal, Bank, Verifikasi, Verifikator, Aksi], 30 baris, '
+      + '1 baris membawa permintaan tambahan. Baris BK2026110039 = "20 Nov 2026 · BK2026110039 · Konsumen Tampilan 791857 · Menaikkan plafon dan kanopi carport · Rp 18.000.000 · '
+      + 'Cash Bertahap · Pembayaran unit · Transfer Bank · Rp 2.000.000 · - · Terverifikasi · Super Admin · Detail Tolak"; baris BK2026110001 = "19 Nov 2026 · BK2026110001 · Dimas Prakoso · Tidak ada · Rp 0"',
+    status: 'Pass',
+    catatan: 'Nilai kolom dibaca dari booking aktif konsumen, atau booking pembatalan terakhir bila pemesananannya sudah dibatalkan, lalu dikirim sebagai atribut '
+      + 'unit_ditempati dan pesanan_tambahan pada CustomerLeadController (app/Http/Controllers/Api/CustomerLeadController.php:85-92; kolom addition_description ditambahkan pada eager '
+      + 'load bookings). Label kolom dipilih dinamis pada leadKolom() (resources/views/app/data-konsumen.blade.php:262 dan 267) dan fallback nilainya lewat leadUnitDitempati() (baris 164): '
+      + 'bila konsumen belum memiliki booking, label "Unit Diminati" pada kategori prospek yang dipakai sehingga tidak ada baris yang tampak kosong mendadak. '
+      + 'Pada pembayaran, permintaan dan biaya tambahan diambil dari booking induknya (resources/views/app/pembayaran.blade.php:101-106, kolom pada baris 181-182) karena keduanya '
+      + 'melekat pada booking, bukan pada catatan pembayaran. Alur pembuatan data, verifikasi, dan isian kolom diuji end-to-end pada TC-R30.',
+    kebutuhan: 'Revisi 41 (kolom Unit Ditempati dan Pesanan Tambahan pada konsumen, kolom Pesanan Tambahan dan Biaya Tambahan pada pembayaran)',
+  },
+  {
+    id: 'FF-R41',
+    nama: 'Pilihan booking berjenjang Proyek lalu Unit, unit berbooking aktif hilang dari pilihan',
+    skenario: 'Revisi 42 — pemilih booking mengikuti proyek dan hanya menampilkan rumah yang masih tersedia',
+    deskripsi: 'Pada modal "Buat Booking Unit", sales memilih proyek lebih dahulu lalu unit/blok milik proyek itu; rumah yang sedang memegang pemesanan aktif tidak lagi muncul sebagai pilihan.',
+    langkah: '1. Masuk sebagai sales@luminpark.com 2. Buka /booking lalu klik "Buat Booking" 3. Baca placeholder dan seluruh opsi pemilih Proyek serta Unit pada keadaan awal 4. Pilih Proyek Asena, Proyek Bruna, Proyek Cendana, dan Cluster Uji Sistem lalu baca label opsi Unit masing-masing 5. Isi konsumen, unit LT-003, dan skema lalu simpan 6. Buka kembali modal dan baca ulang opsi unit Proyek Asena 7. Hapus booking uji lalu pastikan LT-003 kembali 8. Ulangi pembacaan modal sebagai admin.sales@luminpark.com',
+    dataUji: 'peran=sales dan admin_sales; 4 proyek; 12 unit berstatus tersedia pada GET /api/units-available; unit LT-003 (Skandinavia 120, Rp 1.450.000.000) dipakai booking BK2026110018',
+    ekspektasi: 'Isian Proyek berada tepat setelah Konsumen dan wajib diisi; sebelum proyek dipilih, pemilih Unit hanya berisi "Pilih proyek lebih dahulu"; '
+      + 'setelah proyek dipilih isinya hanya unit milik proyek tersebut dengan label "Blok <kode unit> — <tipe unit> — <harga>"; '
+      + 'unit yang memegang booking aktif hilang dari pilihan tanpa menunggu muat ulang halaman dan muncul kembali setelah bookingnya dihapus; '
+      + 'Admin Sales melihat berjenjang yang sama disertai isian Sales Pemegang Booking',
+    method: 'UI',
+    path: '/booking',
+    actualStatus: null,
+    actualBody: 'sales: pemilih Proyek = 5 opsi ["Pilih proyek", "Cluster Uji Sistem 591917", "Proyek Asena", "Proyek Bruna", "Proyek Cendana"] dan pemilih Unit = 1 opsi "Pilih proyek lebih dahulu"; '
+      + 'setelah Proyek Asena dipilih → 6 unit ["Blok LT-003 — Skandinavia 120 — Rp 1.450.000.000", "Blok R15-591917-8 … Rp 350.000.000" sampai "-12"]; '
+      + 'Proyek Bruna → 2 unit [LT-005 Rp 1.050.000.000, LT-006 Rp 1.450.000.000]; Proyek Cendana → 3 unit [LT-007, LT-008, LT-009]; Cluster Uji Sistem → 1 unit [LT-CLUSTER-591917]; '
+      + 'gabungan keempatnya = 12 unit = jumlah baris GET /api/units-available. Booking BK2026110018 (LT-003) disimpan dari modal → toast '
+      + '"Pemesanan (Booking) berhasil dibuat dan pembayaran pertama menunggu verifikasi"; modal dibuka lagi → opsi unit Proyek Asena tinggal 5 dan "Blok LT-003" tidak ada '
+      + '(lt003MasihDipilih=false); DELETE /api/bookings/18 = 200 "Data booking berhasil dihapus" → LT-003 kembali tersedia pada GET /api/units-available. '
+      + 'admin_sales: modal yang sama, pemilih Proyek terisi 4 proyek, unit Proyek Bruna hanya LT-005 dan LT-006, isian sales_id ikut tampil (adaSales=true), '
+      + 'isian Catat Pembayaran Sekarang tampil (adaBayar=true), dan Kategori Pembayaran memiliki 4 opsi termasuk placeholder',
+    status: 'Pass',
+    catatan: 'Penyaringan dikerjakan dua lapis. Sisi klien: bookingPaintUnits() menulis ulang opsi unit dari bookingUnitSelectOptions() (resources/views/app/booking.blade.php:242 dan 253) '
+      + 'dengan sumber opsi proyek bookingProjectOptions() (baris 231) yang diambil dari daftar unit tersedia, dan bookingOpenCreate() memanggil bookingRefreshChoices() (baris 507) '
+      + 'setiap kali modal dibuka sehingga daftar konsumen/unit selalu segar. Sisi server: GET /api/units-available mengeliminasi unit yang memegang booking aktif lewat '
+      + 'whereDoesntHave (app/Http/Controllers/Api/UnitController.php:157) dan POST /api/bookings menolak ulang walau klien mengirim unit lama '
+      + '(app/Http/Controllers/Api/BookingController.php:108, "Unit tidak dapat dipesan karena sudah memiliki booking aktif."). Kata "Blok" memakai unit_code karena tabel units '
+      + 'tidak memiliki kolom blok tersendiri. Pembatalan tidak mengunci unit (status != dibatalkan dikecualikan), sehingga rumah yang pesanannya dibatalkan kembali dapat dibooking. '
+      + 'Dijaga end-to-end pada TC-R33.',
+    kebutuhan: 'Revisi 42 (rumah yang sudah dibooking otomatis tidak ada dalam pilihan booking; pilihannya berdasarkan proyek lalu unit/rumah atau bloknya)',
+  },
+  {
+    id: 'FF-R42',
+    nama: 'Blok pembayaran pertama pada form booking dengan kategori DP, Cicilan, dan Biaya Tambahan',
+    skenario: 'Revisi 43 — pembayaran pertama dicatat sekaligus saat booking dibuat',
+    deskripsi: 'Modal booking menambahkan saklar "Catat Pembayaran Sekarang" beserta pilihan kategori pembayaran; nominalnya terisi otomatis dari simulasi uang muka/angsuran atau dari biaya tambahan konstruksi dan tetap boleh diubah.',
+    langkah: '1. Masuk sebagai sales 2. Buka /booking, klik "Buat Booking", lalu isi konsumen, proyek, unit LT-003, dan skema 3. Baca blok pembayaran pada keadaan awal 4. Pilih saklar "Ada pembayaran saat booking dibuat" 5. Ubah kategori DP → Cicilan → Biaya Tambahan sambil membaca nilai Nominal Pembayaran 6. Isi biaya tambahan 5.000.000 pada unit LT-007, pilih kategori Biaya Tambahan, lalu simpan 7. Baca GET /api/payments?booking_id= dan Riwayat Pembayaran pada Detail booking 8. Hapus booking uji',
+    dataUji: 'peran=sales; LT-003 harga Rp 1.450.000.000 uang muka Rp 290.000.000; LT-007 harga Rp 750.000.000 uang muka Rp 150.000.000 dengan addition_cost Rp 5.000.000',
+    ekspektasi: 'Keadaan awal saklar "Belum ada pembayaran saat booking dibuat" dan empat isian pembayaran tersembunyi; setelah "ada" dipilih isian terlihat; '
+      + 'kategori DP mengisi nominal uang muka, Cicilan mengisi angsuran per bulan, dan Biaya Tambahan mengisi addition_cost (mengosongkan nominal bila biaya tambahannya nol); '
+      + 'booking tersimpan bersama satu catatan pembayaran berstatus menunggu verifikasi tanpa mengubah sisa maupun status booking, super admin menerima notifikasi verifikasi, '
+      + 'dan kombinasi kategori Biaya Tambahan tanpa addition_cost ditolak',
+    method: 'UI',
+    path: '/booking',
+    actualStatus: null,
+    actualBody: 'keadaan awal: nilai initial_payment_requested = "tidak" dengan label initial_category/initial_amount/initial_date/initial_method berkelas hidden; '
+      + 'opsi kategori = ["Pilih kategori", "DP", "Cicilan", "Biaya Tambahan"] dan opsi metode = 5 cara bayar (Transfer Bank, Tunai, QRIS, Virtual Account, Cek / Giro). '
+      + 'LT-003 + skema: kategori dp → Nominal Pembayaran 290000000, kategori cicilan → 15627777.78 (becek dari simulasi). '
+      + 'Booking BK2026110018 tersimpan dengan kategori cicilan berjenis KPR nominal Rp 15.627.777,78 status pending dan sisa tetap Rp 1.450.000.000 status "menunggu dp". '
+      + 'LT-007 + addition_cost 5000000 + kategori biaya tambahan → Nominal Pembayaran terisi 5000000, lalu dp → 150000000, lalu biaya tambahan lagi → 5000000; '
+      + 'tersimpan sebagai BK2026110019 dengan toast "Pemesanan (Booking) berhasil dibuat dan pembayaran pertama menunggu verifikasi", ledger 1 baris '
+      + '{kategori: "biaya tambahan", jenis: "KPR", nominal: 5000000, verifikasi: "pending"} dan booking masih sisa Rp 750.000.000 status "menunggu dp". '
+      + 'Detail booking → header Riwayat Pembayaran (1) = [Tanggal, Jenis, Kategori, Metode, Nominal, Bank, Verifikasi, Verifikator] dengan isi '
+      + '"21 Nov 2026 · KPR · Biaya Tambahan · transfer bank · Rp 5.000.000 · - · Menunggu Verifikasi · Belum diverifikasi". '
+      + 'Notifikasi super admin: "Pembayaran menunggu verifikasi — Pembayaran Biaya Tambahan (KPR) sebesar Rp 5.000.000 untuk booking BK2026110019 menunggu verifikasi."',
+    status: 'Pass',
+    catatan: 'Nominal disarankan bookingSuggestPembayaran() (resources/views/app/booking.blade.php:434) dari bookingSimulasi yang diisi ulang setiap simulasi berhasil, '
+      + 'dan memakai addition_cost pada formulir untuk kategori Biaya Tambahan; nilai 0 mengosongkan isian supaya nominal dari kategori lain tidak ikut terkirim. '
+      + 'Payload dikirim sebagai initial_payment = {payment_category, amount, payment_date, payment_method} dan diuraikan BookingController::catatPembayaranAwal() '
+      + '(app/Http/Controllers/Api/BookingController.php:383-402) dengan payment_type diambil dari skema booking. Kategori Biaya Tambahan tanpa addition_cost '
+      + 'ditolak lebih dahulu oleh tolakKategoriDiLuarBiayaTambahan() dan pesan validasi kategorinya berbahasa Indonesia ("kategori pembayaran yang dipilih tidak valid."). '
+      + 'Dijaga end-to-end pada TC-R35.',
+    kebutuhan: 'Revisi 43 butir 2 (tambahan pembayaran dengan pilihan DP, Cicilan, dan biaya tambahan pada form booking)',
+  },
+  {
+    id: 'FF-R43',
+    nama: 'Kategori pembayaran pada Data Pembayaran dan efeknya terhadap sisa pembayaran',
+    skenario: 'Revisi 43 — pencatatan dan verifikasi pembayaran per kategori',
+    deskripsi: 'Halaman Data Pembayaran menambah kolom Kategori beserta pilihan kategori pada modal Catat Pembayaran; pembayaran berkategori biaya tambahan terverifikasi tanpa mengurangi sisa maupun mengubah status booking.',
+    langkah: '1. Masuk sebagai sales untuk membuat booking BK2026110019 berbiaya tambahan Rp 5.000.000 2. Masuk sebagai superadmin@gmail.com 3. Buka /pembayaran dan baca header tabel serta baris booking uji 4. Klik "Catat Pembayaran", pilih booking, lalu ubah kategori DP → Cicilan → Biaya Tambahan sambil membaca nominal 5. Klik Verifikasi pada baris biaya tambahan, baca dialog, lalu kirim 6. Baca kembali GET /api/payments?booking_id= dan GET /api/bookings/',
+    dataUji: 'peran=super_admin; booking BK2026110019 (unit Rp 750.000.000, addition_cost Rp 5.000.000, pembayaran biaya tambahan Rp 5.000.000 pending); BK2026110004 uang muka Rp 435.000.000 dan angsuran Rp 28.194.444,44',
+    ekspektasi: 'Tabel pembayaran menampilkan kolom Kategori setelah Jenis sebanyak 13 kolom; modal Catat Pembayaran memiliki pilihan kategori wajib dengan tiga opsi dan nominal '
+      + 'yang mengikuti kategori terpilih (DP = uang muka, Cicilan = angsuran, Biaya Tambahan = sisa biaya tambahan, kosong bila tidak ada); dialog verifikasi menyebut kategori; '
+      + 'setelah pembayaran biaya tambahan diverifikasi, verifikator terisi dan sisa pembayaran serta status booking tidak berubah',
+    method: 'UI',
+    path: '/pembayaran',
+    actualStatus: null,
+    actualBody: 'header tabel = 13 kolom [Tanggal, Kode Booking, Konsumen, Pesanan Tambahan, Biaya Tambahan, Jenis, Kategori, Metode, Nominal, Bank, Verifikasi, Verifikator, Aksi]; '
+      + 'baris BK2026110019 = "21 Nov 2026 · BK2026110019 · Bayar Saat Booking 591917 · Kanopi carport uji revisi 43 · Rp 5.000.000 · KPR · Biaya Tambahan · Transfer Bank · '
+      + 'Rp 5.000.000 · - · Menunggu Verifikasi · Belum diverifikasi"; baris lama tanpa kategori tampil sebagai "Pembayaran unit" (mis. BK2026110001 Cash Keras). '
+      + 'Modal Catat Pembayaran pada BK2026110004: dp → amount 435000000, cicilan → 28194444.44, biaya tambahan (addition_cost 0) → isongan amount ""; '
+      + 'hint "DP dan cicilan mengurangi harga unit; biaya tambahan berada di luar harga unit."; preview menyebut Total Harga, Uang Muka, Angsuran per Bulan, dan Sisa Pembayaran. '
+      + 'Dialog verifikasi berbunyi "Verifikasi Pembayaran — BK2026110019 · Nominal Rp 5.000.000 atas nama Bayar Saat Booking 591917 kategori Biaya Tambahan. '
+      + 'Setelah diverifikasi, sisa pembayaran dan status booking akan dihitung ulang oleh sistem." dengan tombol [Batal, Verifikasi Pembayaran]. '
+      + 'Setelah diverifikasi: ledger [{kategori: "biaya tambahan", verifikasi: "verified", verifikator: "Super Admin"}] dan booking tetap '
+      + 'sisa Rp 750.000.000 status "menunggu dp"',
+    status: 'Pass',
+    catatan: 'Kolom Kategori dirender lewat paymentCategoryLabel() (resources/views/app/pembayaran.blade.php:220 dan 130) yang memberi label "Pembayaran unit" untuk baris lama '
+      + 'ber-payment_category NULL, sehingga ledger historis tidak tampil kosong. Pengisian nominal per kategori dikerjakan paymentSaranNominal() (baris 137) dan '
+      + 'paymentSuggestAmount() (baris 308) yang hanya dipanggil bila booking sudah dipilih. Di sisi server, hanya DP dan cicilan (beserta baris NULL) yang mengurangi harga unit: '
+      + 'scopeMengurangiHargaUnit() dipakai PaymentController::recalculateBooking() (app/Http/Controllers/Api/PaymentController.php:241) dan Booking::settlementStatus(), '
+      + 'sedangkan verifikasi pembayaran biaya tambahan tetap diizinkan walau unitnya sudah lunas. Nama kategori pada pesan notifikasi memakai Payment::categoryLabel(). '
+      + 'Penapis ?payment_category= dan seluruh penjagaannya diuji pada TC-R34.',
+    kebutuhan: 'Revisi 43 butir 2 (pilihan pembayaran DP, Cicilan, dan biaya tambahan beserta pemisahan pengaruhnya terhadap harga unit)',
+  },
+];
+
+const perbarui = {
+  'FF-A01': {
+    ekspektasi: 'Sidebar memuat Dashboard, Data Unit Perumahan, Data Proyek, Data Sales, Data Konsumen, Booking Unit, Data Pembayaran, Laporan, dan Log Aktivitas',
+    actualBody: '/dashboard|Dashboard, /data-unit|Data Unit Perumahan, /data-proyek|Data Proyek, /data-sales|Data Sales, /data-konsumen|Data Konsumen, '
+      + '/booking|Booking Unit, /pembayaran|Data Pembayaran, /laporan|Laporan, /log-aktivitas|Log Aktivitas '
+      + '(9 tautan; /log-aktivitas kembali tampil untuk Super Admin sejak revisi 30)',
+    catatan: 'Profil, Sesi Login, Pengaturan Sistem, dan Pengaturan Halaman Publik tidak muncul di sidebar; chip penghitung sesi tampil di header. '
+      + 'Tautan "Data Proyek" menggantikan "Data Cluster" (revisi 4) dan Log Aktivitas berpindah dari Monitoring Manajemen ke Super Admin (revisi 30).',
+  },
+  'FF-A04': {
+    ekspektasi: 'Aksi baris = Detail, Hapus; tersedia tombol Tambah Proyek dan Tambah Unit; penapis Blok/Status/Proyek tampil',
+    actualBody: '14 baris; aksi baris = ["Detail","Hapus"]; tombol atas = ["Tambah Proyek","Tambah Unit"] (tautan "Kelola Proyek" ikut tampil); '
+      + 'penapis = [pencarian "Blok" #unit-search, pemilih "Status" #unit-status, pemilih "Proyek" #unit-cluster]',
+    catatan: 'Verifikasi 19 November 2026 pada port 8081; penyebutan cluster digantikan proyek sesuai revisi 4 dan penapis ditambah sesuai revisi 11.',
+  },
+  'FF-A08': {
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /data-konsumen 3. Baca tombol pada baris tabel, penapis, dan kartu ringkasan',
+    dataUji: 'peran=super_admin, 41 lead',
+    ekspektasi: 'Aksi baris = Detail, Hapus; tersedia tombol Tambah Konsumen; tabel memuat kolom Kategori dan Chat Awal; penapis kategori termasuk Dibatalkan',
+    actualBody: '41 baris ("41 konsumen ditampilkan dari 41 data konsumen."); header = [Konsumen, No. Telepon, Kategori, Status, Sales, Unit Ditempati, Pesanan Tambahan, '
+      + 'Chat Awal, Follow Up Terakhir, Aksi]; penapis Kategori = [Semua Kategori, Konsumen (pembayaran terverifikasi), Calon Konsumen, Dibatalkan]; '
+      + 'penapis Status = [Semua Status, Cold, Warm, Hot]; penapis Sales Penanganan = input pencarian #lead-sales bertype search dengan datalist 9 nama sales; '
+      + 'aksi baris = ["Detail","Hapus"]',
+    catatan: 'Menyaring Kategori=Dibatalkan menghasilkan 3 baris, contoh "Konsumen Revisi 465138 · Dibatalkan · Budi Sales Utama · LT-003 · Tidak ada"; '
+      + 'Kategori=Konsumen menghasilkan 6 baris dengan aksi unik ["Detail","Hapus"]. '
+      + 'Sejak revisi 40 penapis Sales bukan lagi pemilih beropsi "Semua Sales" dan sejak revisi 41 kolom "Unit Diminati" menjadi "Unit Ditempati" '
+      + 'plus kolom "Pesanan Tambahan" pada kategori selain calon konsumen.',
+  },
+  'FF-A09': {
+    langkah: '1. Buka /data-konsumen 2. Klik Detail pada konsumen berkategori Dibatalkan (id 30) 3. Baca field, tombol, dan tabel riwayat',
+    dataUji: 'lead id 30 "Konsumen Revisi 719702" (kategori Dibatalkan)',
+    ekspektasi: 'Field identitas + tanggal chat awal + status + sales + unit + budget + sumber + alamat; tombol Simpan Perubahan dan Catat Follow Up Baru; riwayat pemesanan beserta pembatalan tampil',
+    actualBody: 'judul "Detail Konsumen — Konsumen Revisi 719702"; seksi = [Ubah Data Konsumen, ringkasan konsumen, Aksi Cepat, Riwayat Interaksi (0 catatan follow up), Booking Konsumen]; '
+      + 'field chat awal ikut terbaca; "Booking Konsumen — 1 pemesanan tercatat untuk konsumen ini" dengan header '
+      + '[Kode Booking, Tanggal, Total Harga, Uang Muka, Sisa, Status, Serah Terima, Pembatalan] dan nilai "BK2026110009 · 18 Nov 2026 · Rp 1.050.000.000 · Rp 315.000.000 · Rp 1.050.000.000 · Dibatalkan · Belum Proses · Konsumen mengundurkan diri (uji revisi 5)"',
+    catatan: 'Riwayat pembelian tetap tampil setelah pembatalan (revisi 5); tautan detail memakai /data-konsumen/{id}.',
+  },
+  'FF-A13': {
+    dataUji: 'periode default 30 hari (20 Okt 2026 - 19 Nov 2026), tab Konsumen',
+    ekspektasi: 'Empat tab tersedia; tanggal awal = hari ini dikurangi 29 hari; tabel terisi baris; penapis konsumen mengenal kategori; tombol ekspor ada',
+    actualBody: 'tab: Penjualan, Pelunasan, Kinerja Sales, Konsumen; lap-start=2026-10-20, lap-end=2026-11-19; '
+      + 'tab Konsumen: 25 baris dengan header [Nama Konsumen, Telepon, Email, Status, Kategori, Sumber, Sales, Unit, Budget, Follow Up Terakhir, Dibuat] dan kartu '
+      + '[Total Konsumen 25, Cold 6, Warm 9, Hot 1, Konsumen 6, Dibatalkan 3]; pemilih Status Konsumen = [Semua status, Cold, Warm, Hot, Dibatalkan]; '
+      + 'pilihan Dibatalkan mengirim category=dibatalkan → "3 baris data" dengan kartu Total Konsumen 3 / Dibatalkan 3; tombol "Ekspor Excel (CSV)" dan "Ekspor PDF / Cetak"',
+    catatan: 'Opsi "Booking" pada penapis konsumen diganti menjadi "Dibatalkan" karena status lead kini hanya Cold/Warm/Hot (revisi 7) dan pembatalan '
+      + 'dibaca lewat kategori (revisi 5); ReportController::consumerReport menerima parameter category. Kolom Kategori ditambahkan pada tabel laporan.',
+  },
+  'FF-A16': {
+    ekspektasi: 'Baris booking terisi; aksi baris memuat Detail, Serah Terima, dan Batalkan untuk booking yang masih aktif',
+    actualBody: '8 baris; aksi unik = ["Detail","Serah Terima","Batalkan"]; baris aktif = ["Detail","Serah Terima"], baris belum lunas yang masih aktif = ["Detail","Serah Terima","Batalkan"]; '
+      + 'header = [Kode Booking, Tanggal Booking, Konsumen, Unit, Skema, Total Harga, Uang Muka, Sisa, Status, Serah Terima, Aksi]; '
+      + 'rekap "TOTAL BOOKING 8 · MENUNGGU DP 0 · NILAI BOOKING Rp 8,30 M · SISA PEMBAYARAN Rp 2,21 M"',
+    catatan: 'Tombol Batalkan membuka modal "Batalkan Booking — <kode>" dengan isian Alasan Pembatalan (hint: tercatat pada riwayat booking dan dapat dilihat kembali di halaman detail konsumen).',
+  },
+  'FF-A18': {
+    nama: 'Tombol Tambah Proyek pada Data Unit',
+    skenario: 'Pengelolaan proyek',
+    deskripsi: 'Selain menambah unit, super admin dapat langsung membuat proyek (dulu cluster) dari halaman Data Unit.',
+    langkah: '1. Masuk sebagai superadmin@gmail.com 2. Buka /data-unit 3. Klik #btn-add-proyek 4. Baca label field yang dirender',
+    dataUji: 'peran=super_admin',
+    ekspektasi: 'Tombol atas = Tambah Proyek dan Tambah Unit; modal memuat Perumahan, Nama Proyek, Deskripsi Proyek dengan tombol Simpan Proyek',
+    actualBody: 'tombol atas = ["Tambah Proyek","Tambah Unit"] (+ tautan "Kelola Proyek"); judul modal "Tambah Proyek Baru"; '
+      + 'modal = [Perumahan* (select "Pilih perumahan" dengan 1 opsi "Perumahan Lumin Park Semarang", sudah terisi otomatis), Nama Proyek* (hint: "Nama harus unik di dalam satu perumahan, maksimal 100 karakter."), '
+      + 'Deskripsi Proyek]; tombol kirim "Simpan Proyek"',
+    catatan: 'Deskripsi modal: "Proyek mengelompokkan unit di dalam satu perumahan. Unit baru hanya dapat dibuat setelah proyeknya tersedia." Verifikasi pada port 8081.',
+    kebutuhan: 'Kebutuhan b.4 (kelola data unit) + permintaan Tambah Cluster + revisi 4',
+  },
+  'FF-A19': {
+    nama: 'Proyek Baru Langsung Terpakai di Form Unit',
+    skenario: 'Pengelolaan proyek',
+    deskripsi: 'Proyek yang dibuat dari halaman Data Unit langsung menjadi pilihan pada penapis maupun formulir unit.',
+    langkah: '1. Isi modal Tambah Proyek (perumahan=1, nama=Proyek UI Verifikasi 290640) 2. Klik Simpan Proyek 3. Baca toast dan penapis #unit-cluster 4. Buka form Tambah Unit 5. Hapus proyek uji',
+    dataUji: 'project_id=1, name=Proyek UI Verifikasi 290640',
+    ekspektasi: 'Toast keberhasilan, modal tertutup, proyek baru ada di penapis dan di form unit, lalu dapat dihapus kembali',
+    actualBody: 'toast = "Proyek baru berhasil ditambahkan."; modal tertutup; penapis proyek = 10 opsi termasuk "Proyek UI Verifikasi 290640"; '
+      + 'select proyek pada form Tambah Unit memuat 10 opsi dengan proyek baru terdeteksi; DELETE /clusters/12 = 200 "Proyek berhasil dihapus. Baris datanya tetap tersimpan di basis data."',
+    catatan: 'Setelah penyimpanan, unitLoad() memuat ulang /units, /units/clusters, dan /projects. Verifikasi antarmuka proyek memakai basis data terisolasi '
+      + 'luminpark_test pada port 8081 agar proyek uji tidak masuk ke basis data kerja.',
+    kebutuhan: 'Kebutuhan b (unit baru membutuhkan proyek induk) + revisi 4',
+  },
+  'FF-B01': {
+    nama: 'Sidebar Monitoring Manajemen tanpa Log Aktivitas',
+    ekspektasi: 'Sidebar memuat 8 modul baca tanpa Log Aktivitas; Sesi Login dan Pengaturan tidak muncul',
+    actualBody: '/dashboard, /data-unit, /data-proyek, /data-sales, /data-konsumen, /booking, /pembayaran, /laporan '
+      + '(8 tautan; /log-aktivitas dilepas dari peran ini pada revisi 30)',
+    catatan: 'Data Proyek tetap tampil karena peran Monitoring Manajemen berhak membaca daftar proyek (FF-B09). Revisi 9 pernah memindahkan Log Aktivitas ke peran ini dan revisi 30 mengembalikannya ke Super Admin.',
+    nama_lama: 'Sidebar Monitoring Manajemen memuat Log Aktivitas',
+  },
+  'FF-B03': {
+    ekspektasi: 'Aksi baris hanya Detail; tidak ada Tambah Unit, Tambah Proyek, maupun Hapus',
+    actualBody: '14 baris; aksi baris = ["Detail"]; tombol atas tidak ada yang tampil (Tambah Unit, Tambah Proyek, dan Kelola Proyek sama-sama menyembunyikan diri lewat kelas hidden)',
+    catatan: 'Dijaga ganda: LP.can([\'super_admin\']) di Blade dan role:super_admin pada POST/PUT/DELETE /units.',
+  },
+  'FF-B04': {
+    ekspektasi: 'Keduanya hanya menyediakan Detail; tidak ada Tambah Konsumen, Verifikasi, atau Tolak',
+    actualBody: '/data-konsumen: 25 baris, aksi ["Detail"], tombol atas [], judul tetap "Data Konsumen" dengan penapis Kategori [Semua, Konsumen (sudah booking), Calon Konsumen, Dibatalkan]; '
+      + '/pembayaran: 19 baris, aksi ["Detail"], tombol atas []; tabel pembayaran menampilkan kolom Metode',
+    catatan: 'Kolom Metode pembayaran ikut terbaca bagi peran pembaca (revisi 3) karena hanya kendali tulis yang disembunyikan.',
+  },
+  'FF-B07': {
+    nama: 'Penolakan akses modul dari URL langsung',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Guard per halaman menahan peran yang tidak berhak, termasuk Log Aktivitas untuk Monitoring Manajemen setelah revisi 30.',
+    langkah: '1. Sebagai admin.sales buka /sesi 2. Sebagai admin.sales buka /log-aktivitas 3. Sebagai superadmin@gmail.com buka /log-aktivitas (pembanding, harus berhasil)',
+    dataUji: 'peran=admin_sales dan super_admin',
+    ekspektasi: '/sesi ditolak untuk admin sales dan /log-aktivitas juga ditolak untuk admin sales, sedangkan super admin melihat kedua tab Log Aktivitas',
+    actualBody: '/sesi (admin sales): "Halaman belum tersedia untuk peran Anda — Peran Monitoring Manajemen tidak memiliki hak akses ke modul ini — Kembali ke Dashboard"; '
+      + '/log-aktivitas (admin sales): panel penolakan setara; /log-aktivitas (super admin): 2 tab terisi, jejak audit dan log sistem terbaca',
+    catatan: 'Guard LP.guard per halaman (sesi.blade.php khusus super_admin; log-aktivitas.blade.php kini ['+ "'super_admin'" + ']). API ikut menolak 403 (TC-L04, TC-O03, TC-R21).',
+  },
+  'FF-B08': {
+    nama: 'Tambah Proyek tersembunyi untuk Monitoring Manajemen',
+    skenario: 'RBAC frontend',
+    deskripsi: 'Peran pembaca tidak diberi tombol tulis proyek pada halaman Data Unit, dan API menolak percobaan tulisnya.',
+    langkah: '1. Masuk sebagai admin.sales@luminpark.com 2. Buka /data-unit 3. Periksa kelas hidden #btn-add-proyek 4. GET dan POST /api/clusters',
+    dataUji: 'peran=admin_sales, project_id=1, name=Proyek Ditolak Monitoring',
+    ekspektasi: 'Kedua tombol atas hidden; GET 200; POST 403 dengan pesan akses ditolak',
+    actualBody: '#btn-add-proyek hidden=true dan #btn-add-unit hidden=true; GET /api/clusters = 200 (8 proyek); POST /api/clusters = 403 '
+      + '"Forbidden. Anda tidak memiliki akses ke resource ini."; tabel unit terbaca 14 baris',
+    catatan: 'GET /clusters berada pada group role:super_admin,admin_sales sedangkan POST /clusters hanya role:super_admin (routes/api.php).',
+    kebutuhan: 'Keputusan RBAC Monitoring Manajemen hanya-lihat + revisi 4',
+  },
+  'FF-C01': {
+    ekspektasi: 'Tautan: Dashboard, Konsumen, Database Konsumen, Booking Unit, Data Pembayaran, Laporan Sales; tanpa Sesi Login dan Log Aktivitas',
+    actualBody: '/dashboard|Dashboard, /data-konsumen?kategori=konsumen|Konsumen, /data-konsumen?kategori=prospek|Database Konsumen, '
+      + '/booking|Booking Unit, /pembayaran|Data Pembayaran, /laporan-sales|Laporan Sales (6 tautan)',
+    catatan: 'Dua tautan konsumen adalah menu hasil revisi 7; penanda menu aktif membedakan keduanya lewat parameter ?kategori=.',
+  },
+  'FF-C04': {
+    langkah: '1. Sebagai sales buka /data-konsumen?kategori=prospek lalu ?kategori=konsumen 2. Bandingkan jumlah baris dengan FF-A08',
+    dataUji: 'peran=sales (Budi Sales Utama, user id 4)',
+    ekspektasi: 'Jumlah baris lebih kecil dari daftar manajemen, hanya lead milik sendiri, dan tombol Tambah Konsumen tetap ada',
+    actualBody: 'kategori=prospek: 10 baris dari 17 lead milik sales ("10 konsumen ditampilkan dari 17 data konsumen."), kartu [Total Data Konsumen 17, Calon Konsumen 10, Konsumen 5, Perlu Follow Up 9]; '
+      + 'kategori=konsumen: judul "Konsumen" dan hanya baris bertype kategori konsumen; tombol atas = ["Tambah Konsumen"] tetap ada; '
+      + '(bandingkan 25 baris milik super admin pada FF-A08)',
+    catatan: 'Pemfilteran terjadi di CustomerLeadController::index (scoped per sales_id) dan dipersempit lagi oleh kategori menu (revisi 7).',
+  },
+  'FF-D01': {
+    dataUji: 'public_featured_count=3, public_show_* = 1, tiga proyek memiliki koordinat',
+    ekspektasi: 'Judul hero diambil dari pengaturan; tepat 3 unit unggulan; seksi lokasi proyek tampil dengan kendali rute; tidak ada tautan login internal dan tidak ada kotak pencarian unit',
+    actualBody: 'h1 "Perumahan Lumin Park Padang"; 3 kartu unit; seksi ["Unit Unggulan","Skema Pembayaran","Lokasi Proyek","Kabar Terbaru","Galeri Perumahan","Hubungi Sales"]; '
+      + 'hero hanya menyediakan dua tombol tautan "Lihat Daftar Unit" → /unit dan "Hubungi Sales" → /kontak (kotak pencarian unit dihapus pada revisi 38); '
+      + 'peta Leaflet aktif dengan 3 penanda, blok kendali #beranda-rute, serta entri "Proyek Asena — Jl. Uji Revisi 881534, Padang — 2 unit tersedia"; adaTombolLogin=false',
+    catatan: 'Jumlah kartu mengikuti public_featured_count yang diubah pada FF-A12. Seksi "Lokasi Proyek" ditambahkan sesuai revisi 12 lalu diperluas dengan detail jalan dan rute pada revisi 37 (bukti per butir: FF-R36).',
+  },
+  'FF-D08': {
+    ekspektasi: 'Tidak ada elemen form/input/textarea dan tidak ada tombol kirim; kartu "Informasi Pemasaran" dan "Sales Kami" tampil dengan foto atau inisial sales beserta tautan wa.me; POST /api/public/contact ditolak',
+    actualBody: 'form=0, input/textarea/select=0, tombol=[] ; kartu = "Informasi Pemasaran" + "Sales Kami"; 3 kartu narahubung dengan foto 80×80 px untuk sales yang ber-avatar dan lingkaran inisial untuk yang belum '
+      + '(setelah revisi 36: "Foto Budi Sales Utama" dan "Foto Sari Sales Timur" + inisial "A"); 3 tautan https://wa.me/62812345678101, ...102, ...103; tautan "Lihat Daftar Unit" -> /unit; '
+      + 'teks "Kirim"/"Kirim Pertanyaan" tidak ada; POST /api/public/contact -> HTTP 404 "Alamat tujuan tidak ditemukan."',
+    catatan: 'Skrip halaman hanya memanggil GET /public/sales-contacts dan GET /public/settings sehingga tidak ada jalur tulis tanpa login. Foto narahubung kini diunggah pengelola dari Detail Sales (FF-R35), bukan dari sisi publik.',
+  },
+  'FF-D04': {
+    langkah: '1. Set public_show_gallery=0 lewat PUT /settings 2. Buka /tentang 3. Periksa seksi galeri 4. Kembalikan nilai ke 1',
+    dataUji: 'public_show_gallery=0 lalu 1; halaman /tentang setelah revisi 13',
+    ekspektasi: 'Seksi Galeri Perumahan disembunyikan dan datanya tidak dimuat; seksi Identitas Proyek dan Tim Sales tetap tampil',
+    actualBody: 'simpan=HTTP 200; galeriHidden=true dengan isi #tentang-gallery 0 karakter (tidak ada permintaan galeri); tim sales tetap 3 kartu; '
+      + 'heading halaman = [Gambaran Umum, Identitas Proyek, Galeri Perumahan, Tim Sales Kami]; tidak ada seksi skema pembayaran (FF-R13); pemulihan=HTTP 200',
+    catatan: 'Saklar bagian halaman publik diproses LP.fillSettings() lewat atribut data-seksi; daftar saklar /tentang kini hanya gallery dan sales setelah seksi skema dihapus.',
+  },
+  'FF-A11': {
+    nama: 'Pengaturan sistem memuat kebijakan keamanan login',
+    deskripsi: 'Halaman pengaturan berisi identitas perumahan, parameter penjualan, dan kebijakan sesi serta penguncian login; blok konfigurasi Google sudah dilepas dari antarmuka.',
+    langkah: '1. Masuk sebagai superadmin 2. Buka /pengaturan 3. Baca judul seksi dan seluruh isian yang dirender 4. Pastikan tidak ada isian google_*',
+    ekspektasi: 'Tiga seksi — Identitas Perumahan, Penjualan & Pembayaran, Sistem & Sesi Login; field session_timeout_minutes dan login_lockout_minutes; tanpa field google_*',
+    actualBody: 'seksi: "Identitas Perumahan", "Penjualan & Pembayaran", "Sistem & Sesi Login"; field: set-estate_name/phone/email/hours/address, set-about_text, '
+      + 'set-min_dp_percent, set-booking_validity_days, set-session_timeout_minutes (1440, min 15, max 10080), set-login_lockout_minutes (5, min 1, max 120); '
+      + 'tidak ada #google-status maupun isian set-google_*',
+    catatan: 'Sejak revisi 33 kunci google_* dan public_* disaring dari form (helper terselubung) meski tetap dikirim pada GET /api/settings; '
+      + 'revisi 34 menambah login_lockout_minutes dan mengubah label batas sesi menjadi "Batas Waktu Tanpa Aktivitas (menit)" sesuai revisi 35. Bukti tampilan per butir: FF-R32 dan FF-R33.',
+    kebutuhan: 'Kebutuhan a.4 + kebutuhan non-fungsional keamanan + revisi 33/34/35',
+  },
+  'FF-A21': {
+    nama: 'Penghitung waktu sesi berbasis aktivitas',
+    deskripsi: 'Header menampilkan sisa waktu sebelum keluar otomatis karena tidak ada aktivitas, memberi peringatan sebelum habis, memperpanjang sendiri selama layar dipakai, dan logout ketika ditinggalkan.',
+    langkah: '1. Masuk sebagai superadmin 2. Baca atribut title dan nilai chip #lp-session 3. Majukan jam halaman tanpa aktivitas melewati batas 4. Ulangi dengan sisa kurang dari satu menit sambil menyentuh halaman 5. Periksa token dan alamat tujuan',
+    dataUji: 'session_timeout_minutes=1440 dan login_lockout_minutes=5; jam halaman dimajukan lewat Date.now, bukan perubahan basis data',
+    ekspektasi: 'Chip menghitung mundur dengan judul "Sisa waktu sebelum sistem keluar otomatis karena tidak ada aktivitas"; layar aktif dipulihkan tanpa toast; layar ditinggalkan mengirim pengguna ke /login dengan token kosong',
+    actualBody: 'normal: "23:59:46" dengan title baru; aktif: POST /session/refresh 200 lalu chip 23:59:53, token berganti, tanpa toast; '
+      + 'tanpa aktivitas: toast "Tidak ada aktivitas selama 24:01:07. Silakan masuk kembali." → /login?sesi=berakhir dan luminpark_token kosong',
+    status: 'Pass',
+    catatan: 'Revisi 35 mengganti arti lama "batas umur token" menjadi "batas waktu tanpa aktivitas": aktivitas pointerdown/keydown/wheel/touchstart diperdengarkan sekali (capture, passive) '
+      + 'dan pemanggilan ulang LP.mulaiPenghitungSesi() menata ulang dasar hitungan. Peringatan tetap pada 300 detik (PERINGATAN_SESI_DETIK); nilai ambang dibaca dari /session/status.',
+    kebutuhan: 'Butir a.4 + batasan D-7 (peringatan sesi) + revisi 35 (auto logout tanpa aktivitas)',
+  },
+};
+
+for (const [id, patch] of Object.entries(perbarui)) {
+  const baris = find(id);
+  if (!baris) throw new Error(`baris ${id} tidak ditemukan`);
+  const { nama_lama, ...isi } = patch;
+  Object.assign(baris, isi);
+}
+
+for (const baris of BARU) {
+  const lama = find(baris.id);
+  if (lama) Object.assign(lama, baris);
+  else rows.push(baris);
+}
+
+writeFileSync(OUT, JSON.stringify(rows, null, 2) + '\n');
+console.log(`total ${rows.length} baris; ${BARU.length} baris proyek revisi/perbarui; ${Object.keys(perbarui).length} baris lama disegarkan`);

@@ -177,6 +177,27 @@
         table tr:last-child td {
             border-bottom: none !important;
         }
+
+        /* ========================================================== */
+        /* LEMBAR CETAK (ekspor PDF lewat dialog cetak peramban)      */
+        /* ========================================================== */
+        .lp-print-only { display: none !important; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 14mm; }
+
+            html, body { background: #ffffff !important; height: auto !important; }
+            .lp-no-print, header, #lp-aside, #lp-toast-host { display: none !important; }
+            .lp-print-only { display: block !important; }
+
+            .mx-auto.max-w-\[1600px\] { max-width: none !important; padding: 0 !important; }
+            #app-shell { padding: 0 !important; }
+            table { font-size: 11px !important; }
+            table th, table td { padding: 6px 8px !important; }
+            thead { display: table-header-group; }
+            tr { break-inside: avoid; }
+            #lap-summary > div, #ls-summary > div { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
     </style>
 </head>
 <body class="h-full antialiased">
@@ -195,6 +216,11 @@
             </a>
 
             <div class="ml-auto flex items-center gap-2">
+                <div id="lp-session" class="hidden flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-[#1b3225]" title="Sisa waktu sebelum sistem keluar otomatis karena tidak ada aktivitas">
+                    <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v4l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="whitespace-nowrap">Sesi <span id="lp-session-left" class="font-semibold tabular-nums">--:--</span></span>
+                    <button id="lp-session-extend" type="button" class="hidden rounded-lg bg-[#1b3225] px-2 py-1 text-[11px] font-semibold text-white hover:bg-[#12241a]">Perpanjang</button>
+                </div>
                 <div class="relative">
                     <button id="lp-notif-btn" type="button" class="relative rounded-xl p-2 text-[#1e293b] hover:bg-slate-100" aria-label="Notifikasi" aria-haspopup="true" aria-expanded="false">
                         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 17h4l-1.2-2A6.5 6.5 0 1 0 6 15l-1 2zm-3 3a3 3 0 0 1-4 0"/></svg>
@@ -252,7 +278,7 @@
     </div>
 </div>
 
-<script src="/js/luminpark.js"></script>
+<script src="/js/luminpark.js?v={{ filemtime(public_path('js/luminpark.js')) }}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new MutationObserver(function() {

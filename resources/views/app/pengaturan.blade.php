@@ -4,7 +4,7 @@
 
 @section('page_title', 'Pengaturan')
 
-@section('page_desc', 'Informasi dasar sistem, identitas perumahan, parameter penjualan, dan integrasi login Google.')
+@section('page_desc', 'Informasi dasar sistem, identitas perumahan, parameter penjualan, dan kebijakan keamanan login.')
 
 @section('page_actions')
 <div class="flex flex-wrap items-center gap-2">
@@ -19,16 +19,6 @@
     <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
         Nilai yang disimpan di sini dipakai sistem sebagai parameter uang muka minimum dan masa berlaku booking, serta menjadi identitas perumahan pada halaman publik.
     </div>
-    <section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">Status Masuk dengan Google</h2>
-        <div id="google-status" class="mt-3 text-sm text-zinc-600">Memuat status...</div>
-        <ol class="mt-4 list-decimal space-y-1.5 pl-5 text-sm text-zinc-600">
-            <li>Buka <span class="font-medium text-zinc-800">Google Cloud Console &rsaquo; APIs and Services &rsaquo; Credentials</span> lalu buat <em>OAuth client ID</em> bertipe <em>Web application</em>.</li>
-            <li>Pada <span class="font-medium text-zinc-800">Authorized redirect URIs</span>, isikan persis URI pengalihan balik di bawah ini.</li>
-            <li>Salin <em>Client ID</em> dan <em>Client Secret</em> ke kolom Integrasi Login Google di bawah.</li>
-            <li>Pilih <span class="font-medium text-zinc-800">Aktif</span> pada saklar lalu klik Simpan Perubahan. Tombol Google pada halaman masuk akan aktif otomatis.</li>
-        </ol>
-    </section>
     <p id="set-dirty" class="hidden text-sm font-medium text-amber-700">Ada perubahan yang belum disimpan.</p>
     <div id="set-form"></div>
 </div>
@@ -40,7 +30,6 @@
     identitas: 'Identitas Perumahan',
     penjualan: 'Penjualan & Pembayaran',
     sistem: 'Sistem & Sesi Login',
-    integrasi: 'Integrasi Login Google',
   };
 
   const META = {
@@ -53,23 +42,12 @@
     min_dp_percent: { label: 'Minimal Uang Muka (%)', type: 'number', min: 0, max: 100, step: 0.01 },
     booking_validity_days: { label: 'Batas Waktu Booking (hari)', type: 'number', min: 1, max: 365, step: 1 },
     session_timeout_minutes: {
-      label: 'Batas Sesi Login (menit)', type: 'number', min: 15, max: 10080, step: 1,
-      hint: 'Token login kedaluwarsa otomatis setelah tidak dipakai. Minimum 15 menit, maksimum 10080 menit (7 hari).',
+      label: 'Batas Waktu Tanpa Aktivitas (menit)', type: 'number', min: 15, max: 10080, step: 1,
+      hint: 'Sistem keluar otomatis bila tidak ada aktivitas selama ini. Minimum 15 menit, maksimum 10080 menit (7 hari).',
     },
-    google_login_enabled: {
-      label: 'Saklar Masuk dengan Google', type: 'select', col: 2,
-      options: [{ value: '0', label: 'Nonaktif' }, { value: '1', label: 'Aktif' }],
-      hint: 'Aktif hanya bila Client ID dan Client Secret sudah terisi.',
-    },
-    google_client_id: {
-      label: 'Google Client ID', type: 'text', col: 2,
-      placeholder: '1234567890-abcd1234.apps.googleusercontent.com',
-      hint: 'Berlaku sebagai identitas publik, bukan rahasia.',
-    },
-    google_client_secret: {
-      label: 'Google Client Secret', type: 'text', col: 2,
-      placeholder: 'GOCSPX-xxxxxxxxxxxxxxxx',
-      hint: 'Disimpan di server dan tidak pernah ditampilkan kembali. Kosongkan atau biarkan penanda tersimpan agar nilai lama tidak berubah.',
+    login_lockout_minutes: {
+      label: 'Durasi Penguncian Login (menit)', type: 'number', min: 1, max: 120, step: 1,
+      hint: 'Tiga kali percobaan login gagal pada satu email menahan akun ini selama durasi di atas. Minimum 1 menit, maksimum 120 menit.',
     },
   };
 
@@ -77,27 +55,6 @@
   let editable = [];
 
   const controlId = (key) => 'set-' + key;
-
-  function renderGoogleStatus(info) {
-    const host = document.getElementById('google-status');
-    if (!host) return;
-    const g = info || {};
-    const aktif = g.active
-      ? '<span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Aktif</span>'
-      : '<span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 ring-1 ring-inset ring-zinc-500/20">Belum aktif</span>';
-    const centang = (label, ok) => '<li>' + label + ': ' + (ok
-      ? '<span class="font-semibold text-emerald-700">terisi</span>'
-      : '<span class="font-semibold text-amber-700">belum diisi</span>') + '</li>';
-
-    host.innerHTML = '<div class="flex flex-wrap items-center gap-3">' + aktif
-      + '<span class="text-xs text-zinc-500">Tombol Google pada halaman masuk ikut menyala hanya saat status Aktif.</span></div>'
-      + '<ul class="mt-3 space-y-1 text-sm text-zinc-600">'
-      + centang('Client ID', g.client_configured)
-      + centang('Client Secret', g.secret_configured)
-      + '<li class="pt-1">Daftarkan URI ini pada <em>Authorized redirect URIs</em>: '
-      + '<code class="rounded bg-zinc-100 px-2 py-1 text-xs font-mono text-zinc-800 select-all">' + LP.esc(g.redirect_uri || '-') + '</code></li>'
-      + '</ul>';
-  }
 
   function fieldHtml(key, value) {
     const meta = META[key] || { label: key.replace(/_/g, ' '), type: 'text' };
@@ -131,8 +88,10 @@
   }
 
   function renderForm(semuaItems, values) {
-    // Kunci public_* dikelola di halaman Pengaturan Halaman Publik, tidak di sini.
-    const items = (semuaItems || []).filter((item) => !String(item.key).startsWith('public_'));
+    // Kunci public_* dikelola di halaman Pengaturan Halaman Publik, dan google_* tidak
+    // lagi dikelola lewat antarmuka (revisi 33) — nilainya tetap dipakai saat login Google.
+    const terselubung = (key) => /^(public_|google_)/.test(String(key));
+    const items = (semuaItems || []).filter((item) => !terselubung(item.key));
     const data = values || {};
     const groups = [];
     const groupedKeys = [];
@@ -141,7 +100,7 @@
       groupedKeys.push(item.key);
     });
 
-    const extraKeys = Object.keys(data).filter((key) => !groupedKeys.includes(key) && !String(key).startsWith('public_'));
+    const extraKeys = Object.keys(data).filter((key) => !groupedKeys.includes(key) && !terselubung(key));
     if (extraKeys.length) groups.push('lainnya');
     if (!groups.length) {
       document.getElementById('set-form').innerHTML =
@@ -193,7 +152,6 @@
     const data = await LP.fetchJson('/settings');
     loaded = data.values || {};
     editable = data.editable || [];
-    renderGoogleStatus(data.google);
     renderForm(data.items || [], loaded);
     clearDirty();
   }

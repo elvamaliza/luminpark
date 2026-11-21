@@ -4,12 +4,12 @@
 
 @section('page_title', 'Laporan')
 
-@section('page_desc', 'Laporan penjualan, pelunasan, kinerja sales, dan konsumen untuk periode terpilih.')
+@section('page_desc', 'Laporan penjualan, pelunasan, kinerja sales, dan konsumen untuk periode terpilih — dirinci per proyek.')
 
 @section('page_actions')
 <div class="lp-no-print flex flex-wrap items-center gap-2">
     <button id="lap-export" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] transition-all">Ekspor Excel (CSV)</button>
-    <button id="lap-print" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Cetak</button>
+    <button id="lap-print" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Ekspor PDF / Cetak</button>
 </div>
 @endsection
 
@@ -24,7 +24,7 @@
                 <button type="button" role="tab" data-type="consumers" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all">Konsumen</button>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <label class="block">
                     <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Dari Tanggal</span>
                     <input id="lap-start" name="start_date" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
@@ -33,6 +33,12 @@
                     <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Sampai Tanggal</span>
                     <input id="lap-end" name="end_date" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                 </label>
+                <label class="block">
+                    <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Proyek</span>
+                    <select id="lap-proyek" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
+                        <option value="">Semua Proyek</option>
+                    </select>
+                </label>
                 <label id="lap-status-wrap" class="hidden">
                     <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Konsumen</span>
                     <select id="lap-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
@@ -40,7 +46,7 @@
                         <option value="cold">Cold</option>
                         <option value="warm">Warm</option>
                         <option value="hot">Hot</option>
-                        <option value="booking">Booking</option>
+                        <option value="dibatalkan">Dibatalkan</option>
                     </select>
                 </label>
                 <div class="flex items-end">
@@ -53,7 +59,7 @@
     <p id="lap-period" class="text-sm text-slate-600">Memuat laporan...</p>
 
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Ringkasan Laporan</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-500">Ringkasan per Proyek</h2>
         <div id="lap-summary"></div>
     </section>
 
@@ -82,6 +88,7 @@
         { label: 'Konsumen', render: (r) => LP.esc(r.customer_lead ? r.customer_lead.name : '-') },
         { label: 'Unit', render: (r) => LP.esc(r.unit ? r.unit.unit_code : '-') },
         { label: 'Tipe Unit', render: (r) => LP.esc(r.unit ? r.unit.unit_type : '-') },
+        { label: 'Proyek', render: (r) => LP.esc(r.project || '-') },
         { label: 'Sales', render: (r) => LP.esc(r.sales_profile && r.sales_profile.user ? r.sales_profile.user.name : '-') },
         { label: 'Skema', render: (r) => LP.esc(r.payment_scheme ? r.payment_scheme.scheme_name : '-') },
         { label: 'Harga Total', align: 'right', render: (r) => LP.money(r.total_price) },
@@ -91,10 +98,12 @@
         { label: 'Status', render: (r) => LP.badge(r.status) },
         { label: 'Serah Terima', render: (r) => LP.badge(r.delivery_status) },
       ],
-      summary: (payload) => [
-        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
-        { label: 'Nilai Penjualan', value: LP.shortMoney(payload.total_sales_value), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
-        { label: 'Total Sisa Pembayaran', value: LP.shortMoney(payload.total_remaining_value), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
+      proyekColumns: [
+        { label: 'Proyek', render: (r) => '<span class="font-semibold">' + LP.esc(r.name) + '</span>' },
+        { label: 'Transaksi', align: 'right', render: (r) => LP.number(r.transactions) },
+        { label: 'Dibatalkan', align: 'right', render: (r) => LP.number(r.cancelled) },
+        { label: 'Nilai Penjualan', align: 'right', render: (r) => LP.money(r.sales_value) },
+        { label: 'Sisa Pembayaran', align: 'right', render: (r) => LP.money(r.remaining_value) },
       ],
     },
     settlement: {
@@ -105,6 +114,7 @@
         { label: 'Kode Booking', render: (r) => LP.esc(r.booking ? r.booking.booking_code : '-') },
         { label: 'Konsumen', render: (r) => LP.esc(r.booking && r.booking.customer_lead ? r.booking.customer_lead.name : '-') },
         { label: 'Unit', render: (r) => LP.esc(r.booking && r.booking.unit ? r.booking.unit.unit_code : '-') },
+        { label: 'Proyek', render: (r) => LP.esc(r.project || '-') },
         { label: 'Jenis Pembayaran', render: (r) => LP.esc(r.payment_type) },
         { label: 'Jumlah', align: 'right', render: (r) => LP.money(r.amount) },
         { label: 'Tanggal', render: (r) => LP.date(r.payment_date) },
@@ -113,9 +123,10 @@
         { label: 'Diverifikasi Oleh', render: (r) => LP.esc(r.verifier ? r.verifier.name : '-') },
         { label: 'Waktu Verifikasi', render: (r) => LP.datetime(r.verified_at) },
       ],
-      summary: (payload) => [
-        { label: 'Total Transaksi', value: LP.number(payload.total_transactions), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
-        { label: 'Total Dana Masuk', value: LP.shortMoney(payload.total_settled_amount), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
+      proyekColumns: [
+        { label: 'Proyek', render: (r) => '<span class="font-semibold">' + LP.esc(r.name) + '</span>' },
+        { label: 'Transaksi', align: 'right', render: (r) => LP.number(r.transactions) },
+        { label: 'Dana Masuk', align: 'right', render: (r) => LP.money(r.total_amount) },
       ],
     },
     performance: {
@@ -133,15 +144,13 @@
         { label: 'Target Unit', render: (r) => progressBar(LP.number(r.achieved_units) + ' / ' + LP.number(r.target_units), r.unit_progress) },
         { label: 'Target Nilai', render: (r) => progressBar(LP.shortMoney(r.achieved_amount) + ' / ' + LP.shortMoney(r.target_amount), r.amount_progress) },
       ],
-      summary: (payload) => {
-        const t = payload.totals || {};
-        return [
-          { label: 'Total Lead', value: LP.number(t.total_leads), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
-          { label: 'Total Booking', value: LP.number(t.total_bookings), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
-          { label: 'Total Closing', value: LP.shortMoney(t.total_closing), bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
-          { label: 'Unit Terjual', value: LP.number(t.units_sold), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
-        ];
-      },
+      proyekColumns: [
+        { label: 'Proyek', render: (r) => '<span class="font-semibold">' + LP.esc(r.name) + '</span>' },
+        { label: 'Booking Periode', align: 'right', render: (r) => LP.number(r.transactions) },
+        { label: 'Unit Terjual', align: 'right', render: (r) => LP.number(r.units_sold) },
+        { label: 'Pendapatan Lunas', align: 'right', render: (r) => LP.money(r.revenue_sold) },
+        { label: 'Sales Bekerja', align: 'right', render: (r) => LP.number(r.sales_count) },
+      ],
     },
     consumers: {
       name: 'Konsumen',
@@ -152,28 +161,29 @@
         { label: 'Telepon', render: (r) => LP.esc(r.phone || '-') },
         { label: 'Email', render: (r) => LP.esc(r.email || '-') },
         { label: 'Status', render: (r) => LP.badge(r.status) },
+        { label: 'Kategori', render: (r) => LP.badge(r.category || 'prospek') },
         { label: 'Sumber', render: (r) => LP.esc(r.source || '-') },
         { label: 'Sales', render: (r) => LP.esc(r.sales_profile && r.sales_profile.user ? r.sales_profile.user.name : '-') },
         { label: 'Unit', render: (r) => LP.esc(r.unit ? r.unit.unit_code : (r.interested_unit || '-')) },
+        { label: 'Proyek', render: (r) => LP.esc(r.project || '-') },
         { label: 'Budget', align: 'right', render: (r) => LP.money(r.budget) },
         { label: 'Follow Up Terakhir', render: (r) => LP.date(r.last_follow_up) },
         { label: 'Dibuat', render: (r) => LP.date(r.created_at) },
       ],
-      summary: (payload) => {
-        const t = payload.totals || {};
-        return [
-          { label: 'Total Konsumen', value: LP.number(t.total), bg: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)', border: '#e2e8f0' },
-          { label: 'Cold', value: LP.number(t.cold), bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '#bae6fd' },
-          { label: 'Warm', value: LP.number(t.warm), bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', border: '#fde047' },
-          { label: 'Hot', value: LP.number(t.hot), bg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', border: '#bbf7d0' },
-          { label: 'Sudah Booking', value: LP.number(t.customer), bg: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)', border: '#e9d5ff' },
-        ];
-      },
+      proyekColumns: [
+        { label: 'Proyek', render: (r) => '<span class="font-semibold">' + LP.esc(r.name) + '</span>' },
+        { label: 'Total', align: 'right', render: (r) => LP.number(r.total) },
+        { label: 'Cold', align: 'right', render: (r) => LP.number(r.cold) },
+        { label: 'Warm', align: 'right', render: (r) => LP.number(r.warm) },
+        { label: 'Hot', align: 'right', render: (r) => LP.number(r.hot) },
+        { label: 'Prospek', align: 'right', render: (r) => LP.number(r.prospek) },
+        { label: 'Konsumen', align: 'right', render: (r) => LP.number(r.customer) },
+        { label: 'Dibatalkan', align: 'right', render: (r) => LP.number(r.cancelled) },
+      ],
     },
   };
 
   let currentType = 'sales';
-  const hiddenForPrint = [];
 
   function progressBar(text, percent) {
     const pct = Math.max(0, Math.min(100, Number(percent || 0)));
@@ -190,17 +200,28 @@
       + '<div class="p-1" id="recap-' + LP.esc(title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) + '"></div></div>';
   }
 
-  // KOTAK RINGKASAN DENGAN VARIASI WARNA LEMBUT KONSISTEN
-  function gridCard(items) {
-    const cols = items.length === 5 ? 'repeat(5, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))';
-    return `<div style="display: grid; grid-template-columns: ${cols}; gap: 10px;" class="max-xl:grid-cols-2">`
-      + items.map((item) => {
-          return `<div style="background: ${item.bg}; border: 1px solid ${item.border}; padding: 12px 14px; border-radius: 10px; min-height: 65px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);" class="transition-all hover:shadow-md">
-            <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; margin-bottom: 1px;">${LP.esc(item.label)}</p>
-            <p style="font-size: 15px; font-weight: 700; line-height: 1.1; color: #0f172a; margin-top: 0px;">${item.value}</p>
-            ${item.hint ? `<p style="font-size: 9px; color: #475569; margin-top: 1px;">${LP.esc(item.hint)}</p>` : ''}
-          </div>`;
-      }).join('') + '</div>';
+  // Revisi 32: ringkasan laporan disajikan per proyek, bukan jumlah gabungan.
+  function paintProyek(json) {
+    const pilihan = Array.isArray(json.projects) ? json.projects : [];
+    const aktif = json.project_filter ? String(json.project_filter) : '';
+    const select = document.getElementById('lap-proyek');
+    const sebelumnya = select.value;
+    const dipakai = aktif || sebelumnya;
+
+    select.innerHTML = '<option value="">Semua Proyek</option>'
+      + pilihan.map((item) => '<option value="' + LP.esc(item.id) + '"'
+        + (String(item.id) === dipakai ? ' selected' : '') + '>' + LP.esc(item.name) + '</option>').join('');
+
+    if (pilihan.some((item) => String(item.id) === dipakai)) select.value = dipakai;
+  }
+
+  function renderSummary(conf, json) {
+    LP.table({
+      mount: 'lap-summary',
+      rows: Array.isArray(json.per_project) ? json.per_project : [],
+      columns: conf.proyekColumns,
+      empty: 'Belum ada proyek dengan data pada periode ini.',
+    });
   }
 
   function buildQuery() {
@@ -208,8 +229,13 @@
       start_date: document.getElementById('lap-start').value,
       end_date: document.getElementById('lap-end').value,
     });
+    const proyek = document.getElementById('lap-proyek').value;
+    if (proyek) params.set('cluster_id', proyek);
     const status = document.getElementById('lap-status').value;
-    if (currentType === 'consumers' && status) params.set('status', status);
+    if (currentType === 'consumers' && status) {
+      // Revisi 5: pembatalan adalah kategori, bukan status cold/warm/hot.
+      params.set(status === 'dibatalkan' ? 'category' : 'status', status);
+    }
     return params;
   }
 
@@ -227,7 +253,7 @@
     document.getElementById('lap-status-wrap').className = currentType === 'consumers' ? 'block' : 'hidden';
     setTypeButtons();
 
-    LP.loading('lap-summary', 'Memuat ringkasan...');
+    LP.loading('lap-summary', 'Memuat rincian per proyek...');
     LP.loading('lap-table', 'Memuat detail laporan...');
     document.getElementById('lap-period').textContent = 'Memuat laporan ' + conf.name.toLowerCase() + '...';
     document.getElementById('lap-recap-wrap').classList.add('hidden');
@@ -238,11 +264,14 @@
       if (!json) throw new Error('Respons laporan tidak dikenali.');
 
       const period = json.period || {};
+      const namaProyek = (document.getElementById('lap-proyek').selectedOptions[0] || {}).textContent || 'Semua Proyek';
       document.getElementById('lap-period').textContent = 'Laporan ' + conf.name + ' periode '
         + LP.date(period.start_date) + ' sampai ' + LP.date(period.end_date)
+        + ' pada proyek ' + namaProyek
         + ' — ' + LP.number((json.data || []).length) + ' baris data.';
 
-      document.getElementById('lap-summary').innerHTML = gridCard(conf.summary(json));
+      paintProyek(json);
+      renderSummary(conf, json);
 
       LP.table({ mount: 'lap-table', rows: json.data, columns: conf.columns, empty: 'Tidak ada data transaksi pada periode ini.' });
 
@@ -287,6 +316,8 @@
     loadReport();
   });
 
+  document.getElementById('lap-proyek').addEventListener('change', loadReport);
+
   document.getElementById('lap-export').addEventListener('click', async (event) => {
     const conf = TYPES[currentType];
     await LP.withBusy(event.currentTarget, async () => {
@@ -299,18 +330,27 @@
     });
   });
 
-  document.getElementById('lap-print').addEventListener('click', () => window.print());
+  document.getElementById('lap-print').addEventListener('click', async (event) => {
+    const tombol = event.currentTarget;
+    tombol.disabled = true;
+    tombol.textContent = 'Menyiapkan...';
+    try {
+      const catatanCetak = ['Proyek: ' + (document.getElementById('lap-proyek').selectedOptions[0]?.textContent || 'Semua Proyek')];
+      if (!document.getElementById('lap-status-wrap').classList.contains('hidden')) {
+        catatanCetak.push('Penapis status konsumen: ' + (document.getElementById('lap-status').selectedOptions[0]?.textContent || ''));
+      }
 
-  window.addEventListener('beforeprint', () => {
-    document.querySelectorAll('.lp-no-print, header, #lp-aside, #lp-user-menu').forEach((node) => {
-      if (node.classList.contains('hidden')) return;
-      node.classList.add('hidden');
-      hiddenForPrint.push(node);
-    });
-  });
-  window.addEventListener('afterprint', () => {
-    hiddenForPrint.forEach((node) => node.classList.remove('hidden'));
-    hiddenForPrint.length = 0;
+      await LP.cetakLaporan({
+        judul: 'Laporan ' + TYPES[currentType].name,
+        periode: LP.date(document.getElementById('lap-start').value) + ' s/d ' + LP.date(document.getElementById('lap-end').value),
+        catatan: catatanCetak.join('  ·  '),
+      });
+    } catch (error) {
+      LP.toast(error.message || 'Lembar cetak gagal disiapkan.', 'error');
+    } finally {
+      tombol.disabled = false;
+      tombol.textContent = 'Ekspor PDF / Cetak';
+    }
   });
 
   document.getElementById('lap-start').value = LP.isoDate(Date.now() - 2592000000);

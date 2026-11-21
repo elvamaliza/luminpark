@@ -21,13 +21,14 @@ class SettingSeeder extends Seeder
             'estate_hours'          => ['Senin - Sabtu, 08.00 - 17.00 WIB', 'identitas'],
             'about_text'            => [
                 'Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung '
-                . 'konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah dan cluster dengan '
-                . 'skema pembayaran KPR, cash keras, serta cash bertahap.',
+                . 'konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah pada sejumlah proyek '
+                . 'yang sedang dipasarkan.',
                 'identitas',
             ],
             'min_dp_percent'        => ['10', 'penjualan'],
             'booking_validity_days' => ['7', 'penjualan'],
             'session_timeout_minutes' => ['1440', 'sistem'],
+            'login_lockout_minutes' => ['5', 'sistem'],
             'google_login_enabled'  => ['0', 'integrasi'],
             'google_client_id'      => [null, 'integrasi'],
             'google_client_secret'  => [null, 'integrasi'],
@@ -44,6 +45,7 @@ class SettingSeeder extends Seeder
             'public_featured_unit_ids' => [null, 'publik'],
             'public_show_unggulan'  => ['1', 'publik'],
             'public_show_skema'     => ['1', 'publik'],
+            'public_show_peta'      => ['1', 'publik'],
             'public_show_news'      => ['1', 'publik'],
             'public_show_gallery'   => ['1', 'publik'],
             'public_show_sales'     => ['1', 'publik'],

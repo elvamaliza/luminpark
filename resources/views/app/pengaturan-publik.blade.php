@@ -100,6 +100,7 @@
   const SEKSINYANG = [
     { key: 'public_show_unggulan', label: 'Unit Unggulan' },
     { key: 'public_show_skema', label: 'Skema Pembayaran' },
+    { key: 'public_show_peta', label: 'Peta Lokasi Proyek (Beranda)' },
     { key: 'public_show_news', label: 'Kabar Terbaru' },
     { key: 'public_show_gallery', label: 'Galeri Perumahan' },
     { key: 'public_show_sales', label: 'Hubungi Sales' },

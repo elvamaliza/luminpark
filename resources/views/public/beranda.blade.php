@@ -14,14 +14,11 @@
             Jelajahi unit rumah yang tersedia, bandingkan skema pembayaran, dan hubungi tim sales kami tanpa perlu membuat akun.
         </p>
 
-        <form id="hero-search" class="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
-            <label for="hero-search-input" class="sr-only">Cari unit rumah</label>
-            <input id="hero-search-input" type="search" placeholder="Cari tipe atau kode unit, misalnya Modern Tropical"
-                   class="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-brand-100/60 focus:border-white/50 focus:bg-white/15">
-            <button type="submit" class="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-900 hover:bg-brand-50">
-                Cari Unit
-            </button>
-        </form>
+        {{-- Revisi 38: kotak pencarian kode/tipe unit dihapus; tautan langsung ke daftar unit dan sales. --}}
+        <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/unit" class="rounded-xl bg-white px-6 py-3 text-sm font-bold text-brand-900 hover:bg-brand-50">Lihat Daftar Unit</a>
+            <a href="/kontak" class="rounded-xl border border-white/40 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10">Hubungi Sales</a>
+        </div>
     </div>
 </section>
 
@@ -44,6 +41,15 @@
         <div id="beranda-schemes" class="mt-6"></div>
     </section>
 
+    {{-- Revisi 12: peta lokasi setiap proyek. Revisi 37: penanda memperbesar ke detail jalan dan memberi tautan rute. --}}
+    <section data-seksi="peta">
+        <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Lokasi Proyek</h2>
+        <p class="mt-1 text-sm text-zinc-500">Klik penanda pada peta untuk melihat detail jalan di sekitar proyek, lalu gunakan tombol rute untuk mengetahui cara menuju lokasinya.</p>
+        <div id="beranda-map" class="mt-6 h-[420px] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"></div>
+        <div id="beranda-rute" class="mt-4 flex flex-wrap items-center gap-3"></div>
+        <div id="beranda-map-list" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
     <section class="grid gap-10 lg:grid-cols-2">
         <div data-seksi="news">
             <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Kabar Terbaru</h2>
@@ -63,7 +69,7 @@
         </div>
 
         <div class="mt-8 flex flex-wrap gap-3">
-            <a href="/kontak" class="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800">Kirim Pertanyaan</a>
+            <a href="/kontak" class="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800">Hubungi Kami</a>
             <a href="/unit" class="rounded-xl border border-brand-500 px-6 py-3 text-sm font-semibold text-brand-700 hover:bg-white">Jelajahi Unit</a>
         </div>
     </section>
@@ -184,7 +190,9 @@
             mount.innerHTML = (rows || []).length
                 ? rows.map(function (s) {
                     return '<a href="' + LP.esc(s.whatsapp_link) + '" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-2xl border border-brand-100 bg-white p-4 shadow-sm transition hover:border-brand-500">'
-                        + '<span class="grid h-11 w-11 place-items-center rounded-full bg-brand-50 text-brand-700"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .2-3.2-.7-2.7-1.1-4.4-3.8-4.6-4-.1-.2-1-1.4-1-2.6s.6-1.8.8-2c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.8 2c.1.2 0 .3-.1.5l-.4.6c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.4 0 .6-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.7-.1 1z"/></svg></span>'
+                        + (s.avatar_url
+                            ? LP.fotoSales(s.avatar_url, s.name, 'h-11 w-11')
+                            : '<span class="grid h-11 w-11 place-items-center rounded-full bg-brand-50 text-brand-700"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .2-3.2-.7-2.7-1.1-4.4-3.8-4.6-4-.1-.2-1-1.4-1-2.6s.6-1.8.8-2c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.8 2c.1.2 0 .3-.1.5l-.4.6c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.4 0 .6-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.7-.1 1z"/></svg></span>')
                         + '<span><span class="block text-sm font-bold text-zinc-900">' + LP.esc(s.name) + '</span><span class="block text-xs text-zinc-500">' + LP.esc(s.sales_code) + '</span></span>'
                         + '</a>';
                 }).join('')
@@ -194,11 +202,163 @@
         }
     }
 
-    document.getElementById('hero-search').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const q = document.getElementById('hero-search-input').value.trim();
-        location.href = '/unit' + (q ? '?cari=' + encodeURIComponent(q) : '');
-    });
+    function muatLeaflet() {
+        if (window.L) return Promise.resolve();
+
+        return new Promise(function (resolve, reject) {
+            const css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(css);
+
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.onload = resolve;
+            script.onerror = function () { reject(new Error('Peta tidak dapat dimuat.')); };
+            document.head.appendChild(script);
+        });
+    }
+
+    // Revisi 37: peta bisa diperbesar sampai detail jalan dan menyediakan rute menuju proyek.
+    const ZOOM_JALAN = 17;
+    const LAYANAN_RUTE = 'https://router.project-osrm.org/route/v1/driving/';
+
+    let petaBeranda = null;
+    let lapisanRute = null;
+    let titikSaya = null;
+    let proyekTerpilih = null;
+
+    const ruteGoogle = (r) => 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='
+        + r.latitude + ',' + r.longitude;
+
+    function popupProyek(r) {
+        return '<strong>' + LP.esc(r.name) + '</strong><br>'
+            + LP.esc(r.address || 'Alamat belum diisi') + '<br>'
+            + LP.number(r.units_available) + ' unit tersedia<br>'
+            + '<a href="/unit?proyek=' + encodeURIComponent(r.name) + '">Lihat unit proyek ini</a><br>'
+            + '<a href="' + LP.esc(ruteGoogle(r)) + '" target="_blank" rel="noopener">Rute menuju lokasi</a>';
+    }
+
+    function petaInfo(rows) {
+        document.getElementById('beranda-map-list').innerHTML = rows.map(function (r) {
+            return '<div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">'
+                + '<p class="text-sm font-bold text-zinc-900">' + LP.esc(r.name) + '</p>'
+                + '<p class="mt-1 text-xs text-zinc-500">' + LP.esc(r.address || 'Alamat belum diisi') + '</p>'
+                + '<p class="mt-2 text-xs font-semibold text-brand-700">' + LP.number(r.units_available) + ' unit tersedia</p>'
+                + '<div class="mt-3 flex flex-wrap gap-2">'
+                + '<a href="/unit?proyek=' + encodeURIComponent(r.name) + '" class="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:border-brand-500 hover:text-brand-700">Lihat unit</a>'
+                + '<a href="' + LP.esc(ruteGoogle(r)) + '" target="_blank" rel="noopener" class="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700">Rute menuju lokasi</a>'
+                + '</div></div>';
+        }).join('');
+    }
+
+    function pilihProyekPeta(r) {
+        proyekTerpilih = r;
+        const tombol = document.getElementById('beranda-rute-saya');
+        const buka = document.getElementById('beranda-rute-buka');
+        if (tombol) tombol.textContent = 'Gambar rute dari lokasi saya ke ' + r.name;
+        if (buka) buka.href = ruteGoogle(r);
+    }
+
+    function ruteInfo(pesan) {
+        const el = document.getElementById('beranda-rute-info');
+        if (el) el.textContent = pesan;
+    }
+
+    function posisiPengguna() {
+        return new Promise(function (resolve, reject) {
+            if (!navigator.geolocation) {
+                reject(new Error('Peramban ini tidak mendukung pengambilan lokasi.'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) { resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }); },
+                function () { reject(new Error('Izin lokasi tidak diberikan, sehingga rute dari posisi Anda tidak dapat dibuat.')); },
+                { enableHighAccuracy: true, timeout: 12000 });
+        });
+    }
+
+    async function gambarRute() {
+        if (!petaBeranda || !proyekTerpilih) return;
+        ruteInfo('Mengambil lokasi Anda...');
+
+        try {
+            const asal = await posisiPengguna();
+            const tautan = LAYANAN_RUTE + asal.longitude + ',' + asal.latitude + ';'
+                + proyekTerpilih.longitude + ',' + proyekTerpilih.latitude + '?overview=full&geometries=geojson';
+            const jawaban = await fetch(tautan);
+            const data = await jawaban.json();
+            const rute = data && data.routes ? data.routes[0] : null;
+            if (!rute) throw new Error('Rute berkendara tidak ditemukan pada layanan peta.');
+
+            if (lapisanRute) petaBeranda.removeLayer(lapisanRute);
+            lapisanRute = L.geoJSON(rute.geometry, { style: { color: '#1d4ed8', weight: 5, opacity: 0.75 } }).addTo(petaBeranda);
+
+            if (titikSaya) petaBeranda.removeLayer(titikSaya);
+            titikSaya = L.circleMarker([asal.latitude, asal.longitude], {
+                radius: 6, color: '#0f766e', fillColor: '#14b8a6', fillOpacity: 0.9,
+            }).addTo(petaBeranda).bindPopup('Posisi Anda');
+
+            petaBeranda.fitBounds(lapisanRute.getBounds().pad(0.15), { maxZoom: ZOOM_JALAN });
+            ruteInfo('Rute ke ' + proyekTerpilih.name + ': ' + (rute.distance / 1000).toFixed(1)
+                + ' km, estimasi ' + Math.max(1, Math.round(rute.duration / 60)) + ' menit berkendara melalui jalan umum.');
+        } catch (e) {
+            ruteInfo((e && e.message ? e.message : 'Rute gagal dibuat.')
+                + ' Tetap bisa dibuka lewat tombol Google Maps di samping.');
+        }
+    }
+
+    async function loadMap() {
+        const mount = document.getElementById('beranda-map');
+        LP.loading(mount, 'Memuat peta lokasi proyek...');
+        try {
+            const rows = (await LP.fetchJson('/public/project-locations', ANON)) || [];
+            if (!rows.length) {
+                mount.innerHTML = '<div class="flex h-full items-center justify-center p-8 text-center text-sm text-zinc-500">'
+                    + 'Belum ada proyek dengan koordinat lokasi. Isi Latitude dan Longitude proyek pada menu Data Proyek.</div>';
+                document.getElementById('beranda-map-list').innerHTML = '';
+                document.getElementById('beranda-rute').innerHTML = '';
+                return;
+            }
+
+            await muatLeaflet();
+            mount.innerHTML = '';
+
+            petaBeranda = L.map(mount, { scrollWheelZoom: false, maxZoom: 19 });
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; kontributor OpenStreetMap',
+            }).addTo(petaBeranda);
+
+            const penanda = rows.map(function (r) {
+                const marker = L.marker([r.latitude, r.longitude]).addTo(petaBeranda).bindPopup(popupProyek(r));
+                marker.on('click', function () {
+                    pilihProyekPeta(r);
+                    petaBeranda.flyTo([r.latitude, r.longitude], ZOOM_JALAN);
+                });
+                return marker;
+            });
+
+            if (penanda.length === 1) {
+                petaBeranda.setView([rows[0].latitude, rows[0].longitude], 15);
+            } else {
+                petaBeranda.fitBounds(L.featureGroup(penanda).getBounds().pad(0.3), { maxZoom: ZOOM_JALAN });
+            }
+
+            document.getElementById('beranda-rute').innerHTML =
+                '<button id="beranda-rute-saya" type="button" class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">Gambar rute dari lokasi saya</button>'
+                + '<a id="beranda-rute-buka" href="#" target="_blank" rel="noopener" class="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800">Buka rute di Google Maps</a>'
+                + '<p id="beranda-rute-info" class="text-sm text-zinc-500">Klik penanda pada peta untuk memperbesar sampai detail jalan.</p>';
+            document.getElementById('beranda-rute-saya').addEventListener('click', function (event) {
+                LP.withBusy(event.currentTarget, gambarRute);
+            });
+            pilihProyekPeta(rows[0]);
+
+            petaInfo(rows);
+        } catch (e) {
+            LP.errorBox(mount, e.message || 'Peta lokasi gagal dimuat.');
+        }
+    }
 
     function terapkanTampilan(nilai) {
         if (nilai.public_hero_eyebrow) document.getElementById('hero-eyebrow').textContent = nilai.public_hero_eyebrow;
@@ -212,7 +372,7 @@
         }
 
         const aktif = {};
-        ['unggulan', 'skema', 'news', 'gallery', 'sales'].forEach(function (nama) {
+        ['unggulan', 'skema', 'peta', 'news', 'gallery', 'sales'].forEach(function (nama) {
             const node = document.querySelector('[data-seksi="' + nama + '"]');
             if (!node) return;
             const nyala = String(nilai['public_show_' + nama] === '0' ? '0' : '1') === '1';
@@ -226,11 +386,13 @@
         const aktif = terapkanTampilan(nilai || {});
         if (aktif.unggulan) loadUnits();
         if (aktif.skema) loadSchemes();
+        if (aktif.peta) loadMap();
         if (aktif.news || aktif.gallery) loadNewsAndGallery(aktif);
         if (aktif.sales) loadSales();
     }).catch(function () {
         loadUnits();
         loadSchemes();
+        loadMap();
         loadNewsAndGallery({ news: true, gallery: true });
         loadSales();
     });

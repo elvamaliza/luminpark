@@ -30,6 +30,7 @@
                     <option value="dp lunas">DP Lunas</option>
                     <option value="cicilan">Cicilan Berjalan</option>
                     <option value="lunas">Lunas</option>
+                    <option value="dibatalkan">Dibatalkan</option>
                 </select>
             </label>
             <label class="block">
@@ -63,6 +64,30 @@
     { value: 'selesai', label: 'Selesai' },
   ];
 
+  // Revisi 43: kategori pembayaran boleh dicatat sekaligus saat booking dibuat.
+  const PAYMENT_CATEGORY_LIST = [
+    { value: 'dp', label: 'DP' },
+    { value: 'cicilan', label: 'Cicilan' },
+    { value: 'biaya tambahan', label: 'Biaya Tambahan' },
+  ];
+
+  const PAYMENT_METHOD_LIST = [
+    { value: 'transfer bank', label: 'Transfer Bank' },
+    { value: 'tunai', label: 'Tunai' },
+    { value: 'qris', label: 'QRIS' },
+    { value: 'virtual account', label: 'Virtual Account' },
+    { value: 'cek/giro', label: 'Cek / Giro' },
+  ];
+
+  // Revisi 42: opsi unit baru terisi setelah proyek dipilih, jadi kotak simulasi
+  // kosong menyebut proyek lebih dahulu.
+  const SIMULASI_KOSONG = 'Pilih proyek, unit, dan skema pembayaran untuk melihat simulasi uang muka, angsuran, serta tenor.';
+
+  function bookingCategoryLabel(nilai) {
+    const ditemukan = PAYMENT_CATEGORY_LIST.find((item) => item.value === nilai);
+    return ditemukan ? ditemukan.label : (nilai || 'Pembayaran unit');
+  }
+
   const bookingSearch = document.getElementById('booking-search');
   const bookingStatusFilter = document.getElementById('booking-status');
   const bookingDeliveryFilter = document.getElementById('booking-delivery');
@@ -73,6 +98,7 @@
   let bookingUnits = [];
   let bookingSchemes = [];
   let bookingSalesOptions = [];
+  let bookingSimulasi = null;
   let bookingUser = null;
 
   function bookingLead(row) {
@@ -160,6 +186,7 @@
         { label: 'Unit', render: (row) => LP.esc(bookingUnitLabel(row)) },
         { label: 'Skema', render: (row) => LP.esc(bookingSchemeName(row)) },
         { label: 'Total Harga', align: 'right', render: (row) => LP.money(row.total_price) },
+        { label: 'Biaya Tambahan', align: 'right', render: (row) => LP.money(row.addition_cost || 0) },
         { label: 'Uang Muka', align: 'right', render: (row) => LP.money(row.down_payment_amount) },
         { label: 'Sisa', align: 'right', render: (row) => LP.money(row.remaining_amount) },
         { label: 'Status', render: (row) => LP.badge(row.status) },
@@ -171,24 +198,65 @@
             + (bolehKelola
               ? '<button type="button" data-booking-action="delivery" data-index="' + index + '" class="rounded-lg border border-sky-200 bg-white px-2.5 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-50">Serah Terima</button>'
               : '')
+            + (bolehKelola && bookingBolehBatalkan(row)
+              ? '<button type="button" data-booking-action="cancel" data-index="' + index + '" class="rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50">Batalkan</button>'
+              : '')
             + '</div>',
         },
       ],
     });
   }
 
+  // Revisi 5: pemesanan yang masih berjalan dapat dibatalkan; yang sudah lunas
+  // atau selesai serah terima tetap dapat dibatalkan dan konsumen berpindah ke
+  // kategori Dibatalkan beserta riwayat pembayarannya.
+  function bookingBolehBatalkan(row) {
+    return row.status !== 'dibatalkan';
+  }
+
+  // Revisi 18: hanya calon konsumen berstatus hot yang dapat dibooking, sesuai
+  // alur follow up sales di Database Konsumen.
+  function bookingLeadsHot() {
+    return bookingLeads.filter((item) => item.status === 'hot');
+  }
+
   function bookingLeadOptions() {
-    return bookingLeads.map((item) => ({
+    return bookingLeadsHot().map((item) => ({
       value: item.id,
-      label: item.name + ' — ' + (item.phone || 'tanpa telepon') + ' (' + item.status + ')',
+      label: item.name + ' — ' + (item.phone || 'tanpa telepon'),
     }));
   }
 
-  function bookingUnitSelectOptions() {
-    return bookingUnits.map((item) => ({
-      value: item.id,
-      label: item.unit_code + ' — ' + item.unit_type + ' — ' + LP.money(item.price),
-    }));
+  // Revisi 42: pilihan booking berjenjang — proyek (cluster) lebih dahulu, baru unit.
+  function bookingProjectOptions() {
+    const nama = new Map();
+    bookingUnits.forEach((item) => {
+      if (item.cluster) nama.set(String(item.cluster_id), item.cluster.name);
+    });
+
+    return [...nama.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'id'));
+  }
+
+  function bookingUnitSelectOptions(clusterId) {
+    return bookingUnits
+      .filter((item) => String(item.cluster_id) === String(clusterId))
+      .map((item) => ({
+        value: item.id,
+        label: 'Blok ' + item.unit_code + ' — ' + item.unit_type + ' — ' + LP.money(item.price),
+      }));
+  }
+
+  // Opsi unit ditulis ulang setiap proyek berganti, jadi hanya unit pada proyek
+  // terpilih — dan hanya yang belum dibooking — yang dapat dipilih.
+  function bookingPaintUnits(form, clusterId) {
+    const select = form.querySelector('[name=unit_id]');
+    const pilihan = clusterId ? bookingUnitSelectOptions(clusterId) : [];
+    const kosong = clusterId ? 'Semua unit pada proyek ini sudah dibooking' : 'Pilih proyek lebih dahulu';
+
+    select.innerHTML = '<option value="">' + LP.esc(pilihan.length ? 'Pilih unit dan bloknya' : kosong) + '</option>'
+      + pilihan.map((item) => '<option value="' + LP.esc(item.value) + '">' + LP.esc(item.label) + '</option>').join('');
   }
 
   function bookingSchemeOptions() {
@@ -210,10 +278,46 @@
 
   function bookingCreateFields() {
     const fields = [
-      { name: 'lead_id', label: 'Konsumen', type: 'select', required: true, options: bookingLeadOptions(), placeholder: 'Pilih konsumen' },
-      { name: 'unit_id', label: 'Unit Yang Dipesan', type: 'select', required: true, options: bookingUnitSelectOptions(), placeholder: 'Pilih unit tersedia' },
+      { name: 'lead_id', label: 'Konsumen', type: 'select', required: true, options: bookingLeadOptions(), placeholder: 'Pilih konsumen berstatus Hot' },
+      // Revisi 42: proyek dipilih lebih dahulu, opsi unit mengikuti proyek tersebut.
+      { name: 'cluster_id', label: 'Proyek', type: 'select', required: true, options: bookingProjectOptions(), placeholder: 'Pilih proyek' },
+      { name: 'unit_id', label: 'Unit Yang Dipesan', type: 'select', required: true, options: [], placeholder: 'Pilih proyek lebih dahulu' },
       { name: 'payment_scheme_id', label: 'Skema Pembayaran', type: 'select', required: true, options: bookingSchemeOptions(), placeholder: 'Pilih skema' },
       { name: 'booking_date', label: 'Tanggal Booking', type: 'date', required: true },
+      // Revisi 18: sales memilih dahulu ada/tidaknya permintaan tambahan bangunan.
+      {
+        name: 'addition_requested',
+        label: 'Permintaan Tambahan Bangunan',
+        type: 'select',
+        required: true,
+        col: 2,
+        options: [
+          { value: 'tidak', label: 'Tidak ada permintaan tambahan' },
+          { value: 'ya', label: 'Ada permintaan tambahan bangunan' },
+        ],
+        hint: 'Pilih "ada" untuk mengisi keterangan pekerjaan tambahan beserta biayanya.',
+      },
+      // Revisi 15: permintaan pekerjaan tambahan dicatat terpisah dari harga utama unit.
+      { name: 'addition_description', label: 'Tambahan Unit (Keterangan)', type: 'text', col: 2, placeholder: 'Contoh: kanopi carport, upgrade granit, satu sekat ruangan' },
+      { name: 'addition_cost', label: 'Biaya Tambahan Konstruksi (Rp)', type: 'number', min: 0, step: 'any', placeholder: '0', hint: 'Di luar harga utama perumahan; tidak mengubah uang muka maupun angsuran.' },
+      // Revisi 43: pembayaran pertama boleh langsung dicatat; nominalnya diambil dari
+      // simulasi uang muka/angsuran atau biaya tambahan dan tetap boleh diubah.
+      {
+        name: 'initial_payment_requested',
+        label: 'Catat Pembayaran Sekarang',
+        type: 'select',
+        required: true,
+        col: 2,
+        options: [
+          { value: 'tidak', label: 'Belum ada pembayaran saat booking dibuat' },
+          { value: 'ya', label: 'Ada pembayaran saat booking dibuat' },
+        ],
+        hint: 'Pilih "ada" untuk mengisi kategori DP, cicilan, atau biaya tambahan beserta nominalnya.',
+      },
+      { name: 'initial_category', label: 'Kategori Pembayaran', type: 'select', options: PAYMENT_CATEGORY_LIST, placeholder: 'Pilih kategori' },
+      { name: 'initial_amount', label: 'Nominal Pembayaran (Rp)', type: 'number', min: 0.01, step: 'any', placeholder: '0', hint: 'Terisi otomatis dari simulasi, boleh diubah.' },
+      { name: 'initial_date', label: 'Tanggal Pembayaran', type: 'date' },
+      { name: 'initial_method', label: 'Metode Pembayaran', type: 'select', options: PAYMENT_METHOD_LIST },
     ];
 
     if (!bookingIsSalesRole()) {
@@ -239,7 +343,7 @@
     box = document.createElement('div');
     box.className = 'sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600';
     box.setAttribute('data-booking-simulasi', 'ya');
-    box.innerHTML = 'Pilih unit dan skema pembayaran untuk melihat simulasi uang muka, angsuran, serta tenor.';
+    box.innerHTML = SIMULASI_KOSONG;
     form.querySelector('.grid').appendChild(box);
     return box;
   }
@@ -249,8 +353,10 @@
     const schemeId = form.querySelector('[name=payment_scheme_id]').value;
     const box = bookingPreviewBox(form);
 
+    bookingSimulasi = null;
+
     if (!unitId || !schemeId) {
-      box.innerHTML = 'Pilih unit dan skema pembayaran untuk melihat simulasi uang muka, angsuran, serta tenor.';
+      box.innerHTML = SIMULASI_KOSONG;
       return;
     }
 
@@ -262,6 +368,9 @@
       const data = (hasil.json && hasil.json.data) || {};
       const unit = bookingUnits.find((item) => String(item.id) === String(unitId));
 
+      bookingSimulasi = data;
+      bookingSuggestPembayaran(form);
+
       box.innerHTML = '<p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Simulasi '
         + LP.esc(data.scheme_name || 'skema pembayaran') + (unit ? ' — unit ' + LP.esc(unit.unit_code) : '') + '</p>'
         + '<div class="mt-3 grid gap-3 sm:grid-cols-4">'
@@ -270,9 +379,74 @@
         + '<div><p class="text-xs text-slate-500">Tenor</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.number(data.installment_months)) + ' bulan</p></div>'
         + '<div><p class="text-xs text-slate-500">Total Bunga</p><p class="mt-1 font-semibold text-slate-900">' + LP.esc(LP.money(data.interest_total)) + '</p></div>'
         + '</div>'
-        + '<p class="mt-3 text-xs text-slate-500">Nilai di atas dihitung sistem dari harga unit dan akan menjadi dasar uang muka serta angsuran booking.</p>';
+        + '<p class="mt-3 text-xs text-slate-500">Nilai di atas dihitung sistem dari harga unit dan akan menjadi dasar uang muka serta angsuran booking.</p>'
+        + bookingAdditionNote(form);
     } catch (error) {
       box.innerHTML = '<p class="text-rose-700">Simulasi gagal dihitung: ' + LP.esc(error.message || 'terjadi kesalahan.') + '</p>';
+    }
+  }
+
+  // Revisi 15: biaya tambahan konstruksi ditampilkan sebagai catatan terpisah karena
+  // berada di luar harga utama unit dan tidak ikut menghitung uang muka atau angsuran.
+  function bookingAdditionNote(form) {
+    const biaya = Number((form.querySelector('[name=addition_cost]') || {}).value || 0);
+    if (!biaya) return '';
+
+    const permintaan = ((form.querySelector('[name=addition_description]') || {}).value || '').trim();
+
+    return '<p data-catatan-tambahan class="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Biaya tambahan konstruksi '
+      + LP.esc(LP.money(biaya)) + (permintaan ? ' untuk ' + LP.esc(permintaan) : '')
+      + ' berada di luar harga utama unit dan tidak mengubah simulasi di atas.</p>';
+  }
+
+  // Revisi 18: isian permintaan tambahan hanya tampil bila sales memilih "ada".
+  function bookingToggleTambahan(form) {
+    const select = form.querySelector('[name=addition_requested]');
+    const ada = select && select.value === 'ya';
+
+    ['addition_description', 'addition_cost'].forEach((nama) => {
+      const input = form.querySelector('[name=' + nama + ']');
+      if (!input) return;
+      input.closest('label').classList.toggle('hidden', !ada);
+      if (!ada) input.value = '';
+    });
+
+    const catatan = form.querySelector('[data-catatan-tambahan]');
+    if (catatan) catatan.outerHTML = bookingAdditionNote(form);
+  }
+
+  // Revisi 43: blok pembayaran hanya tampil bila pembayaran dicatat bersama booking.
+  function bookingTogglePembayaran(form) {
+    const select = form.querySelector('[name=initial_payment_requested]');
+    const ada = select && select.value === 'ya';
+
+    ['initial_category', 'initial_amount', 'initial_date', 'initial_method'].forEach((nama) => {
+      const input = form.querySelector('[name=' + nama + ']');
+      if (!input) return;
+      input.closest('label').classList.toggle('hidden', !ada);
+    });
+
+    if (ada) bookingSuggestPembayaran(form);
+  }
+
+  // Nominal disarankan dari simulasi uang muka/angsuran atau dari biaya tambahan,
+  // tergantung kategori yang dipilih; nilai yang muncul masih boleh diubah sales.
+  function bookingSuggestPembayaran(form) {
+    const kategori = form.querySelector('[name=initial_category]').value;
+    const input = form.querySelector('[name=initial_amount]');
+
+    if (!kategori) return;
+
+    const saran = kategori === 'biaya tambahan'
+      ? Number(form.querySelector('[name=addition_cost]').value || 0)
+      : Number((bookingSimulasi || {})[kategori === 'dp' ? 'down_payment_amount' : 'installment_amount'] || 0);
+
+    if (saran > 0) {
+      input.value = saran;
+    } else {
+      // Kategori tanpa saran nominal (misalnya biaya tambahan yang belum diisi)
+      // mengosongkan isian supaya nominal lama dari kategori lain tidak ikut tercatat.
+      input.value = '';
     }
   }
 
@@ -285,16 +459,41 @@
   }
 
   async function bookingCreate(values, context) {
+    const adaTambahan = values.addition_requested === 'ya';
+    const keterangan = String(values.addition_description || '').trim();
+
+    if (adaTambahan && !keterangan) {
+      throw new Error('Keterangan tambahan bangunan wajib diisi bila ada permintaan tambahan.');
+    }
+
     const body = {
       lead_id: Number(values.lead_id),
       unit_id: Number(values.unit_id),
       payment_scheme_id: Number(values.payment_scheme_id),
       booking_date: values.booking_date,
+      addition_cost: adaTambahan ? Number(values.addition_cost || 0) : 0,
+      addition_description: adaTambahan ? keterangan : null,
       notes: values.notes,
       sales_id: bookingIsSalesRole() ? bookingOwnSalesId() : Number(values.sales_id),
     };
 
     if (!body.sales_id) throw new Error('Akun Anda belum memiliki profil sales. Hubungi admin untuk melengkapi data sales.');
+
+    // Revisi 43: blok pembayaran ikut terkirim bila sales memilih mencatat pembayaran.
+    if (values.initial_payment_requested === 'ya') {
+      const nominal = Number(values.initial_amount || 0);
+
+      if (!values.initial_category) throw new Error('Kategori pembayaran wajib dipilih bila mencatat pembayaran saat booking.');
+      if (!(nominal > 0)) throw new Error('Nominal pembayaran harus lebih besar dari nol.');
+      if (!values.initial_date) throw new Error('Tanggal pembayaran wajib diisi.');
+
+      body.initial_payment = {
+        payment_category: values.initial_category,
+        amount: nominal,
+        payment_date: values.initial_date,
+        payment_method: values.initial_method,
+      };
+    }
 
     const hasil = await LP.http.post('/bookings', body);
     const kode = hasil.json && hasil.json.data ? hasil.json.data.booking_code : '';
@@ -303,17 +502,36 @@
     await bookingLoad();
   }
 
-  function bookingOpenCreate() {
-    if (!bookingLeads.length || !bookingUnits.length || !bookingSchemes.length) {
-      LP.toast('Data konsumen, unit tersedia, atau skema pembayaran belum lengkap untuk membuat booking.', 'error');
+  // Revisi 42: konsumen dan unit dimuat ulang setiap form dibuka supaya unit yang baru
+  // saja dibooking otomatis hilang dari pilihan.
+  async function bookingRefreshChoices() {
+    try {
+      const [leads, units] = await Promise.all([LP.fetchJson('/customer-leads'), LP.fetchJson('/units-available')]);
+      bookingLeads = Array.isArray(leads) ? leads : [];
+      bookingUnits = Array.isArray(units) ? units : [];
+    } catch (error) {
+      LP.toast('Pilihan booking gagal dimuat ulang: ' + error.message, 'error');
+    }
+  }
+
+  async function bookingOpenCreate() {
+    await bookingRefreshChoices();
+
+    if (!bookingLeadsHot().length) {
+      LP.toast('Belum ada calon konsumen berstatus Hot. Ubah status calon konsumen menjadi Hot lebih dahulu pada menu Database Konsumen.', 'error');
+      return;
+    }
+
+    if (!bookingUnits.length || !bookingSchemes.length) {
+      LP.toast('Unit tersedia atau skema pembayaran belum lengkap untuk membuat booking.', 'error');
       return;
     }
 
     const modal = LP.formModal({
       title: 'Buat Booking Unit',
-      description: 'Pilih konsumen berstatus Hot, unit tersedia, dan skema pembayaran. Simulasi muncul otomatis sebelum disimpan.',
+      description: 'Pilih konsumen berstatus Hot, lalu proyek dan unit yang masih tersedia, kemudian skema pembayaran. Simulasi muncul otomatis sebelum disimpan.',
       fields: bookingCreateFields(),
-      values: { booking_date: LP.today() },
+      values: { booking_date: LP.today(), initial_date: LP.today(), initial_method: 'transfer bank', addition_requested: 'tidak', initial_payment_requested: 'tidak' },
       submitLabel: 'Simpan Booking',
       width: 'max-w-4xl',
       onSubmit: bookingCreate,
@@ -321,9 +539,29 @@
 
     const form = modal.wrap.querySelector('form');
     bookingPreviewBox(form);
+    bookingPaintUnits(form, '');
+    bookingToggleTambahan(form);
+    bookingTogglePembayaran(form);
+
+    const selectProyek = form.querySelector('[name=cluster_id]');
+    selectProyek.addEventListener('change', () => {
+      bookingPaintUnits(form, selectProyek.value);
+      bookingSimulate(form);
+    });
 
     form.querySelector('[name=unit_id]').addEventListener('change', () => bookingSimulate(form));
     form.querySelector('[name=payment_scheme_id]').addEventListener('change', () => bookingSimulate(form));
+
+    const pilihTambahan = form.querySelector('[name=addition_requested]');
+    if (pilihTambahan) pilihTambahan.addEventListener('change', () => bookingToggleTambahan(form));
+
+    const inputBiayaTambahan = form.querySelector('[name=addition_cost]');
+    if (inputBiayaTambahan) inputBiayaTambahan.addEventListener('change', () => bookingToggleTambahan(form));
+
+    const pilihBayar = form.querySelector('[name=initial_payment_requested]');
+    if (pilihBayar) pilihBayar.addEventListener('change', () => bookingTogglePembayaran(form));
+
+    form.querySelector('[name=initial_category]').addEventListener('change', () => bookingSuggestPembayaran(form));
 
     const selectLead = form.querySelector('[name=lead_id]');
     if (selectLead) selectLead.addEventListener('change', () => bookingSyncSales(form));
@@ -387,21 +625,31 @@
       + bookingDetailRow('Status', LP.badge(data.status))
       + bookingDetailRow('Serah Terima', LP.badge(data.delivery_status))
       + bookingDetailRow('Status Pelunasan', LP.esc(data.settlement_status || data.status))
+      + (data.status === 'dibatalkan'
+        ? bookingDetailRow('Waktu Pembatalan', LP.esc(LP.datetime(data.cancelled_at)))
+          + bookingDetailRow('Alasan Pembatalan', LP.esc(data.cancellation_reason || 'Tanpa alasan tercatat'))
+        : '')
       + '</div>'
       + '<div class="rounded-xl border border-slate-200 p-4">'
       + bookingDetailRow('Konsumen', LP.esc(lead.name || '-') + '<span class="block text-xs text-slate-500">' + LP.esc(lead.phone || '') + '</span>')
       + bookingDetailRow('Unit', LP.esc(unit.unit_code || '-') + '<span class="block text-xs text-slate-500">' + LP.esc(unit.unit_type || '') + '</span>')
-      + bookingDetailRow('Cluster', LP.esc(unit.cluster ? unit.cluster.name : '-'))
+      + bookingDetailRow('Proyek', LP.esc(unit.cluster ? unit.cluster.name : '-'))
       + bookingDetailRow('Skema', LP.esc(data.payment_scheme ? data.payment_scheme.scheme_name : '-'))
       + bookingDetailRow('Sales', LP.esc(profil.user ? profil.user.name : '-') + ' (' + LP.esc(profil.sales_code || '-') + ')')
       + '</div></div>';
 
-    const nominal = '<div class="mt-4 grid gap-3 sm:grid-cols-4">'
+    const nominal = '<div class="mt-4 grid gap-3 sm:grid-cols-5">'
       + LP.statCard({ label: 'Total Harga', value: LP.money(data.total_price), tone: 'zinc' })
       + LP.statCard({ label: 'Uang Muka', value: LP.money(data.down_payment_amount), tone: 'emerald' })
       + LP.statCard({ label: 'Angsuran', value: LP.money(data.installment_amount), tone: 'violet' })
       + LP.statCard({ label: 'Sisa Pembayaran', value: LP.money(data.remaining_amount), tone: 'amber' })
-      + '</div>';
+      + LP.statCard({ label: 'Biaya Tambahan', value: LP.money(data.addition_cost || 0), tone: 'sky', hint: 'Di luar harga utama unit' })
+      + '</div>'
+      + (Number(data.addition_cost || 0) || data.addition_description
+        ? '<p class="mt-3 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">Request tambahan bangunan: '
+          + LP.esc(data.addition_description || 'tanpa keterangan') + ' — ' + LP.esc(LP.money(data.addition_cost || 0))
+          + '. Biaya ini dicatat terpisah sehingga uang muka, angsuran, dan sisa pembayaran tetap mengikuti harga utama unit.</p>'
+        : '');
 
     const catatan = data.notes
       ? '<p class="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">' + LP.esc(data.notes) + '</p>'
@@ -424,6 +672,9 @@
         columns: [
           { label: 'Tanggal', render: (row) => LP.date(row.payment_date) },
           { label: 'Jenis', render: (row) => LP.esc(row.payment_type) },
+          // Revisi 43: kategori menunjukkan uang ini dibayarkan untuk apa.
+          { label: 'Kategori', render: (row) => LP.esc(bookingCategoryLabel(row.payment_category)) },
+          { label: 'Metode', render: (row) => LP.esc(row.payment_method || '-') },
           { label: 'Nominal', align: 'right', render: (row) => LP.money(row.amount) },
           { label: 'Bank', render: (row) => LP.esc(row.bank_name || '-') },
           { label: 'Verifikasi', render: (row) => LP.badge(row.verification_status) },
@@ -451,6 +702,45 @@
       onSubmit: async (values, context) => {
         const hasil = await LP.http.put('/bookings/' + row.id, { delivery_status: values.delivery_status });
         LP.toast((hasil.json && hasil.json.message) || 'Status serah terima booking diperbarui.');
+        context.close();
+        await bookingLoad();
+      },
+    });
+  }
+
+  function bookingOpenCancel(row) {
+    LP.formModal({
+      title: 'Batalkan Booking — ' + row.booking_code,
+      description: 'Unit kembali tersedia dan konsumen keluar dari daftar Konsumen menjadi kategori Dibatalkan. '
+        + 'Pembatalan juga diterima untuk booking yang sudah lunas atau selesai serah terima, dan pembayaran yang sudah tercatat tetap tersimpan sebagai riwayat pembelian.',
+      fields: [{
+        name: 'reason',
+        label: 'Alasan Pembatalan',
+        type: 'textarea',
+        rows: 3,
+        col: 2,
+        required: true,
+        placeholder: 'Contoh: konsumen membatalkan karena pengajuan KPR tidak disetujui bank.',
+        hint: 'Tercatat pada riwayat booking dan dapat dilihat kembali di halaman detail konsumen.',
+      }, {
+        name: 'cancelled_at',
+        label: 'Tanggal Pembatalan',
+        type: 'date',
+        required: true,
+        hint: 'Tanggal konsumen menyampaikan pembatalan.',
+      }],
+      values: { cancelled_at: LP.today() },
+      submitLabel: 'Ya, Batalkan Booking',
+      width: 'max-w-lg',
+      onSubmit: async (values, context) => {
+        const alasan = String(values.reason || '').trim();
+        if (alasan.length < 5) throw new Error('Alasan pembatalan minimal 5 karakter.');
+
+        const hasil = await LP.http.patch('/bookings/' + row.id + '/cancel', {
+          reason: alasan,
+          cancelled_at: values.cancelled_at,
+        });
+        LP.toast((hasil.json && hasil.json.message) || 'Booking berhasil dibatalkan.');
         context.close();
         await bookingLoad();
       },
@@ -511,6 +801,7 @@
       const baris = bookingView[Number(tombol.dataset.index)];
       if (!baris) return;
       if (tombol.dataset.bookingAction === 'detail') bookingOpenDetail(baris.id);
+      else if (tombol.dataset.bookingAction === 'cancel') bookingOpenCancel(baris);
       else bookingOpenDelivery(baris);
     });
 

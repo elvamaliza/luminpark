@@ -22,7 +22,6 @@
     { value: 'cold', label: 'Cold' },
     { value: 'warm', label: 'Warm' },
     { value: 'hot', label: 'Hot' },
-    { value: 'booking', label: 'Booking' },
   ];
   const METHOD_LABEL = {
     whatsapp: 'WhatsApp',
@@ -93,7 +92,13 @@
 
   function detailIdentity(lead) {
     const profil = detailProfile(lead);
-    const sales = profil && profil.user ? profil.user.name : 'Belum ditangani sales';
+    const pengguna = profil && profil.user ? profil.user : null;
+    const sales = pengguna && pengguna.name ? pengguna.name : 'Belum ditangani sales';
+    // Revisi 1: foto sales yang bertanggung jawab atas konsumen ini.
+    const salesFoto = pengguna && pengguna.avatar_url
+      ? LP.fotoSales(pengguna.avatar_url, pengguna.name, 'h-10 w-10')
+      : '<span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">'
+        + LP.esc(String(pengguna ? pengguna.name || sales : '?').charAt(0)) + '</span>';
     const unitHtml = lead.unit
       ? '<a class="font-medium text-brand-600 hover:underline" href="/data-unit/' + LP.esc(lead.unit.id) + '">'
         + LP.esc(lead.unit.unit_code + ' — ' + lead.unit.unit_type) + '</a>'
@@ -106,13 +111,17 @@
       + '<div class="flex flex-wrap items-start justify-between gap-3">'
       + '<div><h2 class="text-lg font-semibold text-zinc-900">' + LP.esc(lead.name) + '</h2>'
       + '<p class="mt-0.5 text-sm text-zinc-500">Terdaftar sejak ' + LP.esc(LP.date(lead.created_at)) + '</p></div>'
-      + '<div>' + LP.badge(lead.status) + '</div></div>'
+      + '<div class="flex flex-wrap items-center justify-end gap-2">'
+      + LP.badge(lead.category || 'prospek') + LP.badge(lead.status) + '</div></div>'
       + '<dl class="mt-4">'
       + detailRow('Nomor Telepon', '<a class="text-brand-600 hover:underline" href="tel:' + LP.esc(lead.phone) + '">' + LP.esc(lead.phone || '-') + '</a>')
-      + detailRow('Sales Penanganan', LP.esc(sales)
-        + (profil && profil.sales_code ? ' <span class="text-xs text-zinc-500">(' + LP.esc(profil.sales_code) + ')</span>' : ''))
+      + detailRow('Sales Penanganan', '<span class="flex items-center gap-3">' + salesFoto
+        + '<span>' + LP.esc(sales)
+        + (profil && profil.sales_code ? ' <span class="text-xs text-zinc-500">(' + LP.esc(profil.sales_code) + ')</span>' : '')
+        + '</span></span>')
       + detailRow('Unit Diminati', unitHtml)
       + detailRow('Sumber', lead.source ? LP.esc(lead.source) : '<span class="text-zinc-500">Manual</span>')
+      + detailRow('Tanggal Chat Awal', lead.first_chat_date ? LP.esc(LP.date(lead.first_chat_date)) : '<span class="text-zinc-500">Belum tercatat</span>')
       + detailRow('Follow Up Terakhir', lead.last_follow_up ? LP.esc(LP.datetime(lead.last_follow_up)) : '<span class="text-rose-600">Belum pernah diikuti</span>')
       + '</dl></section>';
   }
@@ -129,7 +138,7 @@
     return '<section class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">'
       + '<div class="flex flex-wrap items-center justify-between gap-3">'
       + '<div><h2 class="text-base font-semibold text-zinc-900">Ubah Data Konsumen</h2>'
-      + '<p class="mt-1 text-sm text-zinc-500">Status berubah otomatis menjadi Booking saat pemesanan dibuat.</p></div>'
+      + '<p class="mt-1 text-sm text-zinc-500">Kategori berubah menjadi Konsumen begitu pemesanan dibuat dan tetap tercatat sebagai riwayat bila dibatalkan.</p></div>'
       + (bolehUbah() ? '<button id="dc-save" type="button" class="rounded-xl bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60">Simpan Perubahan</button>' : '')
       + '</div>'
       + '<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">'
@@ -137,6 +146,9 @@
       + fieldHtml('phone', 'Nomor Telepon', lead.phone, { required: true, hint: 'Maksimal 15 karakter.' })
       + fieldHtml('email', 'Email', lead.email || '', { type: 'email' })
       + fieldHtml('status', 'Status Konsumen', lead.status, { type: 'select', required: true, options: LEAD_STATUS_LIST })
+      + fieldHtml('first_chat_date', 'Tanggal Chat Awal', lead.first_chat_date ? LP.isoDate(lead.first_chat_date) : '', {
+        type: 'date', hint: 'Tanggal konsumen pertama kali menghubungi sales.',
+      })
       + (LP.currentUserRole() === 'sales' ? '' : fieldHtml('sales_id', 'Sales Penanganan', lead.sales_id || '', {
         type: 'select', options: detailSalesOptions, placeholder: 'Belum ditangani sales',
       }))
@@ -217,10 +229,18 @@
         { label: 'Kode Booking', render: (row) => '<a class="font-medium text-brand-600 hover:underline" href="/booking">' + LP.esc(row.booking_code) + '</a>' },
         { label: 'Tanggal', render: (row) => LP.date(row.booking_date) },
         { label: 'Total Harga', align: 'right', render: (row) => LP.money(row.total_price) },
+        { label: 'Biaya Tambahan', align: 'right', render: (row) => LP.money(row.addition_cost || 0) },
         { label: 'Uang Muka', align: 'right', render: (row) => LP.money(row.down_payment_amount) },
         { label: 'Sisa', align: 'right', render: (row) => LP.money(row.remaining_amount) },
         { label: 'Status', render: (row) => LP.badge(row.status) },
         { label: 'Serah Terima', render: (row) => LP.badge(row.delivery_status) },
+        {
+          label: 'Pembatalan',
+          render: (row) => (row.status === 'dibatalkan'
+            ? '<span class="block text-xs font-medium text-rose-700">' + LP.esc(row.cancellation_reason || 'Tanpa alasan tercatat') + '</span>'
+              + '<span class="block text-xs text-zinc-500">' + LP.esc(LP.datetime(row.cancelled_at)) + '</span>'
+            : '<span class="text-xs text-zinc-500">-</span>'),
+        },
       ],
     });
   }
@@ -253,6 +273,7 @@
       address: nilai('address'),
       note: nilai('note'),
       budget: nilai('budget'),
+      first_chat_date: nilai('first_chat_date'),
       last_follow_up: nilai('last_follow_up'),
       source: nilai('source'),
       unit_id: nilai('unit_id'),

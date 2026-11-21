@@ -53,6 +53,7 @@ class DemoFlowSeeder extends Seeder
                 [
                     'name'            => $name,
                     'email'           => strtolower(str_replace(' ', '.', $name)) . '@example.com',
+                    'first_chat_date' => now()->subDays(20 - $i)->toDateString(),
                     'address'         => 'Jl. Melati No. ' . ($i + 1) . ', Semarang',
                     'status'          => $status,
                     'sales_id'        => $profile->id,
@@ -153,6 +154,7 @@ class DemoFlowSeeder extends Seeder
                 ['payment_date' => now()->subDays($p['days'])->toDateString(), 'amount' => $p['amount']],
                 [
                     'payment_type'        => $p['type'],
+                    'payment_method'      => Payment::METHOD_TRANSFER,
                     'bank_name'           => 'Bank Central Asia',
                     'account_number'      => '8890122345',
                     'account_holder'      => 'PT Lumin Park Properti',
@@ -175,7 +177,9 @@ class DemoFlowSeeder extends Seeder
             'status' => $remaining <= 0 ? Unit::STATUS_SOLD_OUT : ($fullyPaid ? Unit::STATUS_SOLD_OUT : Unit::STATUS_BOOKING),
         ]);
 
-        $lead->update(['status' => CustomerLead::STATUS_BOOKING]);
+        // Nilai status 'booking' tidak dipakai lagi: lead yang sudah memesan ditampilkan
+        // sebagai Hot dan kategorinya dihitung dari pembayaran terverifikasi.
+        $lead->update(['status' => CustomerLead::STATUS_HOT]);
     }
 
     /** Kode booking berikutnya untuk bulan berjalan, mengikuti kode terbesar yang sudah ada. */

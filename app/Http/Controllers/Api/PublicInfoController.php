@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\CustomerLead;
+use App\Models\Cluster;
 use App\Models\PaymentScheme;
 use App\Models\PublicPost;
 use App\Models\SalesProfile;
@@ -85,11 +85,37 @@ class PublicInfoController extends Controller
             ->map(fn (SalesProfile $p) => [
                 'sales_code'      => $p->sales_code,
                 'name'            => $p->user?->name,
+                'avatar_url'      => $p->user?->avatar_url,
                 'whatsapp_number' => $p->whatsapp_number,
                 'whatsapp_link'   => 'https://wa.me/' . preg_replace('/\D+/', '', (string) $p->whatsapp_number),
             ]);
 
         return response()->json(['success' => true, 'data' => $contacts], 200);
+    }
+
+    /**
+     * Lokasi setiap proyek aktif untuk peta pada halaman beranda (revisi 12).
+     * Proyek tanpa koordinat tidak dikirim supaya marker tidak menumpuk di nol.
+     */
+    public function projectLocations()
+    {
+        $rows = Cluster::withCount(['units' => fn ($q) => $q->where('status', Unit::STATUS_AVAILABLE)])
+            ->aktif()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Cluster $c) => [
+                'id'          => $c->id,
+                'name'        => $c->name,
+                'address'     => $c->address,
+                'description' => $c->description,
+                'latitude'    => (float) $c->latitude,
+                'longitude'   => (float) $c->longitude,
+                'units_available' => (int) $c->units_count,
+            ]);
+
+        return response()->json(['success' => true, 'data' => $rows], 200);
     }
 
     // 5. API Berita & Galeri Publik
@@ -147,39 +173,6 @@ class PublicInfoController extends Controller
             'success' => true,
             'data'    => $units->map($this->presentUnit(...))->values(),
         ], 200);
-    }
-
-    // 6. Form Kontak Publik (Otomatis masuk sebagai Customer Lead baru)
-    public function submitContactForm(Request $request)
-    {
-        $validated = $request->validate([
-            'name'    => 'required|string|max:100',
-            'email'   => 'nullable|email|max:100',
-            'phone'   => 'required|string|max:15',
-            'address' => 'nullable|string',
-            'note'    => 'nullable|string',
-            'unit_id' => 'nullable|exists:units,id',
-        ]);
-
-        $unit = isset($validated['unit_id']) ? Unit::find($validated['unit_id']) : null;
-
-        $lead = CustomerLead::create([
-            'name'            => $validated['name'],
-            'email'           => $validated['email'] ?? null,
-            'phone'           => $validated['phone'],
-            'address'         => $validated['address'] ?? null,
-            'note'            => $validated['note'] ?? 'Form Kontak Landing Page',
-            'unit_id'         => $unit?->id,
-            'interested_unit' => $unit?->unit_code,
-            'status'          => CustomerLead::STATUS_COLD,
-            'source'          => 'website',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Pesan Anda berhasil dikirim! Tim sales kami akan segera menghubungi Anda.',
-            'data'    => ['id' => $lead->id, 'name' => $lead->name, 'status' => $lead->status],
-        ], 201);
     }
 
     private function presentUnit(Unit $unit): array

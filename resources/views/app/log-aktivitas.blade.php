@@ -4,7 +4,7 @@
 
 @section('page_title', 'Log Aktivitas Sistem')
 
-@section('page_desc', 'Jejak aktivitas pengguna di dalam sistem beserta waktu, alamat IP, dan perangkatnya.')
+@section('page_desc', 'Khusus peran Super Admin. Dua jejak berbeda: perubahan data per modul (activity_logs) dan kejadian akun/sistem (system_logs).')
 
 @section('page_actions')
 <button id="log-reload" type="button" class="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">Muat Ulang</button>
@@ -12,6 +12,11 @@
 
 @section('content')
 <div class="space-y-5">
+    <div class="flex flex-wrap items-center gap-2">
+        <button type="button" data-log-source="audit" class="log-tab rounded-xl border px-4 py-2 text-sm font-semibold">Jejak audit data</button>
+        <button type="button" data-log-source="system" class="log-tab rounded-xl border px-4 py-2 text-sm font-semibold">Aktivitas sistem &amp; login</button>
+    </div>
+
     <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block sm:col-span-2">
@@ -37,6 +42,12 @@
 @push('scripts')
 <script>
   let rows = [];
+  let sumber = 'audit';
+
+  const SUMBER = {
+    audit: { endpoint: '/activity-logs?per_page=200', kosong: 'Belum ada perubahan data tercatat.', kolom: ['Modul & aksi', 'Perangkat'] },
+    system: { endpoint: '/system-logs', kosong: 'Belum ada aktivitas sistem tersimpan.', kolom: ['Aktivitas', 'Perangkat'] },
+  };
 
   const activityLabel = (value) => String(value || '-').replace(/_/g, ' ');
 
@@ -76,24 +87,39 @@
     LP.table({
       mount: 'log-table',
       rows: list,
-      empty: rows.length ? 'Tidak ada log yang cocok dengan pencarian.' : 'Belum ada log aktivitas tersimpan.',
+      empty: rows.length ? 'Tidak ada log yang cocok dengan pencarian.' : SUMBER[sumber].kosong,
       columns: [
         { label: 'Waktu', render: (row) => LP.datetime(row.created_at) },
         { label: 'Pengguna', render: (row) => LP.esc(row.user ? row.user.name : 'Sistem') + '<span class="block text-xs text-zinc-500">' + LP.esc(row.user ? LP.roleLabel(row.user.role) : 'tanpa akun') + '</span>' },
-        { label: 'Aktivitas', render: (row) => '<span class="inline-flex items-center rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">' + LP.esc(activityLabel(row.activity)) + '</span>' },
+        { label: SUMBER[sumber].kolom[0], render: (row) => '<span class="inline-flex items-center rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">' + LP.esc(activityLabel(row.activity)) + '</span>' },
         { label: 'Keterangan', render: (row) => LP.esc(row.description || '-') },
         { label: 'Alamat IP', render: (row) => LP.esc(row.ip_address || '-') },
-        { label: 'Perangkat', render: (row) => { const text = String(row.user_agent || '-'); return '<span title="' + LP.esc(text) + '">' + LP.esc(text.length > 40 ? text.slice(0, 37) + '...' : text) + '</span>'; } },
+        { label: SUMBER[sumber].kolom[1], render: (row) => { const text = String(row.user_agent || '-'); return '<span title="' + LP.esc(text) + '">' + LP.esc(text.length > 40 ? text.slice(0, 37) + '...' : text) + '</span>'; } },
       ],
+    });
+  }
+
+  function aktifkanTab() {
+    document.querySelectorAll('.log-tab').forEach((tab) => {
+      const aktif = tab.dataset.logSource === sumber;
+      tab.classList.toggle('border-[#1b3225]', aktif);
+      tab.classList.toggle('bg-[#1b3225]', aktif);
+      tab.classList.toggle('text-white', aktif);
+      tab.classList.toggle('border-zinc-300', !aktif);
+      tab.classList.toggle('bg-white', !aktif);
+      tab.classList.toggle('text-zinc-700', !aktif);
+      tab.setAttribute('aria-current', aktif ? 'true' : 'false');
     });
   }
 
   async function load() {
     LP.loading('log-table', 'Memuat log aktivitas...');
     document.getElementById('log-count').textContent = 'Memuat log...';
+    aktifkanTab();
     try {
-      const data = await LP.fetchJson('/system-logs');
-      rows = Array.isArray(data) ? data : [];
+      const data = await LP.fetchJson(SUMBER[sumber].endpoint);
+      // Baris audit memakai kolom action, sedangkan system log memakai activity.
+      rows = (Array.isArray(data) ? data : []).map((row) => ({ ...row, activity: row.activity || row.action }));
       fillUserFilter();
       render();
     } catch (error) {
@@ -107,6 +133,14 @@
   document.getElementById('log-user').addEventListener('change', render);
   document.getElementById('log-reload').addEventListener('click', (event) => {
     LP.withBusy(event.currentTarget, load);
+  });
+  document.querySelectorAll('.log-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      if (sumber === tab.dataset.logSource) return;
+      sumber = tab.dataset.logSource;
+      document.getElementById('log-search').value = '';
+      load();
+    });
   });
 
   LP.guard(['super_admin'], load);

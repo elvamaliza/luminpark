@@ -2,12 +2,16 @@
 
 @section('title', 'Data Unit Perumahan')
 @section('page_title', 'Data Unit Perumahan')
-@section('page_desc', 'Telusuri dan saring unit; buka Detail untuk mengubah informasi unit. Tambah cluster dan unit hanya milik Super Admin.')
+@section('page_desc', 'Telusuri dan saring unit; buka Detail untuk melihat informasi unit beserta riwayat pemesanannya.')
 
 @section('page_actions')
-    <button id="btn-add-cluster" type="button" class="hidden inline-flex items-center gap-2 rounded-xl border border-[#1b3225] px-4 py-2 text-sm font-semibold text-[#1b3225] shadow-sm hover:bg-[#1b3225]/5 transition-all">
+    <a id="btn-kelola-proyek" href="/data-proyek" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-[#1b3225] shadow-sm hover:bg-slate-50 transition-all">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Kelola Proyek
+    </a>
+    <button id="btn-add-proyek" type="button" class="hidden inline-flex items-center gap-2 rounded-xl border border-[#1b3225] px-4 py-2 text-sm font-semibold text-[#1b3225] shadow-sm hover:bg-[#1b3225]/5 transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h16M6 20V9l6-4 6 4v11M9 20v-6h6v6"/></svg>
-        Tambah Cluster
+        Tambah Proyek
     </button>
     <button id="btn-add-unit" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#1b3225] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#12241a] disabled:opacity-60 transition-all">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -22,11 +26,11 @@
     <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cari Unit</span>
-                <input id="unit-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="kode unit, tipe, atau cluster">
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Blok</span>
+                <input id="unit-search" type="search" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20" placeholder="kode blok unit, mis. LT-01">
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status Unit</span>
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Status</span>
                 <select id="unit-status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
                     <option value="">Semua Status</option>
                     <option value="available">Tersedia</option>
@@ -36,9 +40,9 @@
                 </select>
             </label>
             <label class="block">
-                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Cluster</span>
+                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Proyek</span>
                 <select id="unit-cluster" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#5c7361] focus:ring-2 focus:ring-[#5c7361]/20">
-                    <option value="">Semua Cluster</option>
+                    <option value="">Semua Proyek</option>
                 </select>
             </label>
             <p id="unit-count" class="self-end text-sm text-slate-500">Memuat data unit...</p>
@@ -78,13 +82,12 @@
   }
 
   function unitFiltered() {
-    const kata = (unitSearch.value || '').trim().toLowerCase();
+    const blok = (unitSearch.value || '').trim().toLowerCase();
     const status = unitStatusFilter.value;
     const clusterId = unitClusterFilter.value;
 
     return unitAll.filter((row) => {
-      const haystack = [row.unit_code, row.unit_type, unitClusterName(row)].join(' ').toLowerCase();
-      if (kata && haystack.indexOf(kata) === -1) return false;
+      if (blok && String(row.unit_code || '').toLowerCase().indexOf(blok) === -1) return false;
       if (status && row.status !== status) return false;
       if (clusterId && String(row.cluster_id) !== clusterId) return false;
       return true;
@@ -129,7 +132,7 @@
           label: 'Blok / Kode Unit',
           render: (row) => '<span class="font-semibold text-slate-900">' + LP.esc(row.unit_code) + '</span>',
         },
-        { label: 'Cluster', render: (row) => LP.esc(unitClusterName(row)) },
+        { label: 'Proyek', render: (row) => LP.esc(unitClusterName(row)) },
         { label: 'Tipe Unit', render: (row) => LP.esc(row.unit_type) },
         { label: 'Luas Tanah', align: 'right', render: (row) => LP.number(row.land_size) + ' m2' },
         { label: 'Luas Bangunan', align: 'right', render: (row) => LP.number(row.building_size) + ' m2' },
@@ -150,19 +153,23 @@
   }
 
   function unitClusterOptions() {
-    return unitClusters.map((item) => ({ value: item.id, label: item.name }));
+    // Proyek arsip tetap ada pada penyaring karena unit lamanya masih memakai proyek itu,
+    // tetapi tidak lagi ditawarkan pada formulir unit.
+    return unitClusters
+      .filter((item) => item.status !== 'diarsipkan')
+      .map((item) => ({ value: item.id, label: item.name }));
   }
 
   function unitFields() {
     return [
-      { name: 'cluster_id', label: 'Cluster', type: 'select', required: true, options: unitClusterOptions(), placeholder: 'Pilih cluster', col: 2 },
+      { name: 'cluster_id', label: 'Proyek', type: 'select', required: true, options: unitClusterOptions(), placeholder: 'Pilih proyek', col: 2 },
       { name: 'unit_code', label: 'Kode Unit / Blok', type: 'text', required: true, placeholder: 'LT-011', hint: 'Kode unik, maksimal 30 karakter.' },
       { name: 'unit_type', label: 'Tipe Unit', type: 'text', required: true, placeholder: 'Modern Tropical 60' },
       { name: 'land_size', label: 'Luas Tanah (m2)', type: 'number', required: true, min: 1, step: 'any' },
       { name: 'building_size', label: 'Luas Bangunan (m2)', type: 'number', required: true, min: 1, step: 'any' },
       { name: 'price', label: 'Harga Unit (Rp)', type: 'number', required: true, min: 0, step: 'any' },
       { name: 'status', label: 'Status Unit', type: 'select', required: true, options: UNIT_STATUS_LIST },
-      { name: 'description', label: 'Deskripsi Unit', type: 'textarea', rows: 3, col: 2, placeholder: 'Contoh: 3 kamar tidur, hadap taman cluster.' },
+      { name: 'description', label: 'Deskripsi Unit', type: 'textarea', rows: 3, col: 2, placeholder: 'Contoh: 3 kamar tidur, menghadap taman proyek.' },
       { name: 'image', label: 'Foto Unit', type: 'file', accept: 'image/*', col: 2, hint: 'Format JPG, JPEG, atau PNG. Ukuran maksimal 2 MB.' },
     ];
   }
@@ -228,7 +235,7 @@
 
   function unitOpenForm(original) {
     if (!unitClusters.length) {
-      LP.toast('Daftar cluster belum tersedia. Gunakan tombol Tambah Cluster sebelum membuat unit.', 'error');
+      LP.toast('Daftar proyek belum tersedia. Gunakan tombol Tambah Proyek sebelum membuat unit.', 'error');
       return;
     }
 
@@ -245,21 +252,21 @@
     });
   }
 
-  function clusterFields() {
+  function proyekTambahFields() {
     return [
       {
-        name: 'project_id', label: 'Proyek Induk', type: 'select', required: true, col: 2,
+        name: 'project_id', label: 'Perumahan', type: 'select', required: true, col: 2,
         options: unitProjects.map((item) => ({ value: item.id, label: item.name })),
-        placeholder: 'Pilih proyek',
+        placeholder: 'Pilih perumahan',
       },
-      { name: 'name', label: 'Nama Cluster', type: 'text', required: true, placeholder: 'Cluster Asena', hint: 'Nama harus unik di dalam satu proyek, maksimal 100 karakter.' },
-      { name: 'description', label: 'Deskripsi Cluster', type: 'textarea', rows: 3, col: 2, placeholder: 'Contoh: cluster depan dengan jalur hijau dan taman bermain.' },
+      { name: 'name', label: 'Nama Proyek', type: 'text', required: true, placeholder: 'Proyek Asena', hint: 'Nama harus unik di dalam satu perumahan, maksimal 100 karakter.' },
+      { name: 'description', label: 'Deskripsi Proyek', type: 'textarea', rows: 3, col: 2, placeholder: 'Contoh: proyek depan dengan jalur hijau dan taman bermain.' },
     ];
   }
 
-  async function clusterSave(values, context) {
+  async function proyekTambahSave(values, context) {
     const nama = (values.name || '').trim();
-    if (!nama) throw new Error('Nama cluster wajib diisi.');
+    if (!nama) throw new Error('Nama proyek wajib diisi.');
 
     const hasil = await LP.http.post('/clusters', {
       project_id: Number(values.project_id),
@@ -267,24 +274,24 @@
       description: (values.description || '').trim() || null,
     });
 
-    LP.toast((hasil.json && hasil.json.message) || 'Cluster baru berhasil ditambahkan.');
+    LP.toast((hasil.json && hasil.json.message) || 'Proyek baru berhasil ditambahkan.');
     context.close();
     await unitLoad();
   }
 
-  function clusterOpenForm() {
+  function proyekTambahOpenForm() {
     if (!unitProjects.length) {
-      LP.toast('Daftar proyek belum tersedia, padahal setiap cluster membutuhkan proyek induk.', 'error');
+      LP.toast('Daftar perumahan belum tersedia, padahal setiap proyek membutuhkan perumahan induk.', 'error');
       return;
     }
 
     LP.formModal({
-      title: 'Tambah Cluster Baru',
-      description: 'Cluster mengelompokkan unit di dalam satu proyek. Unit baru hanya dapat dibuat setelah cluster-nya tersedia.',
-      fields: clusterFields(),
+      title: 'Tambah Proyek Baru',
+      description: 'Proyek mengelompokkan unit di dalam satu perumahan. Unit baru hanya dapat dibuat setelah proyeknya tersedia.',
+      fields: proyekTambahFields(),
       values: { project_id: unitProjects.length === 1 ? unitProjects[0].id : '' },
-      submitLabel: 'Simpan Cluster',
-      onSubmit: (values, context) => clusterSave(values, context),
+      submitLabel: 'Simpan Proyek',
+      onSubmit: (values, context) => proyekTambahSave(values, context),
     });
   }
 
@@ -307,8 +314,8 @@
 
   function unitPaintClusterFilter() {
     const selected = unitClusterFilter.value;
-    unitClusterFilter.innerHTML = '<option value="">Semua Cluster</option>'
-      + unitClusters.map((item) => '<option value="' + LP.esc(item.id) + '">' + LP.esc(item.name) + '</option>').join('');
+    unitClusterFilter.innerHTML = '<option value="">Semua Proyek</option>'
+      + unitClusters.map((item) => '<option value="' + LP.esc(item.id) + '">' + LP.esc(item.name) + (item.status === 'diarsipkan' ? ' (arsip)' : '') + '</option>').join('');
     unitClusterFilter.value = selected;
   }
 
@@ -324,7 +331,7 @@
       unitAll = Array.isArray(daftar) ? daftar : [];
       unitClusters = Array.isArray(clusters) ? clusters : [];
 
-      // Daftar proyek hanya dibutuhkan tombol Tambah Cluster; kegagalan baca tidak boleh
+      // Daftar perumahan hanya dibutuhkan tombol Tambah Proyek; kegagalan baca tidak boleh
       // menghentikan tabel unit.
       try {
         const proyek = await LP.fetchJson('/projects');
@@ -346,10 +353,11 @@
   LP.guard(ROLE_PENGELOLA, async () => {
     if (!LP.can(['super_admin'])) {
       document.getElementById('btn-add-unit').classList.add('hidden');
+      document.getElementById('btn-kelola-proyek').classList.add('hidden');
     } else {
       document.getElementById('btn-add-unit').addEventListener('click', () => unitOpenForm(null));
-      document.getElementById('btn-add-cluster').addEventListener('click', clusterOpenForm);
-      document.getElementById('btn-add-cluster').classList.remove('hidden');
+      document.getElementById('btn-add-proyek').addEventListener('click', proyekTambahOpenForm);
+      document.getElementById('btn-add-proyek').classList.remove('hidden');
     }
 
     const renderDebounced = LP.debounce(unitRender);

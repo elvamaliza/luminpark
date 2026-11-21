@@ -31,7 +31,7 @@
         
         <div class="space-y-1 text-center">
             <h2 class="text-xl font-bold tracking-tight text-zinc-900">Masuk ke Sistem</h2>
-            <p class="text-[11px] font-normal leading-relaxed text-zinc-700">Khusus Super Admin, Admin Sales, dan Sales. Konsumen cukup memakai halaman publik.</p>
+            <p class="text-[11px] font-normal leading-relaxed text-zinc-700">Khusus Super Admin, Monitoring Manajemen, dan Sales. Konsumen cukup memakai halaman publik.</p>
         </div>
 
         <form id="login-form" class="mt-5 space-y-3.5" novalidate>
@@ -93,7 +93,7 @@
     </main>
 </div>
 
-<script src="/js/luminpark.js"></script>
+<script src="/js/luminpark.js?v={{ filemtime(public_path('js/luminpark.js')) }}"></script>
 <script>
     const PESAN_GOOGLE = {
         'belum-diaktifkan': 'Masuk dengan Google belum diaktifkan. Gunakan email dan kata sandi Anda.',
@@ -102,8 +102,8 @@
         'pertukaran-gagal': 'Kode Google tidak dapat ditukarkan. Silakan coba lagi.',
         'server-google-tidak-terjangkau': 'Layanan Google tidak dapat dihubungi. Periksa koneksi internet Anda.',
         'email-belum-diverifikasi': 'Email akun Google Anda belum terverifikasi sehingga tidak dapat dipakai masuk.',
-        'bukan-akun-internal': 'Email Google itu tidak terdaftar sebagai akun staf internal. Hubungi Super Admin atau Admin Sales.',
-        'akun-nonaktif': 'Akun Anda dinonaktifkan. Hubungi Super Admin atau Admin Sales.',
+        'bukan-akun-internal': 'Email Google itu tidak terdaftar sebagai akun staf internal. Hubungi Super Admin atau Monitoring Manajemen.',
+        'akun-nonaktif': 'Akun Anda dinonaktifkan. Hubungi Super Admin atau Monitoring Manajemen.',
         'google-sudah-tertaut': 'Akun internal ini sudah tertaut dengan akun Google lain.',
     };
 
@@ -122,6 +122,11 @@
     if (errorKey) {
         history.replaceState(null, '', '/login');
         LP.toast(PESAN_GOOGLE[errorKey] || 'Login Google gagal. Silakan coba lagi.', 'error');
+    }
+
+    if (new URLSearchParams(location.search).get('sesi') === 'berakhir') {
+        history.replaceState(null, '', '/login');
+        LP.toast('Sesi Anda berakhir karena tidak ada aktivitas. Silakan masuk kembali.', 'error');
     }
 
     const form = document.getElementById('login-form');

@@ -24,8 +24,10 @@
     <div class="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
         <h1 class="text-xl font-bold text-zinc-900">Ganti Kata Sandi Awal</h1>
         <p class="mt-2 text-sm text-zinc-500">
-            Anda masuk memakai kata sandi awal yang dibuatkan pengelola. Ganti terlebih dahulu
-            sebelum menggunakan sistem. Setelah berhasil, Anda akan diminta masuk kembali dengan kata sandi baru.
+            Anda masuk memakai kata sandi awal yang dibuatkan pengelola — tanggal lahir Anda dalam format
+            <span class="font-semibold">yyyymmdd</span> (contoh 19950314). Ganti terlebih dahulu sebelum menggunakan
+            sistem. Kata sandi baru harus minimal 8 karakter serta memuat huruf besar, huruf kecil, dan angka.
+            Setelah berhasil, Anda akan diminta masuk kembali dengan kata sandi baru.
         </p>
 
         <p id="identitas" class="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-900">Memuat data akun...</p>
@@ -39,14 +41,14 @@
             </div>
             <div>
                 <label for="password_baru" class="mb-1.5 block text-sm font-medium text-zinc-700">Kata Sandi Baru</label>
-                <input id="password_baru" type="password" autocomplete="new-password" required minlength="6"
+                <input id="password_baru" type="password" autocomplete="new-password" required minlength="8"
                        class="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-                       placeholder="minimal 6 karakter">
-                <span class="mt-1 block text-xs text-zinc-500">Jangan gunakan tanggal lahir Anda.</span>
+                       placeholder="minimal 8 karakter, huruf besar, kecil, dan angka">
+                <span class="mt-1 block text-xs text-zinc-500">Contoh yang sah: Sales2026. Jangan gunakan tanggal lahir Anda.</span>
             </div>
             <div>
                 <label for="password_baru2" class="mb-1.5 block text-sm font-medium text-zinc-700">Ulangi Kata Sandi Baru</label>
-                <input id="password_baru2" type="password" autocomplete="new-password" required minlength="6"
+                <input id="password_baru2" type="password" autocomplete="new-password" required minlength="8"
                        class="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                        placeholder="ketik ulang kata sandi baru">
             </div>
@@ -63,7 +65,7 @@
     </div>
 </main>
 
-<script src="/js/luminpark.js"></script>
+<script src="/js/luminpark.js?v={{ filemtime(public_path('js/luminpark.js')) }}"></script>
 <script>
     const identitas = document.getElementById('identitas');
     const form = document.getElementById('ganti-form');
@@ -102,8 +104,8 @@
             LP.toast('Semua kata sandi wajib diisi.', 'error');
             return;
         }
-        if (baru.length < 6) {
-            LP.toast('Kata sandi baru minimal 6 karakter.', 'error');
+        if (baru.length < 8 || !LP.sandiKuat(baru)) {
+            LP.toast(LP.PESAN_SANDI, 'error');
             return;
         }
         if (baru !== ulang) {

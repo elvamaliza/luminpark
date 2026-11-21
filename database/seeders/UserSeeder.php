@@ -60,7 +60,7 @@ class UserSeeder extends Seeder
         // Akun admin dan manajer hasil rancangan lama dihapus: super admin cukup superadmin@gmail.com.
         User::whereIn('email', ['admin@luminpark.com', 'manager@luminpark.com'])->delete();
 
-        // Beberapa lead belum tertangani (dibuat publik melalui form kontak).
+        // Beberapa lead belum tertangani (dicatat sales dari kunjungan situs web).
         CustomerLead::updateOrCreate(
             ['phone' => '0812000000001'],
             [
@@ -68,7 +68,7 @@ class UserSeeder extends Seeder
                 'email'  => 'web.lead@example.com',
                 'status' => CustomerLead::STATUS_COLD,
                 'source' => 'website',
-                'note'   => 'Dikirim dari form kontak landing page.',
+                'note'   => 'Dicatat sales setelah menghubungi narahubung pada halaman publik.',
             ]
         );
     }

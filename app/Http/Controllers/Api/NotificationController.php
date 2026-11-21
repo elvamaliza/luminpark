@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Notification::where('user_id', $request->user()->id)->latest();
+        $query = $this->milikPengguna($request)->latest();
 
         if ($request->boolean('unread_only')) {
             $query->unread();
@@ -26,7 +27,7 @@ class NotificationController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => ['unread_count' => Notification::where('user_id', $request->user()->id)->unread()->count()],
+            'data'    => ['unread_count' => $this->milikPengguna($request)->unread()->count()],
         ], 200);
     }
 
@@ -48,5 +49,18 @@ class NotificationController extends Controller
         $updated = Notification::where('user_id', $request->user()->id)->unread()->update(['is_read' => true]);
 
         return response()->json(['success' => true, 'message' => 'Semua notifikasi ditandai sudah dibaca.', 'data' => ['updated' => $updated]], 200);
+    }
+
+    private function milikPengguna(Request $request)
+    {
+        $query = Notification::where('user_id', $request->user()->id);
+
+        // Revisi 29 melepas Admin Sales dari siaran booking & pembayaran, tetapi baris yang tercetak
+        // sebelum pelepasan itu masih tersimpan, jadi jenis tersebut disaring pada saat pembacaan.
+        if ($request->user()->role === User::ROLE_ADMIN_SALES) {
+            $query->whereNotIn('type', ['booking', 'payment']);
+        }
+
+        return $query;
     }
 }

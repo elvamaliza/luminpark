@@ -28,6 +28,7 @@ class Setting extends Model
         'public_featured_count',
         'public_show_unggulan',
         'public_show_skema',
+        'public_show_peta',
         'public_show_news',
         'public_show_gallery',
         'public_show_sales',
