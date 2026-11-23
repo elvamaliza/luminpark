@@ -1,0 +1,2225 @@
+{
+  "public.units": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 3,
+          "unit_code": "LT-003",
+          "unit_type": "Skandinavia 120",
+          "land_size": 120,
+          "building_size": 120,
+          "price": 1450000000,
+          "description": "Skandinavia 120 di Cluster Asena — 120m² / 120m².",
+          "image": null,
+          "image_url": null,
+          "cluster": "Cluster Asena",
+          "project": "Perumahan Lumin Park Semarang"
+        },
+        {
+          "id": 5,
+          "unit_code": "LT-005",
+          "unit_type": "Modern Tropical 90",
+          "land_size": 96,
+          "building_size": 90,
+          "price": 1050000000,
+          "description": "Modern Tropical 90 di Cluster Bruna — 96m² / 90m².",
+          "image": null,
+          "image_url": null,
+          "cluster": "Cluster Bruna",
+          "project": "Perumahan Lumin Park Semarang"
+        }
+      ]
+    }
+  },
+  "public.payment_schemes": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 3,
+          "scheme_name": "Cash Bertahap",
+          "scheme_type": "cash bertahap",
+          "description": "Pembayaran tunai dicicil langsung ke pengembang. Uang muka 30%, diangsur 36 bulan tanpa bunga bank.",
+          "down_payment_percent": 30,
+          "installment_months": 36,
+          "interest_rate": 0
+        },
+        {
+          "id": 4,
+          "scheme_name": "Cash Bertahap 24",
+          "scheme_type": "cash bertahap",
+          "description": "Uji perhitungan skema.",
+          "down_payment_percent": 25,
+          "installment_months": 24,
+          "interest_rate": 0
+        }
+      ]
+    }
+  },
+  "public.sales_contacts": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "sales_code": "SL-001",
+          "name": "Sari Sales Timur",
+          "whatsapp_number": "62812345678101",
+          "whatsapp_link": "https://wa.me/62812345678101"
+        },
+        {
+          "sales_code": "SL-002",
+          "name": "Sari Sales Timur",
+          "whatsapp_number": "62812345678102",
+          "whatsapp_link": "https://wa.me/62812345678102"
+        }
+      ]
+    }
+  },
+  "public.news_gallery": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "news": [
+          {
+            "id": 1,
+            "title": "Promo DP 0% Lumin Park",
+            "date": "2026-10-01",
+            "content": "Dapatkan promo menarik..."
+          },
+          {
+            "id": 2,
+            "title": "Progres Pembangunan Cluster A",
+            "date": "2026-10-05",
+            "content": "Pembangunan tahap 1 telah selesai..."
+          }
+        ],
+        "gallery": [
+          {
+            "id": 11,
+            "title": "Modern Tropical Upload — LT-UPLOAD-01",
+            "image_url": "http://127.0.0.1:8080/storage/units/WMHfGmzPV6jaHdy5ntTdxO4A9Vi66ue1aNqyaBht.png"
+          }
+        ]
+      }
+    }
+  },
+  "public.settings": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "estate_name": "Perumahan Lumin Park Padang",
+        "estate_address": "Jalan Lubuk Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota Padang, Sumatera Barat",
+        "estate_phone": "(0751) 550100",
+        "estate_email": "info@luminpark.co.id",
+        "estate_hours": "Senin - Sabtu, 08.00 - 17.00 WIB",
+        "about_text": "Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah dan cluster dengan skema pembayaran KPR, cash keras, serta cash bertahap.",
+        "min_dp_percent": "15",
+        "booking_validity_days": "7"
+      }
+    }
+  },
+  "public.unit_detail": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 3,
+        "unit_code": "LT-003",
+        "unit_type": "Skandinavia 120",
+        "land_size": 120,
+        "building_size": 120,
+        "price": 1450000000,
+        "description": "Skandinavia 120 di Cluster Asena — 120m² / 120m².",
+        "image": null,
+        "image_url": null,
+        "cluster": "Cluster Asena",
+        "project": "Perumahan Lumin Park Semarang"
+      }
+    }
+  },
+  "units.index": {
+    "status": 200,
+    "shape": [
+      {
+        "id": 1,
+        "cluster_id": 1,
+        "unit_code": "LT-001",
+        "unit_type": "Modern Tropical 60",
+        "land_size": 72,
+        "building_size": 60,
+        "price": "750000000.00",
+        "status": "sold_out",
+        "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+        "image": null,
+        "created_at": "2026-10-30T05:55:22.000000Z",
+        "updated_at": "2026-10-30T05:55:25.000000Z",
+        "cluster": {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cluster Asena",
+          "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "cluster_id": 1,
+        "unit_code": "LT-002",
+        "unit_type": "Modern Tropical 90",
+        "land_size": 96,
+        "building_size": 90,
+        "price": "1050000000.00",
+        "status": "booking",
+        "description": "Modern Tropical 90 di Cluster Asena — 96m² / 90m².",
+        "image": null,
+        "created_at": "2026-10-30T05:55:22.000000Z",
+        "updated_at": "2026-10-30T05:55:26.000000Z",
+        "cluster": {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cluster Asena",
+          "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      }
+    ]
+  },
+  "units.clusters": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cluster Asena",
+          "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        },
+        {
+          "id": 2,
+          "project_id": 1,
+          "name": "Cluster Bruna",
+          "description": "Cluster tengah dengan konsep taman hijau.",
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:55:23.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      ]
+    }
+  },
+  "units.available": {
+    "status": 200,
+    "shape": [
+      {
+        "id": 3,
+        "cluster_id": 1,
+        "unit_code": "LT-003",
+        "unit_type": "Skandinavia 120",
+        "land_size": 120,
+        "building_size": 120,
+        "price": "1450000000.00",
+        "status": "available",
+        "description": "Skandinavia 120 di Cluster Asena — 120m² / 120m².",
+        "image": null,
+        "created_at": "2026-10-30T05:55:22.000000Z",
+        "updated_at": "2026-10-30T05:55:22.000000Z",
+        "cluster": {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cluster Asena",
+          "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "cluster_id": 2,
+        "unit_code": "LT-005",
+        "unit_type": "Modern Tropical 90",
+        "land_size": 96,
+        "building_size": 90,
+        "price": "1050000000.00",
+        "status": "available",
+        "description": "Modern Tropical 90 di Cluster Bruna — 96m² / 90m².",
+        "image": null,
+        "created_at": "2026-10-30T05:55:23.000000Z",
+        "updated_at": "2026-10-30T05:55:23.000000Z",
+        "cluster": {
+          "id": 2,
+          "project_id": 1,
+          "name": "Cluster Bruna",
+          "description": "Cluster tengah dengan konsep taman hijau.",
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:55:23.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      }
+    ]
+  },
+  "units.show": {
+    "status": 200,
+    "shape": {
+      "message": "Detail unit berhasil ditemukan.",
+      "data": {
+        "id": 1,
+        "cluster_id": 1,
+        "unit_code": "LT-001",
+        "unit_type": "Modern Tropical 60",
+        "land_size": 72,
+        "building_size": 60,
+        "price": "750000000.00",
+        "status": "sold_out",
+        "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+        "image": null,
+        "created_at": "2026-10-30T05:55:22.000000Z",
+        "updated_at": "2026-10-30T05:55:25.000000Z",
+        "cluster": {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cluster Asena",
+          "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z",
+          "project": {
+            "id": 1,
+            "name": "Perumahan Lumin Park Semarang",
+            "description": "Pengembangan perumahan menengah ke atas dengan tiga tipe rumah dan beberapa cluster.",
+            "address": "Jl. Raya Semarang, Jawa Tengah",
+            "status": "active",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        }
+      }
+    }
+  },
+  "leads.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 8,
+          "sales_id": null,
+          "unit_id": 3,
+          "name": "Web Visitor",
+          "phone": "081233777001",
+          "email": "visitor@web.com",
+          "address": null,
+          "status": "cold",
+          "interested_unit": "LT-003",
+          "budget": null,
+          "note": "Tanya ketersediaan unit.",
+          "last_follow_up": null,
+          "source": "website",
+          "created_at": "2026-10-30T05:56:17.000000Z",
+          "updated_at": "2026-10-30T05:56:17.000000Z",
+          "sales_profile": null,
+          "unit": {
+            "id": 3,
+            "cluster_id": 1,
+            "unit_code": "LT-003",
+            "unit_type": "Skandinavia 120",
+            "land_size": 120,
+            "building_size": 120,
+            "price": "1450000000.00",
+            "status": "available",
+            "description": "Skandinavia 120 di Cluster Asena — 120m² / 120m².",
+            "image": null,
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        },
+        {
+          "id": 7,
+          "sales_id": 2,
+          "unit_id": null,
+          "name": "Lead Milik Sales Lain",
+          "phone": "081233990055",
+          "email": null,
+          "address": null,
+          "status": "warm",
+          "interested_unit": null,
+          "budget": null,
+          "note": null,
+          "last_follow_up": null,
+          "source": "manual",
+          "created_at": "2026-10-30T05:55:49.000000Z",
+          "updated_at": "2026-10-30T05:55:49.000000Z",
+          "sales_profile": {
+            "id": 2,
+            "user_id": 5,
+            "sales_code": "SL-002",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678102",
+            "created_at": "2026-10-30T05:55:20.000000Z",
+            "updated_at": "2026-10-30T05:55:20.000000Z",
+            "user": {
+              "id": 5,
+              "name": "Sari Sales Timur",
+              "email": "sales2@luminpark.com",
+              "role": "sales",
+              "phone": "0812345678102",
+              "address": "Jl. Contoh No. 1, Semarang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:20.000000Z",
+              "updated_at": "2026-10-30T05:55:20.000000Z",
+              "avatar_url": null
+            }
+          },
+          "unit": null
+        }
+      ]
+    }
+  },
+  "leads.show": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 8,
+        "sales_id": null,
+        "unit_id": 3,
+        "name": "Web Visitor",
+        "phone": "081233777001",
+        "email": "visitor@web.com",
+        "address": null,
+        "status": "cold",
+        "interested_unit": "LT-003",
+        "budget": null,
+        "note": "Tanya ketersediaan unit.",
+        "last_follow_up": null,
+        "source": "website",
+        "created_at": "2026-10-30T05:56:17.000000Z",
+        "updated_at": "2026-10-30T05:56:17.000000Z",
+        "sales_profile": null,
+        "unit": {
+          "id": 3,
+          "cluster_id": 1,
+          "unit_code": "LT-003",
+          "unit_type": "Skandinavia 120",
+          "land_size": 120,
+          "building_size": 120,
+          "price": "1450000000.00",
+          "status": "available",
+          "description": "Skandinavia 120 di Cluster Asena — 120m² / 120m².",
+          "image": null,
+          "created_at": "2026-10-30T05:55:22.000000Z",
+          "updated_at": "2026-10-30T05:55:22.000000Z"
+        },
+        "follow_up_histories": [],
+        "bookings": []
+      }
+    }
+  },
+  "followups.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": []
+    }
+  },
+  "bookings.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 3,
+          "booking_code": "BK2026100003",
+          "lead_id": 6,
+          "sales_id": 1,
+          "unit_id": 4,
+          "payment_scheme_id": 3,
+          "booking_date": "2026-10-21T00:00:00.000000Z",
+          "total_price": "750000000.00",
+          "down_payment_amount": "225000000.00",
+          "installment_amount": "14583333.33",
+          "remaining_amount": "14483333.33",
+          "status": "cicilan",
+          "delivery_status": "belum proses",
+          "notes": null,
+          "created_at": "2026-10-30T05:55:52.000000Z",
+          "updated_at": "2026-10-30T05:56:41.000000Z",
+          "customer_lead": {
+            "id": 6,
+            "sales_id": 1,
+            "unit_id": null,
+            "name": "Consumer Uji",
+            "phone": "081233990001",
+            "email": "uji@consumer.com",
+            "address": "Jl. Uji Coba 1",
+            "status": "booking",
+            "interested_unit": null,
+            "budget": "800000000.00",
+            "note": "Lead pengujian.",
+            "last_follow_up": "2026-10-20T00:00:00.000000Z",
+            "source": "manual",
+            "created_at": "2026-10-30T05:55:44.000000Z",
+            "updated_at": "2026-10-30T05:55:52.000000Z"
+          },
+          "sales_profile": {
+            "id": 1,
+            "user_id": 4,
+            "sales_code": "SL-001",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678101",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:55:19.000000Z",
+            "user": {
+              "id": 4,
+              "name": "Sari Sales Timur",
+              "email": "sales@luminpark.com",
+              "role": "sales",
+              "phone": "081233000111",
+              "address": "Koto Tangah, Padang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:19.000000Z",
+              "updated_at": "2026-10-30T05:56:23.000000Z",
+              "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+            }
+          },
+          "unit": {
+            "id": 4,
+            "cluster_id": 2,
+            "unit_code": "LT-004",
+            "unit_type": "Modern Tropical 60",
+            "land_size": 72,
+            "building_size": 60,
+            "price": "750000000.00",
+            "status": "sold_out",
+            "description": "Modern Tropical 60 di Cluster Bruna — 72m² / 60m².",
+            "image": null,
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:56:02.000000Z",
+            "cluster": {
+              "id": 2,
+              "project_id": 1,
+              "name": "Cluster Bruna",
+              "description": "Cluster tengah dengan konsep taman hijau.",
+              "created_at": "2026-10-30T05:55:23.000000Z",
+              "updated_at": "2026-10-30T05:55:23.000000Z"
+            }
+          },
+          "payment_scheme": {
+            "id": 3,
+            "scheme_name": "Cash Bertahap",
+            "description": "Pembayaran tunai dicicil langsung ke pengembang. Uang muka 30%, diangsur 36 bulan tanpa bunga bank.",
+            "scheme_type": "cash bertahap",
+            "down_payment_percent": "30.00",
+            "installment_months": 36,
+            "interest_rate": "0.00",
+            "is_active": true,
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:23.000000Z"
+          }
+        },
+        {
+          "id": 1,
+          "booking_code": "BK2026100001",
+          "lead_id": 3,
+          "sales_id": 1,
+          "unit_id": 1,
+          "payment_scheme_id": 2,
+          "booking_date": "2026-10-20T00:00:00.000000Z",
+          "total_price": "750000000.00",
+          "down_payment_amount": "375000000.00",
+          "installment_amount": "125000000.00",
+          "remaining_amount": "0.00",
+          "status": "lunas",
+          "delivery_status": "belum proses",
+          "notes": "Dibuat oleh seeder contoh.",
+          "created_at": "2026-10-30T05:55:24.000000Z",
+          "updated_at": "2026-10-30T05:55:25.000000Z",
+          "customer_lead": {
+            "id": 3,
+            "sales_id": 2,
+            "unit_id": null,
+            "name": "Dimas Prakoso",
+            "phone": "081233000002",
+            "email": "dimas.prakoso@example.com",
+            "address": "Jl. Melati No. 2, Semarang",
+            "status": "booking",
+            "interested_unit": null,
+            "budget": "900000000.00",
+            "note": "Sumber: telemarketing event akhir tahun.",
+            "last_follow_up": "2026-10-28T00:00:00.000000Z",
+            "source": "manual",
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z"
+          },
+          "sales_profile": {
+            "id": 1,
+            "user_id": 4,
+            "sales_code": "SL-001",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678101",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:55:19.000000Z",
+            "user": {
+              "id": 4,
+              "name": "Sari Sales Timur",
+              "email": "sales@luminpark.com",
+              "role": "sales",
+              "phone": "081233000111",
+              "address": "Koto Tangah, Padang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:19.000000Z",
+              "updated_at": "2026-10-30T05:56:23.000000Z",
+              "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+            }
+          },
+          "unit": {
+            "id": 1,
+            "cluster_id": 1,
+            "unit_code": "LT-001",
+            "unit_type": "Modern Tropical 60",
+            "land_size": 72,
+            "building_size": 60,
+            "price": "750000000.00",
+            "status": "sold_out",
+            "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+            "image": null,
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z",
+            "cluster": {
+              "id": 1,
+              "project_id": 1,
+              "name": "Cluster Asena",
+              "description": "Cluster depan dengan akses langsung ke fasilitas utama.",
+              "created_at": "2026-10-30T05:55:22.000000Z",
+              "updated_at": "2026-10-30T05:55:22.000000Z"
+            }
+          },
+          "payment_scheme": {
+            "id": 2,
+            "scheme_name": "Cash Keras",
+            "description": "Pembayaran tunai tanpa kredit bank. Uang muka 50%, sisanya dilunaskan dalam 3 bulan tanpa bunga.",
+            "scheme_type": "cash keras",
+            "down_payment_percent": "50.00",
+            "installment_months": 3,
+            "interest_rate": "0.00",
+            "is_active": true,
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:23.000000Z"
+          }
+        }
+      ]
+    }
+  },
+  "bookings.show": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 3,
+        "booking_code": "BK2026100003",
+        "lead_id": 6,
+        "sales_id": 1,
+        "unit_id": 4,
+        "payment_scheme_id": 3,
+        "booking_date": "2026-10-21T00:00:00.000000Z",
+        "total_price": "750000000.00",
+        "down_payment_amount": "225000000.00",
+        "installment_amount": "14583333.33",
+        "remaining_amount": "14483333.33",
+        "status": "cicilan",
+        "delivery_status": "belum proses",
+        "notes": null,
+        "created_at": "2026-10-30T05:55:52.000000Z",
+        "updated_at": "2026-10-30T05:56:41.000000Z",
+        "settlement_status": "cicilan",
+        "customer_lead": {
+          "id": 6,
+          "sales_id": 1,
+          "unit_id": null,
+          "name": "Consumer Uji",
+          "phone": "081233990001",
+          "email": "uji@consumer.com",
+          "address": "Jl. Uji Coba 1",
+          "status": "booking",
+          "interested_unit": null,
+          "budget": "800000000.00",
+          "note": "Lead pengujian.",
+          "last_follow_up": "2026-10-20T00:00:00.000000Z",
+          "source": "manual",
+          "created_at": "2026-10-30T05:55:44.000000Z",
+          "updated_at": "2026-10-30T05:55:52.000000Z"
+        },
+        "sales_profile": {
+          "id": 1,
+          "user_id": 4,
+          "sales_code": "SL-001",
+          "join_date": "2026-03-02T00:00:00.000000Z",
+          "status": "aktif",
+          "whatsapp_number": "62812345678101",
+          "created_at": "2026-10-30T05:55:19.000000Z",
+          "updated_at": "2026-10-30T05:55:19.000000Z",
+          "user": {
+            "id": 4,
+            "name": "Sari Sales Timur",
+            "email": "sales@luminpark.com",
+            "role": "sales",
+            "phone": "081233000111",
+            "address": "Koto Tangah, Padang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:19.000000Z",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:56:23.000000Z",
+            "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+          }
+        },
+        "unit": {
+          "id": 4,
+          "cluster_id": 2,
+          "unit_code": "LT-004",
+          "unit_type": "Modern Tropical 60",
+          "land_size": 72,
+          "building_size": 60,
+          "price": "750000000.00",
+          "status": "sold_out",
+          "description": "Modern Tropical 60 di Cluster Bruna — 72m² / 60m².",
+          "image": null,
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:56:02.000000Z",
+          "cluster": {
+            "id": 2,
+            "project_id": 1,
+            "name": "Cluster Bruna",
+            "description": "Cluster tengah dengan konsep taman hijau.",
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:23.000000Z"
+          }
+        },
+        "payment_scheme": {
+          "id": 3,
+          "scheme_name": "Cash Bertahap",
+          "description": "Pembayaran tunai dicicil langsung ke pengembang. Uang muka 30%, diangsur 36 bulan tanpa bunga bank.",
+          "scheme_type": "cash bertahap",
+          "down_payment_percent": "30.00",
+          "installment_months": 36,
+          "interest_rate": "0.00",
+          "is_active": true,
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:55:23.000000Z"
+        },
+        "payments": [
+          {
+            "id": 5,
+            "booking_id": 3,
+            "payment_type": "cash bertahap",
+            "amount": "225000000.00",
+            "payment_date": "2026-10-22T00:00:00.000000Z",
+            "bank_name": "BCA",
+            "account_number": "8890122345",
+            "account_holder": "PT Lumin Park Properti",
+            "transfer_receipt": null,
+            "verification_status": "verified",
+            "verified_by": 2,
+            "verified_at": "2026-10-30T05:55:56.000000Z",
+            "notes": "Bukti sesuai.",
+            "created_at": "2026-10-30T05:55:54.000000Z",
+            "updated_at": "2026-10-30T05:55:56.000000Z",
+            "verifier": {
+              "id": 2,
+              "name": "Manager Lumin Park",
+              "email": "manager@luminpark.com",
+              "role": "manager",
+              "phone": "0811000000002",
+              "address": "Jl. Contoh No. 1, Semarang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:18.000000Z",
+              "created_at": "2026-10-30T05:55:18.000000Z",
+              "updated_at": "2026-10-30T05:55:18.000000Z",
+              "avatar_url": null
+            }
+          },
+          {
+            "id": 6,
+            "booking_id": 3,
+            "payment_type": "cash bertahap",
+            "amount": "14583333.33",
+            "payment_date": "2026-10-23T00:00:00.000000Z",
+            "bank_name": "BCA",
+            "account_number": null,
+            "account_holder": null,
+            "transfer_receipt": null,
+            "verification_status": "rejected",
+            "verified_by": 2,
+            "verified_at": "2026-10-30T05:55:58.000000Z",
+            "notes": "Bukti transfer tidak terbaca.",
+            "created_at": "2026-10-30T05:55:57.000000Z",
+            "updated_at": "2026-10-30T05:55:58.000000Z",
+            "verifier": {
+              "id": 2,
+              "name": "Manager Lumin Park",
+              "email": "manager@luminpark.com",
+              "role": "manager",
+              "phone": "0811000000002",
+              "address": "Jl. Contoh No. 1, Semarang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:18.000000Z",
+              "created_at": "2026-10-30T05:55:18.000000Z",
+              "updated_at": "2026-10-30T05:55:18.000000Z",
+              "avatar_url": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  "payments.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 2,
+          "booking_id": 1,
+          "payment_type": "cash keras",
+          "amount": "375000000.00",
+          "payment_date": "2026-10-28T00:00:00.000000Z",
+          "bank_name": "Bank Central Asia",
+          "account_number": "8890122345",
+          "account_holder": "PT Lumin Park Properti",
+          "transfer_receipt": null,
+          "verification_status": "verified",
+          "verified_by": 2,
+          "verified_at": "2026-10-29T05:55:25.000000Z",
+          "notes": "Terverifikasi saat seed data contoh.",
+          "created_at": "2026-10-30T05:55:25.000000Z",
+          "updated_at": "2026-10-30T05:55:25.000000Z",
+          "booking": {
+            "id": 1,
+            "booking_code": "BK2026100001",
+            "lead_id": 3,
+            "sales_id": 1,
+            "unit_id": 1,
+            "payment_scheme_id": 2,
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": "750000000.00",
+            "down_payment_amount": "375000000.00",
+            "installment_amount": "125000000.00",
+            "remaining_amount": "0.00",
+            "status": "lunas",
+            "delivery_status": "belum proses",
+            "notes": "Dibuat oleh seeder contoh.",
+            "created_at": "2026-10-30T05:55:24.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z",
+            "customer_lead": {
+              "id": 3,
+              "sales_id": 2,
+              "unit_id": null,
+              "name": "Dimas Prakoso",
+              "phone": "081233000002",
+              "email": "dimas.prakoso@example.com",
+              "address": "Jl. Melati No. 2, Semarang",
+              "status": "booking",
+              "interested_unit": null,
+              "budget": "900000000.00",
+              "note": "Sumber: telemarketing event akhir tahun.",
+              "last_follow_up": "2026-10-28T00:00:00.000000Z",
+              "source": "manual",
+              "created_at": "2026-10-30T05:55:23.000000Z",
+              "updated_at": "2026-10-30T05:55:25.000000Z"
+            },
+            "unit": {
+              "id": 1,
+              "cluster_id": 1,
+              "unit_code": "LT-001",
+              "unit_type": "Modern Tropical 60",
+              "land_size": 72,
+              "building_size": 60,
+              "price": "750000000.00",
+              "status": "sold_out",
+              "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+              "image": null,
+              "created_at": "2026-10-30T05:55:22.000000Z",
+              "updated_at": "2026-10-30T05:55:25.000000Z"
+            }
+          },
+          "verifier": {
+            "id": 2,
+            "name": "Manager Lumin Park",
+            "email": "manager@luminpark.com",
+            "role": "manager",
+            "phone": "0811000000002",
+            "address": "Jl. Contoh No. 1, Semarang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:18.000000Z",
+            "created_at": "2026-10-30T05:55:18.000000Z",
+            "updated_at": "2026-10-30T05:55:18.000000Z",
+            "avatar_url": null
+          }
+        },
+        {
+          "id": 4,
+          "booking_id": 2,
+          "payment_type": "KPR",
+          "amount": "11316666.67",
+          "payment_date": "2026-10-27T00:00:00.000000Z",
+          "bank_name": "Bank Central Asia",
+          "account_number": "8890122345",
+          "account_holder": "PT Lumin Park Properti",
+          "transfer_receipt": null,
+          "verification_status": "verified",
+          "verified_by": 2,
+          "verified_at": "2026-10-28T05:55:26.000000Z",
+          "notes": "Terverifikasi saat seed data contoh.",
+          "created_at": "2026-10-30T05:55:26.000000Z",
+          "updated_at": "2026-10-30T05:55:26.000000Z",
+          "booking": {
+            "id": 2,
+            "booking_code": "BK2026100002",
+            "lead_id": 4,
+            "sales_id": 2,
+            "unit_id": 2,
+            "payment_scheme_id": 1,
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": "1050000000.00",
+            "down_payment_amount": "210000000.00",
+            "installment_amount": "11316666.67",
+            "remaining_amount": "828683333.33",
+            "status": "cicilan",
+            "delivery_status": "belum proses",
+            "notes": "Dibuat oleh seeder contoh.",
+            "created_at": "2026-10-30T05:55:25.000000Z",
+            "updated_at": "2026-10-30T05:55:26.000000Z",
+            "customer_lead": {
+              "id": 4,
+              "sales_id": 3,
+              "unit_id": null,
+              "name": "Yoga Saputra",
+              "phone": "081233000003",
+              "email": "yoga.saputra@example.com",
+              "address": "Jl. Melati No. 3, Semarang",
+              "status": "booking",
+              "interested_unit": null,
+              "budget": "1000000000.00",
+              "note": "Sumber: telemarketing event akhir tahun.",
+              "last_follow_up": "2026-10-27T00:00:00.000000Z",
+              "source": "manual",
+              "created_at": "2026-10-30T05:55:24.000000Z",
+              "updated_at": "2026-10-30T05:55:26.000000Z"
+            },
+            "unit": {
+              "id": 2,
+              "cluster_id": 1,
+              "unit_code": "LT-002",
+              "unit_type": "Modern Tropical 90",
+              "land_size": 96,
+              "building_size": 90,
+              "price": "1050000000.00",
+              "status": "booking",
+              "description": "Modern Tropical 90 di Cluster Asena — 96m² / 90m².",
+              "image": null,
+              "created_at": "2026-10-30T05:55:22.000000Z",
+              "updated_at": "2026-10-30T05:55:26.000000Z"
+            }
+          },
+          "verifier": {
+            "id": 2,
+            "name": "Manager Lumin Park",
+            "email": "manager@luminpark.com",
+            "role": "manager",
+            "phone": "0811000000002",
+            "address": "Jl. Contoh No. 1, Semarang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:18.000000Z",
+            "created_at": "2026-10-30T05:55:18.000000Z",
+            "updated_at": "2026-10-30T05:55:18.000000Z",
+            "avatar_url": null
+          }
+        }
+      ]
+    }
+  },
+  "schemes.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 1,
+          "scheme_name": "KPR",
+          "description": "Kredit pemilikan rumah melalui bank. Uang muka 20%, angsuran pokok + bunga dihitung dengan suku bunga efektif.",
+          "scheme_type": "KPR",
+          "down_payment_percent": "20.00",
+          "installment_months": 180,
+          "interest_rate": "9.50",
+          "is_active": true,
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:55:23.000000Z"
+        },
+        {
+          "id": 2,
+          "scheme_name": "Cash Keras",
+          "description": "Pembayaran tunai tanpa kredit bank. Uang muka 50%, sisanya dilunaskan dalam 3 bulan tanpa bunga.",
+          "scheme_type": "cash keras",
+          "down_payment_percent": "50.00",
+          "installment_months": 3,
+          "interest_rate": "0.00",
+          "is_active": true,
+          "created_at": "2026-10-30T05:55:23.000000Z",
+          "updated_at": "2026-10-30T05:55:23.000000Z"
+        }
+      ]
+    }
+  },
+  "schemes.simulate": {
+    "status": 405,
+    "shape": {
+      "message": "The GET method is not supported for route api/payment-schemes/1/simulate. Supported methods: POST.",
+      "exception": "Symfony\\Component\\HttpKernel\\Exception\\MethodNotAllowedHttpException",
+      "file": "C:\\laragon\\www\\luminpark-main\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\AbstractRouteCollection.php",
+      "line": 122,
+      "trace": [
+        {
+          "file": "C:\\laragon\\www\\luminpark-main\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\AbstractRouteCollection.php",
+          "line": 107,
+          "function": "requestMethodNotAllowed",
+          "class": "Illuminate\\Routing\\AbstractRouteCollection",
+          "type": "->"
+        },
+        {
+          "file": "C:\\laragon\\www\\luminpark-main\\vendor\\laravel\\framework\\src\\Illuminate\\Routing\\AbstractRouteCollection.php",
+          "line": 41,
+          "function": "getRouteForMethods",
+          "class": "Illuminate\\Routing\\AbstractRouteCollection",
+          "type": "->"
+        }
+      ]
+    }
+  },
+  "sales.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "message": "Daftar data sales berhasil diambil",
+      "data": [
+        {
+          "id": 6,
+          "name": "Andi Sales Barat",
+          "email": "sales3@luminpark.com",
+          "role": "sales",
+          "phone": "0812345678103",
+          "address": "Jl. Contoh No. 1, Semarang",
+          "status": "aktif",
+          "email_verified_at": "2026-10-30T05:55:20.000000Z",
+          "created_at": "2026-10-30T05:55:20.000000Z",
+          "updated_at": "2026-10-30T05:55:20.000000Z",
+          "avatar_url": null,
+          "sales_profile": {
+            "id": 3,
+            "user_id": 6,
+            "sales_code": "SL-003",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678103",
+            "created_at": "2026-10-30T05:55:20.000000Z",
+            "updated_at": "2026-10-30T05:55:20.000000Z"
+          }
+        },
+        {
+          "id": 4,
+          "name": "Sari Sales Timur",
+          "email": "sales@luminpark.com",
+          "role": "sales",
+          "phone": "081233000111",
+          "address": "Koto Tangah, Padang",
+          "status": "aktif",
+          "email_verified_at": "2026-10-30T05:55:19.000000Z",
+          "created_at": "2026-10-30T05:55:19.000000Z",
+          "updated_at": "2026-10-30T05:56:23.000000Z",
+          "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png",
+          "sales_profile": {
+            "id": 1,
+            "user_id": 4,
+            "sales_code": "SL-001",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678101",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:55:19.000000Z"
+          }
+        }
+      ]
+    }
+  },
+  "sales.show": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 6,
+        "name": "Andi Sales Barat",
+        "email": "sales3@luminpark.com",
+        "role": "sales",
+        "phone": "0812345678103",
+        "address": "Jl. Contoh No. 1, Semarang",
+        "status": "aktif",
+        "email_verified_at": "2026-10-30T05:55:20.000000Z",
+        "created_at": "2026-10-30T05:55:20.000000Z",
+        "updated_at": "2026-10-30T05:55:20.000000Z",
+        "avatar_url": null,
+        "sales_profile": {
+          "id": 3,
+          "user_id": 6,
+          "sales_code": "SL-003",
+          "join_date": "2026-03-02T00:00:00.000000Z",
+          "status": "aktif",
+          "whatsapp_number": "62812345678103",
+          "created_at": "2026-10-30T05:55:20.000000Z",
+          "updated_at": "2026-10-30T05:55:20.000000Z",
+          "targets": [
+            {
+              "id": 3,
+              "sales_id": 3,
+              "period_start": "2026-10-01T00:00:00.000000Z",
+              "period_end": "2026-10-31T00:00:00.000000Z",
+              "target_units": 3,
+              "target_amount": "1000000000.00",
+              "achieved_units": 0,
+              "achieved_amount": "0.00",
+              "created_at": "2026-10-30T05:55:26.000000Z",
+              "updated_at": "2026-10-30T05:55:26.000000Z"
+            }
+          ],
+          "bookings": []
+        }
+      }
+    }
+  },
+  "sales.performance": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "sales": {
+          "id": 3,
+          "user_id": 6,
+          "name": "Andi Sales Barat",
+          "sales_code": "SL-003"
+        },
+        "period": {
+          "start_date": "2026-10-01",
+          "end_date": "2026-10-31"
+        },
+        "metrics": {
+          "total_leads": 1,
+          "new_leads": 1,
+          "total_follow_ups": 1,
+          "bookings": 0,
+          "units_sold": 0,
+          "booked_revenue": 0,
+          "verified_payments": 0
+        },
+        "target": {
+          "target_units": 3,
+          "achieved_units": 0,
+          "unit_progress": 0,
+          "target_amount": 1000000000,
+          "achieved_amount": 0,
+          "amount_progress": 0
+        }
+      }
+    }
+  },
+  "dashboard.manager": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "total_units": 10,
+        "units_available": 7,
+        "units_booking": 1,
+        "units_sold_out": 2,
+        "units_not_delivered": 1,
+        "total_revenue": 1706833333.34,
+        "total_sales": 3,
+        "total_prospects": 5,
+        "total_customers": 3,
+        "total_leads": 8,
+        "total_bookings": 3,
+        "active_bookings": 2,
+        "payments_pending": 0,
+        "sales_by_month": [
+          {
+            "month": "2026-05",
+            "label": "May 2026",
+            "revenue": 0,
+            "units_sold": 0
+          },
+          {
+            "month": "2026-06",
+            "label": "Jun 2026",
+            "revenue": 0,
+            "units_sold": 0
+          }
+        ],
+        "recent_bookings": [
+          {
+            "id": 3,
+            "booking_code": "BK2026100003",
+            "customer": "Consumer Uji",
+            "unit": "LT-004",
+            "unit_type": "Modern Tropical 60",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-21T00:00:00.000000Z",
+            "total_price": 750000000,
+            "remaining": 14483333.33,
+            "status": "cicilan"
+          },
+          {
+            "id": 2,
+            "booking_code": "BK2026100002",
+            "customer": "Yoga Saputra",
+            "unit": "LT-002",
+            "unit_type": "Modern Tropical 90",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": 1050000000,
+            "remaining": 828683333.33,
+            "status": "cicilan"
+          }
+        ]
+      }
+    }
+  },
+  "dashboard.admin_sales": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "period": {
+          "start_date": "2026-10-01",
+          "end_date": "2026-10-31"
+        },
+        "totals": {
+          "sales_count": 3,
+          "total_bookings": 3,
+          "total_revenue": 0,
+          "total_leads": 6
+        },
+        "counters": {
+          "total_units": 10,
+          "units_available": 7,
+          "units_sold_out": 2,
+          "total_customers": 3,
+          "active_bookings": 2,
+          "payments_pending": 0
+        },
+        "sales_by_month": [
+          {
+            "month": "2026-05",
+            "label": "May 2026",
+            "revenue": 0,
+            "units_sold": 0
+          },
+          {
+            "month": "2026-06",
+            "label": "Jun 2026",
+            "revenue": 0,
+            "units_sold": 0
+          }
+        ],
+        "recent_bookings": [
+          {
+            "id": 3,
+            "booking_code": "BK2026100003",
+            "customer": "Consumer Uji",
+            "unit": "LT-004",
+            "unit_type": "Modern Tropical 60",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-21T00:00:00.000000Z",
+            "total_price": 750000000,
+            "remaining": 14483333.33,
+            "status": "cicilan"
+          },
+          {
+            "id": 2,
+            "booking_code": "BK2026100002",
+            "customer": "Yoga Saputra",
+            "unit": "LT-002",
+            "unit_type": "Modern Tropical 90",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": 1050000000,
+            "remaining": 828683333.33,
+            "status": "cicilan"
+          }
+        ],
+        "per_sales": [
+          {
+            "id": 3,
+            "sales_code": "SL-003",
+            "name": "Andi Sales Barat",
+            "email": "sales3@luminpark.com",
+            "status": "aktif",
+            "bookings_count": 0,
+            "revenue": "0.00",
+            "leads_count": 1
+          },
+          {
+            "id": 1,
+            "sales_code": "SL-001",
+            "name": "Sari Sales Timur",
+            "email": "sales@luminpark.com",
+            "status": "aktif",
+            "bookings_count": 2,
+            "revenue": "0.00",
+            "leads_count": 3
+          }
+        ]
+      }
+    }
+  },
+  "dashboard.sales": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "sales_id": 1,
+        "sales_code": "SL-001",
+        "total_leads": 3,
+        "leads_by_status": {
+          "cold": 1,
+          "warm": 1,
+          "hot": 0,
+          "booking": 1
+        },
+        "total_bookings": 2,
+        "bookings_by_status": {
+          "menunggu dp": 0,
+          "dp lunas": 0,
+          "cicilan": 1,
+          "lunas": 1
+        },
+        "total_closing": 1500000000,
+        "payments_total": 6,
+        "payments_pending": 0,
+        "units_available": 7,
+        "recent_bookings": [
+          {
+            "id": 3,
+            "booking_code": "BK2026100003",
+            "customer": "Consumer Uji",
+            "unit": "LT-004",
+            "unit_type": "Modern Tropical 60",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-21T00:00:00.000000Z",
+            "total_price": 750000000,
+            "remaining": 14483333.33,
+            "status": "cicilan"
+          },
+          {
+            "id": 1,
+            "booking_code": "BK2026100001",
+            "customer": "Dimas Prakoso",
+            "unit": "LT-001",
+            "unit_type": "Modern Tropical 60",
+            "sales": "Sari Sales Timur",
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": 750000000,
+            "remaining": 0,
+            "status": "lunas"
+          }
+        ],
+        "pending_follow_up": 1
+      }
+    }
+  },
+  "reports.sales": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "period": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "total_transactions": 3,
+      "total_sales_value": 2550000000,
+      "total_remaining_value": 843166666.66,
+      "data": [
+        {
+          "id": 1,
+          "booking_code": "BK2026100001",
+          "lead_id": 3,
+          "sales_id": 1,
+          "unit_id": 1,
+          "payment_scheme_id": 2,
+          "booking_date": "2026-10-20T00:00:00.000000Z",
+          "total_price": "750000000.00",
+          "down_payment_amount": "375000000.00",
+          "installment_amount": "125000000.00",
+          "remaining_amount": "0.00",
+          "status": "lunas",
+          "delivery_status": "belum proses",
+          "notes": "Dibuat oleh seeder contoh.",
+          "created_at": "2026-10-30T05:55:24.000000Z",
+          "updated_at": "2026-10-30T05:55:25.000000Z",
+          "customer_lead": {
+            "id": 3,
+            "sales_id": 2,
+            "unit_id": null,
+            "name": "Dimas Prakoso",
+            "phone": "081233000002",
+            "email": "dimas.prakoso@example.com",
+            "address": "Jl. Melati No. 2, Semarang",
+            "status": "booking",
+            "interested_unit": null,
+            "budget": "900000000.00",
+            "note": "Sumber: telemarketing event akhir tahun.",
+            "last_follow_up": "2026-10-28T00:00:00.000000Z",
+            "source": "manual",
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z"
+          },
+          "sales_profile": {
+            "id": 1,
+            "user_id": 4,
+            "sales_code": "SL-001",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678101",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:55:19.000000Z",
+            "user": {
+              "id": 4,
+              "name": "Sari Sales Timur",
+              "email": "sales@luminpark.com",
+              "role": "sales",
+              "phone": "081233000111",
+              "address": "Koto Tangah, Padang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:19.000000Z",
+              "updated_at": "2026-10-30T05:56:23.000000Z",
+              "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+            }
+          },
+          "unit": {
+            "id": 1,
+            "cluster_id": 1,
+            "unit_code": "LT-001",
+            "unit_type": "Modern Tropical 60",
+            "land_size": 72,
+            "building_size": 60,
+            "price": "750000000.00",
+            "status": "sold_out",
+            "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+            "image": null,
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z"
+          },
+          "payment_scheme": {
+            "id": 2,
+            "scheme_name": "Cash Keras",
+            "description": "Pembayaran tunai tanpa kredit bank. Uang muka 50%, sisanya dilunaskan dalam 3 bulan tanpa bunga.",
+            "scheme_type": "cash keras",
+            "down_payment_percent": "50.00",
+            "installment_months": 3,
+            "interest_rate": "0.00",
+            "is_active": true,
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:23.000000Z"
+          }
+        },
+        {
+          "id": 2,
+          "booking_code": "BK2026100002",
+          "lead_id": 4,
+          "sales_id": 2,
+          "unit_id": 2,
+          "payment_scheme_id": 1,
+          "booking_date": "2026-10-20T00:00:00.000000Z",
+          "total_price": "1050000000.00",
+          "down_payment_amount": "210000000.00",
+          "installment_amount": "11316666.67",
+          "remaining_amount": "828683333.33",
+          "status": "cicilan",
+          "delivery_status": "belum proses",
+          "notes": "Dibuat oleh seeder contoh.",
+          "created_at": "2026-10-30T05:55:25.000000Z",
+          "updated_at": "2026-10-30T05:55:26.000000Z",
+          "customer_lead": {
+            "id": 4,
+            "sales_id": 3,
+            "unit_id": null,
+            "name": "Yoga Saputra",
+            "phone": "081233000003",
+            "email": "yoga.saputra@example.com",
+            "address": "Jl. Melati No. 3, Semarang",
+            "status": "booking",
+            "interested_unit": null,
+            "budget": "1000000000.00",
+            "note": "Sumber: telemarketing event akhir tahun.",
+            "last_follow_up": "2026-10-27T00:00:00.000000Z",
+            "source": "manual",
+            "created_at": "2026-10-30T05:55:24.000000Z",
+            "updated_at": "2026-10-30T05:55:26.000000Z"
+          },
+          "sales_profile": {
+            "id": 2,
+            "user_id": 5,
+            "sales_code": "SL-002",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678102",
+            "created_at": "2026-10-30T05:55:20.000000Z",
+            "updated_at": "2026-10-30T05:55:20.000000Z",
+            "user": {
+              "id": 5,
+              "name": "Sari Sales Timur",
+              "email": "sales2@luminpark.com",
+              "role": "sales",
+              "phone": "0812345678102",
+              "address": "Jl. Contoh No. 1, Semarang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:20.000000Z",
+              "updated_at": "2026-10-30T05:55:20.000000Z",
+              "avatar_url": null
+            }
+          },
+          "unit": {
+            "id": 2,
+            "cluster_id": 1,
+            "unit_code": "LT-002",
+            "unit_type": "Modern Tropical 90",
+            "land_size": 96,
+            "building_size": 90,
+            "price": "1050000000.00",
+            "status": "booking",
+            "description": "Modern Tropical 90 di Cluster Asena — 96m² / 90m².",
+            "image": null,
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:26.000000Z"
+          },
+          "payment_scheme": {
+            "id": 1,
+            "scheme_name": "KPR",
+            "description": "Kredit pemilikan rumah melalui bank. Uang muka 20%, angsuran pokok + bunga dihitung dengan suku bunga efektif.",
+            "scheme_type": "KPR",
+            "down_payment_percent": "20.00",
+            "installment_months": 180,
+            "interest_rate": "9.50",
+            "is_active": true,
+            "created_at": "2026-10-30T05:55:23.000000Z",
+            "updated_at": "2026-10-30T05:55:23.000000Z"
+          }
+        }
+      ]
+    }
+  },
+  "reports.settlement": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "period": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "total_transactions": 7,
+      "total_settled_amount": 1706833333.34,
+      "recap": {
+        "by_consumer": {
+          "Dimas Prakoso": {
+            "transactions": 2,
+            "total_amount": 750000000
+          },
+          "Yoga Saputra": {
+            "transactions": 2,
+            "total_amount": 221316666.67
+          },
+          "Consumer Uji": {
+            "transactions": 3,
+            "total_amount": 735516666.67
+          }
+        },
+        "by_unit": {
+          "LT-001": {
+            "transactions": 2,
+            "total_amount": 750000000
+          },
+          "LT-002": {
+            "transactions": 2,
+            "total_amount": 221316666.67
+          },
+          "LT-004": {
+            "transactions": 3,
+            "total_amount": 735516666.67
+          }
+        },
+        "by_scheme": {
+          "cash keras": {
+            "transactions": 3,
+            "total_amount": 750100000
+          },
+          "KPR": {
+            "transactions": 2,
+            "total_amount": 221316666.67
+          },
+          "cash bertahap": {
+            "transactions": 2,
+            "total_amount": 735416666.67
+          }
+        }
+      },
+      "data": [
+        {
+          "id": 1,
+          "booking_id": 1,
+          "payment_type": "cash keras",
+          "amount": "375000000.00",
+          "payment_date": "2026-10-22T00:00:00.000000Z",
+          "bank_name": "Bank Central Asia",
+          "account_number": "8890122345",
+          "account_holder": "PT Lumin Park Properti",
+          "transfer_receipt": null,
+          "verification_status": "verified",
+          "verified_by": 2,
+          "verified_at": "2026-10-23T05:55:25.000000Z",
+          "notes": "Terverifikasi saat seed data contoh.",
+          "created_at": "2026-10-30T05:55:25.000000Z",
+          "updated_at": "2026-10-30T05:55:25.000000Z",
+          "booking": {
+            "id": 1,
+            "booking_code": "BK2026100001",
+            "lead_id": 3,
+            "sales_id": 1,
+            "unit_id": 1,
+            "payment_scheme_id": 2,
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": "750000000.00",
+            "down_payment_amount": "375000000.00",
+            "installment_amount": "125000000.00",
+            "remaining_amount": "0.00",
+            "status": "lunas",
+            "delivery_status": "belum proses",
+            "notes": "Dibuat oleh seeder contoh.",
+            "created_at": "2026-10-30T05:55:24.000000Z",
+            "updated_at": "2026-10-30T05:55:25.000000Z",
+            "customer_lead": {
+              "id": 3,
+              "sales_id": 2,
+              "unit_id": null,
+              "name": "Dimas Prakoso",
+              "phone": "081233000002",
+              "email": "dimas.prakoso@example.com",
+              "address": "Jl. Melati No. 2, Semarang",
+              "status": "booking",
+              "interested_unit": null,
+              "budget": "900000000.00",
+              "note": "Sumber: telemarketing event akhir tahun.",
+              "last_follow_up": "2026-10-28T00:00:00.000000Z",
+              "source": "manual",
+              "created_at": "2026-10-30T05:55:23.000000Z",
+              "updated_at": "2026-10-30T05:55:25.000000Z"
+            },
+            "unit": {
+              "id": 1,
+              "cluster_id": 1,
+              "unit_code": "LT-001",
+              "unit_type": "Modern Tropical 60",
+              "land_size": 72,
+              "building_size": 60,
+              "price": "750000000.00",
+              "status": "sold_out",
+              "description": "Modern Tropical 60 di Cluster Asena — 72m² / 60m².",
+              "image": null,
+              "created_at": "2026-10-30T05:55:22.000000Z",
+              "updated_at": "2026-10-30T05:55:25.000000Z"
+            }
+          },
+          "verifier": {
+            "id": 2,
+            "name": "Manager Lumin Park",
+            "email": "manager@luminpark.com",
+            "role": "manager",
+            "phone": "0811000000002",
+            "address": "Jl. Contoh No. 1, Semarang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:18.000000Z",
+            "created_at": "2026-10-30T05:55:18.000000Z",
+            "updated_at": "2026-10-30T05:55:18.000000Z",
+            "avatar_url": null
+          }
+        },
+        {
+          "id": 3,
+          "booking_id": 2,
+          "payment_type": "KPR",
+          "amount": "210000000.00",
+          "payment_date": "2026-10-22T00:00:00.000000Z",
+          "bank_name": "Bank Central Asia",
+          "account_number": "8890122345",
+          "account_holder": "PT Lumin Park Properti",
+          "transfer_receipt": null,
+          "verification_status": "verified",
+          "verified_by": 2,
+          "verified_at": "2026-10-23T05:55:26.000000Z",
+          "notes": "Terverifikasi saat seed data contoh.",
+          "created_at": "2026-10-30T05:55:26.000000Z",
+          "updated_at": "2026-10-30T05:55:26.000000Z",
+          "booking": {
+            "id": 2,
+            "booking_code": "BK2026100002",
+            "lead_id": 4,
+            "sales_id": 2,
+            "unit_id": 2,
+            "payment_scheme_id": 1,
+            "booking_date": "2026-10-20T00:00:00.000000Z",
+            "total_price": "1050000000.00",
+            "down_payment_amount": "210000000.00",
+            "installment_amount": "11316666.67",
+            "remaining_amount": "828683333.33",
+            "status": "cicilan",
+            "delivery_status": "belum proses",
+            "notes": "Dibuat oleh seeder contoh.",
+            "created_at": "2026-10-30T05:55:25.000000Z",
+            "updated_at": "2026-10-30T05:55:26.000000Z",
+            "customer_lead": {
+              "id": 4,
+              "sales_id": 3,
+              "unit_id": null,
+              "name": "Yoga Saputra",
+              "phone": "081233000003",
+              "email": "yoga.saputra@example.com",
+              "address": "Jl. Melati No. 3, Semarang",
+              "status": "booking",
+              "interested_unit": null,
+              "budget": "1000000000.00",
+              "note": "Sumber: telemarketing event akhir tahun.",
+              "last_follow_up": "2026-10-27T00:00:00.000000Z",
+              "source": "manual",
+              "created_at": "2026-10-30T05:55:24.000000Z",
+              "updated_at": "2026-10-30T05:55:26.000000Z"
+            },
+            "unit": {
+              "id": 2,
+              "cluster_id": 1,
+              "unit_code": "LT-002",
+              "unit_type": "Modern Tropical 90",
+              "land_size": 96,
+              "building_size": 90,
+              "price": "1050000000.00",
+              "status": "booking",
+              "description": "Modern Tropical 90 di Cluster Asena — 96m² / 90m².",
+              "image": null,
+              "created_at": "2026-10-30T05:55:22.000000Z",
+              "updated_at": "2026-10-30T05:55:26.000000Z"
+            }
+          },
+          "verifier": {
+            "id": 2,
+            "name": "Manager Lumin Park",
+            "email": "manager@luminpark.com",
+            "role": "manager",
+            "phone": "0811000000002",
+            "address": "Jl. Contoh No. 1, Semarang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:18.000000Z",
+            "created_at": "2026-10-30T05:55:18.000000Z",
+            "updated_at": "2026-10-30T05:55:18.000000Z",
+            "avatar_url": null
+          }
+        }
+      ]
+    }
+  },
+  "reports.performance": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "period": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "totals": {
+        "total_leads": 6,
+        "total_bookings": 3,
+        "total_closing": 2550000000,
+        "units_sold": 1
+      },
+      "data": [
+        {
+          "sales_id": 1,
+          "sales_code": "SL-001",
+          "name": "Sari Sales Timur",
+          "email": "sales@luminpark.com",
+          "status": "aktif",
+          "total_leads": 3,
+          "total_bookings": 2,
+          "total_closing": 1500000000,
+          "units_sold": 1,
+          "revenue_sold": 750000000,
+          "target_units": 3,
+          "achieved_units": 1,
+          "unit_progress": 33.33,
+          "target_amount": "1000000000.00",
+          "achieved_amount": "1485416666.67",
+          "amount_progress": 148.54
+        },
+        {
+          "sales_id": 2,
+          "sales_code": "SL-002",
+          "name": "Sari Sales Timur",
+          "email": "sales2@luminpark.com",
+          "status": "aktif",
+          "total_leads": 2,
+          "total_bookings": 1,
+          "total_closing": 1050000000,
+          "units_sold": 0,
+          "revenue_sold": 0,
+          "target_units": 3,
+          "achieved_units": 0,
+          "unit_progress": 0,
+          "target_amount": "1000000000.00",
+          "achieved_amount": "221316666.67",
+          "amount_progress": 22.13
+        }
+      ]
+    }
+  },
+  "reports.consumers": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "period": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "totals": {
+        "total": 8,
+        "cold": 3,
+        "warm": 2,
+        "hot": 0,
+        "customer": 3
+      },
+      "data": [
+        {
+          "id": 1,
+          "sales_id": null,
+          "unit_id": null,
+          "name": "Calon Konsumen Web",
+          "phone": "0812000000001",
+          "email": "web.lead@example.com",
+          "address": null,
+          "status": "cold",
+          "interested_unit": null,
+          "budget": null,
+          "note": "Dikirim dari form kontak landing page.",
+          "last_follow_up": null,
+          "source": "website",
+          "created_at": "2026-10-30T05:55:21.000000Z",
+          "updated_at": "2026-10-30T05:55:21.000000Z",
+          "sales_profile": null,
+          "unit": null,
+          "follow_up_histories": []
+        },
+        {
+          "id": 6,
+          "sales_id": 1,
+          "unit_id": null,
+          "name": "Consumer Uji",
+          "phone": "081233990001",
+          "email": "uji@consumer.com",
+          "address": "Jl. Uji Coba 1",
+          "status": "booking",
+          "interested_unit": null,
+          "budget": "800000000.00",
+          "note": "Lead pengujian.",
+          "last_follow_up": "2026-10-20T00:00:00.000000Z",
+          "source": "manual",
+          "created_at": "2026-10-30T05:55:44.000000Z",
+          "updated_at": "2026-10-30T05:55:52.000000Z",
+          "sales_profile": {
+            "id": 1,
+            "user_id": 4,
+            "sales_code": "SL-001",
+            "join_date": "2026-03-02T00:00:00.000000Z",
+            "status": "aktif",
+            "whatsapp_number": "62812345678101",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:55:19.000000Z",
+            "user": {
+              "id": 4,
+              "name": "Sari Sales Timur",
+              "email": "sales@luminpark.com",
+              "role": "sales",
+              "phone": "081233000111",
+              "address": "Koto Tangah, Padang",
+              "status": "aktif",
+              "email_verified_at": "2026-10-30T05:55:19.000000Z",
+              "created_at": "2026-10-30T05:55:19.000000Z",
+              "updated_at": "2026-10-30T05:56:23.000000Z",
+              "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+            }
+          },
+          "unit": null,
+          "follow_up_histories": []
+        }
+      ]
+    }
+  },
+  "reports.my_sales": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "period": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "sales": {
+        "id": 1,
+        "sales_code": "SL-001",
+        "name": "Sari Sales Timur"
+      },
+      "summary": {
+        "total_customers": 2,
+        "total_prospects": 2,
+        "total_bookings": 2,
+        "units_sold": 1,
+        "total_revenue": 1485516666.67
+      },
+      "data": [
+        {
+          "date": "2026-10-30",
+          "customer": "Lead Masih Dingin",
+          "unit": null,
+          "booking_code": "-",
+          "scheme": "-",
+          "paid_amount": 0,
+          "remaining_amount": 0,
+          "status_label": "Calon Pembeli",
+          "status": "cold"
+        },
+        {
+          "date": "2026-10-29",
+          "customer": "Rina Wulandari",
+          "unit": null,
+          "booking_code": "-",
+          "scheme": "-",
+          "paid_amount": 0,
+          "remaining_amount": 0,
+          "status_label": "Calon Pembeli",
+          "status": "warm"
+        }
+      ]
+    }
+  },
+  "settings.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "items": [
+          {
+            "id": 6,
+            "key": "about_text",
+            "value": "Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah dan cluster dengan skema pembayaran KPR, cash keras, serta cash bertahap.",
+            "group": "identitas",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          },
+          {
+            "id": 2,
+            "key": "estate_address",
+            "value": "Jalan Lubuk Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota Padang, Sumatera Barat",
+            "group": "identitas",
+            "created_at": "2026-10-30T05:55:22.000000Z",
+            "updated_at": "2026-10-30T05:55:22.000000Z"
+          }
+        ],
+        "values": {
+          "about_text": "Lumin Park (Lubuk Minturun Park) adalah pengembang perumahan di Kota Padang yang mengusung konsep hunian minimalis, asri, dan islami. Tersedia beberapa tipe rumah dan cluster dengan skema pembayaran KPR, cash keras, serta cash bertahap.",
+          "estate_address": "Jalan Lubuk Minturun, Kelurahan Koto Panjang Ikua Koto, Kecamatan Koto Tangah, Kota Padang, Sumatera Barat",
+          "estate_email": "info@luminpark.co.id",
+          "estate_hours": "Senin - Sabtu, 08.00 - 17.00 WIB",
+          "estate_phone": "(0751) 550100",
+          "estate_name": "Perumahan Lumin Park Padang",
+          "min_dp_percent": "15",
+          "booking_validity_days": "7"
+        },
+        "editable": [
+          "estate_name",
+          "estate_address"
+        ]
+      }
+    }
+  },
+  "profile.manager": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 2,
+        "name": "Manager Lumin Park",
+        "email": "manager@luminpark.com",
+        "username": "manager@luminpark.com",
+        "role": "manager",
+        "phone": "0811000000002",
+        "address": "Jl. Contoh No. 1, Semarang",
+        "avatar_url": null,
+        "status": "aktif",
+        "sales_code": null,
+        "join_date": null,
+        "whatsapp_number": null,
+        "targets": [],
+        "active_sessions": 5,
+        "created_at": "2026-10-30T05:55:18.000000Z"
+      }
+    }
+  },
+  "profile.sales": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 4,
+        "name": "Sari Sales Timur",
+        "email": "sales@luminpark.com",
+        "username": "sales@luminpark.com",
+        "role": "sales",
+        "phone": "081233000111",
+        "address": "Koto Tangah, Padang",
+        "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png",
+        "status": "aktif",
+        "sales_code": "SL-001",
+        "join_date": "2026-03-02T00:00:00.000000Z",
+        "whatsapp_number": "62812345678101",
+        "targets": [
+          {
+            "id": 1,
+            "sales_id": 1,
+            "period_start": "2026-10-01T00:00:00.000000Z",
+            "period_end": "2026-10-31T00:00:00.000000Z",
+            "target_units": 3,
+            "target_amount": "1000000000.00",
+            "achieved_units": 1,
+            "achieved_amount": "1485416666.67",
+            "created_at": "2026-10-30T05:55:26.000000Z",
+            "updated_at": "2026-10-30T05:56:10.000000Z"
+          }
+        ],
+        "active_sessions": 4,
+        "created_at": "2026-10-30T05:55:19.000000Z"
+      }
+    }
+  },
+  "notifications.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 42,
+          "user_id": 2,
+          "title": "Pembayaran verified",
+          "message": "Pembayaran booking BK2026100003 berstatus verified.",
+          "type": "payment",
+          "link": "/dashboard/manager",
+          "is_read": false,
+          "created_at": "2026-10-30T05:56:41.000000Z",
+          "updated_at": "2026-10-30T05:56:41.000000Z"
+        },
+        {
+          "id": 38,
+          "user_id": 2,
+          "title": "Pembayaran menunggu verifikasi",
+          "message": "Pembayaran cash keras untuk booking BK2026100003 menunggu verifikasi.",
+          "type": "payment",
+          "link": "/dashboard/manager",
+          "is_read": false,
+          "created_at": "2026-10-30T05:56:40.000000Z",
+          "updated_at": "2026-10-30T05:56:40.000000Z"
+        }
+      ]
+    }
+  },
+  "notifications.unread": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "unread_count": 10
+      }
+    }
+  },
+  "sessions.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 14,
+          "user_id": 2,
+          "token_id": "14",
+          "ip_address": "127.0.0.1",
+          "user_agent": "node",
+          "login_at": "2026-10-30T05:57:54.000000Z",
+          "logout_at": null,
+          "status": "active",
+          "created_at": "2026-10-30T05:57:54.000000Z",
+          "updated_at": "2026-10-30T05:57:54.000000Z"
+        },
+        {
+          "id": 13,
+          "user_id": 2,
+          "token_id": "13",
+          "ip_address": "127.0.0.1",
+          "user_agent": "node",
+          "login_at": "2026-10-30T05:56:42.000000Z",
+          "logout_at": null,
+          "status": "active",
+          "created_at": "2026-10-30T05:56:42.000000Z",
+          "updated_at": "2026-10-30T05:56:42.000000Z"
+        }
+      ]
+    }
+  },
+  "system_logs.index": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": [
+        {
+          "id": 21,
+          "user_id": 4,
+          "activity": "login",
+          "description": "User berhasil login",
+          "ip_address": "127.0.0.1",
+          "user_agent": "node",
+          "created_at": "2026-10-30T05:57:56.000000Z",
+          "updated_at": "2026-10-30T05:57:56.000000Z",
+          "user": {
+            "id": 4,
+            "name": "Sari Sales Timur",
+            "email": "sales@luminpark.com",
+            "role": "sales",
+            "phone": "081233000111",
+            "address": "Koto Tangah, Padang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:19.000000Z",
+            "created_at": "2026-10-30T05:55:19.000000Z",
+            "updated_at": "2026-10-30T05:56:23.000000Z",
+            "avatar_url": "http://127.0.0.1:8080/storage/avatars/lve6Iblh7lUOSTmSkVdtQAQFN5qeCjHcZGwvki70.png"
+          }
+        },
+        {
+          "id": 20,
+          "user_id": 3,
+          "activity": "login",
+          "description": "User berhasil login",
+          "ip_address": "127.0.0.1",
+          "user_agent": "node",
+          "created_at": "2026-10-30T05:57:55.000000Z",
+          "updated_at": "2026-10-30T05:57:55.000000Z",
+          "user": {
+            "id": 3,
+            "name": "Admin Sales",
+            "email": "admin.sales@luminpark.com",
+            "role": "admin_sales",
+            "phone": "0811000000003",
+            "address": "Jl. Contoh No. 1, Semarang",
+            "status": "aktif",
+            "email_verified_at": "2026-10-30T05:55:18.000000Z",
+            "created_at": "2026-10-30T05:55:18.000000Z",
+            "updated_at": "2026-10-30T05:55:18.000000Z",
+            "avatar_url": null
+          }
+        }
+      ]
+    }
+  },
+  "auth.me": {
+    "status": 200,
+    "shape": {
+      "success": true,
+      "data": {
+        "id": 2,
+        "name": "Manager Lumin Park",
+        "email": "manager@luminpark.com",
+        "role": "manager",
+        "phone": "0811000000002",
+        "address": "Jl. Contoh No. 1, Semarang",
+        "status": "aktif",
+        "email_verified_at": "2026-10-30T05:55:18.000000Z",
+        "created_at": "2026-10-30T05:55:18.000000Z",
+        "updated_at": "2026-10-30T05:55:18.000000Z",
+        "avatar_url": null,
+        "sales_profile": null
+      }
+    }
+  }
+}
