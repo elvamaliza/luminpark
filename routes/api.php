@@ -105,6 +105,7 @@ Route::middleware(['auth:sanctum', 'force.password'])->group(function () {
         ->get('sales/{id}/performance', [SalesController::class, 'performance']);
 
     Route::middleware('role:super_admin,admin_sales')->group(function () {
+        Route::get('sales/ranking', [SalesController::class, 'ranking']);
         Route::post('sales/{id}/reset-password', [SalesController::class, 'resetPassword']);
         Route::apiResource('sales', SalesController::class);
     });

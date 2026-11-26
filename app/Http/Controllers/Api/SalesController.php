@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\FiltersProjects;
+use App\Http\Controllers\Concerns\ScopesSalesData;
 use App\Models\Booking;
+use App\Models\Cluster;
 use App\Models\CustomerLead;
 use App\Models\FollowUpHistory;
 use App\Models\SalesProfile;
@@ -11,6 +14,7 @@ use App\Models\SalesTarget;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +22,9 @@ use Illuminate\Validation\Rule;
 
 class SalesController extends Controller
 {
+    use FiltersProjects;
+    use ScopesSalesData;
+
     // 1. GET /api/sales (Menampilkan daftar semua sales)
     public function index(Request $request)
     {
@@ -221,7 +228,65 @@ class SalesController extends Controller
         ], 200);
     }
 
-    // 6. GET /api/sales/{id}/performance (Kinerja Sales pada periode)
+    // 6. GET /api/sales/ranking (Peringkat seluruh sales pada periode)
+    public function ranking(Request $request)
+    {
+        [$periodStart, $periodEnd] = [
+            $request->input('start_date', now()->startOfMonth()->toDateString()),
+            $request->input('end_date', now()->endOfMonth()->toDateString()),
+        ];
+        $proyek = $this->clusterIdDari($request);
+        $salesId = $this->salesIdTerbatas($request);
+        $bukanBatal = fn ($query) => $this->padaProyek($query, $proyek, 'unit')
+            ->whereBetween('booking_date', [$periodStart, $periodEnd])
+            ->where('status', '!=', Booking::STATUS_DIBATALKAN);
+
+        $rows = SalesProfile::query()
+            ->with('user:id,name')
+            ->withCount(['bookings' => $bukanBatal])
+            ->withSum(['bookings' => $bukanBatal], 'total_price')
+            ->with(['targets' => fn ($query) => $query
+                ->whereDate('period_start', '<=', $periodEnd)
+                ->whereDate('period_end', '>=', $periodStart)
+                ->latest('period_start')])
+            ->whereHas('user', fn ($query) => $query->where('role', User::ROLE_SALES))
+            ->when($salesId !== null, fn ($query) => $query->whereKey($salesId))
+            ->get();
+
+        $rows = $this->sortRankingRows($rows)
+            ->map(function (SalesProfile $profile, int $index) {
+                $target = $profile->targets->first();
+
+                return [
+                    'rank'             => $index + 1,
+                    'sales_id'         => $profile->id,
+                    'name'             => $profile->user?->name,
+                    'jumlah_booking'   => (int) $profile->bookings_count,
+                    'total_unit'       => (int) $profile->bookings_count,
+                    'total_nilai'      => round((float) $profile->bookings_sum_total_price, 2),
+                    'unit_progress'    => $target?->unit_progress,
+                    'amount_progress'  => $target?->amount_progress,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'period'  => ['start_date' => $periodStart, 'end_date' => $periodEnd],
+            'project_filter' => $proyek,
+            'projects' => Cluster::query()->aktif()->orderBy('name')->get(['id', 'name']),
+            'data' => $rows,
+        ], 200);
+    }
+
+    private function sortRankingRows(Collection $rows): Collection
+    {
+        return $rows->sort(function (SalesProfile $a, SalesProfile $b) {
+            return ($b->bookings_count <=> $a->bookings_count)
+                ?: strcasecmp((string) ($a->user?->name ?? ''), (string) ($b->user?->name ?? ''));
+        })->values();
+    }
+
+    // 7. GET /api/sales/{id}/performance (Kinerja Sales pada periode)
     public function performance(Request $request, $id)
     {
         $user = User::where('role', User::ROLE_SALES)->find($id);
