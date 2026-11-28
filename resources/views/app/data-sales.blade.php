@@ -34,6 +34,20 @@
         </div>
     </section>
 
+    <section class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Peringkat Sales</h2>
+            <div class="flex flex-wrap gap-2">
+                <select id="ranking-month" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"></select>
+                <select id="ranking-year" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"></select>
+                <select id="ranking-project" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
+                    <option value="">Semua Proyek</option>
+                </select>
+            </div>
+        </div>
+        <div id="sales-ranking-table"></div>
+    </section>
+
     <div id="sales-table"></div>
 
     <p class="mt-4 text-xs text-slate-500">
@@ -57,6 +71,7 @@
   let salesAll = [];
   let salesView = [];
   let salesBookingCount = {};
+  let salesRanking = [];
 
   function salesProfile(row) {
     return row.sales_profile || row.salesProfile || null;
@@ -235,6 +250,59 @@
     await salesLoad();
   }
 
+  function rankingPeriod() {
+    const year = Number(document.getElementById('ranking-year').value);
+    const month = Number(document.getElementById('ranking-month').value);
+    const start = year + '-' + String(month).padStart(2, '0') + '-01';
+    const end = new Date(year, month, 0);
+    return { start_date: start, end_date: year + '-' + String(month).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0') };
+  }
+
+  function rankingControls() {
+    const now = new Date();
+    const month = document.getElementById('ranking-month');
+    const year = document.getElementById('ranking-year');
+    month.innerHTML = Array.from({ length: 12 }, (_, index) => '<option value="' + (index + 1) + '">' + new Date(2000, index, 1).toLocaleString('id-ID', { month: 'long' }) + '</option>').join('');
+    year.innerHTML = Array.from({ length: 5 }, (_, index) => '<option value="' + (now.getFullYear() - index) + '">' + (now.getFullYear() - index) + '</option>').join('');
+    month.value = now.getMonth() + 1;
+    year.value = now.getFullYear();
+  }
+
+  function salesRenderRanking() {
+    LP.table({
+      mount: 'sales-ranking-table',
+      rows: salesRanking,
+      empty: 'Belum ada data peringkat sales pada periode ini.',
+      columns: [
+        { label: 'Peringkat', render: (row) => '<span class="inline-flex min-w-8 justify-center rounded-full px-2 py-1 text-xs font-bold ' + (row.rank === 1 ? 'bg-amber-100 text-amber-800' : row.rank === 2 ? 'bg-slate-200 text-slate-700' : row.rank === 3 ? 'bg-orange-100 text-orange-800' : 'bg-slate-50 text-slate-600') + '">' + LP.number(row.rank) + '</span>' },
+        { label: 'Nama Sales', render: (row) => LP.esc(row.name || '-') },
+        { label: 'Jumlah Booking', align: 'right', render: (row) => LP.number(row.jumlah_booking) },
+        { label: 'Total Penjualan', align: 'right', render: (row) => LP.money(row.total_nilai) },
+        { label: 'Capaian Target', align: 'right', render: (row) => row.unit_progress == null ? '-' : LP.number(row.unit_progress) + '%' },
+      ],
+    });
+  }
+
+  async function rankingLoad() {
+    const period = rankingPeriod();
+    const params = new URLSearchParams(period);
+    const project = document.getElementById('ranking-project').value;
+    if (project) params.set('cluster_id', project);
+    LP.loading('sales-ranking-table', 'Memuat peringkat sales...');
+
+    try {
+      const { json } = await LP.http.get('/sales/ranking?' + params.toString());
+      salesRanking = json && Array.isArray(json.data) ? json.data : [];
+      const projects = json && Array.isArray(json.projects) ? json.projects : [];
+      const selected = project || String((json && json.project_filter) || '');
+      document.getElementById('ranking-project').innerHTML = '<option value="">Semua Proyek</option>' + projects.map((item) => '<option value="' + LP.esc(item.id) + '">' + LP.esc(item.name) + '</option>').join('');
+      document.getElementById('ranking-project').value = selected;
+      salesRenderRanking();
+    } catch (error) {
+      LP.errorBox('sales-ranking-table', error.message || 'Peringkat sales gagal dimuat.');
+    }
+  }
+
   async function salesLoad() {
     LP.loading('sales-table', 'Memuat data sales...');
     document.getElementById('sales-count').textContent = 'Memuat data sales...';
@@ -256,9 +324,14 @@
 
     salesRenderStats();
     salesRender();
+    await rankingLoad();
   }
 
   LP.guard(ROLE_PENGELOLA, async () => {
+    rankingControls();
+    document.getElementById('ranking-month').addEventListener('change', rankingLoad);
+    document.getElementById('ranking-year').addEventListener('change', rankingLoad);
+    document.getElementById('ranking-project').addEventListener('change', rankingLoad);
     document.getElementById('btn-add-sales').addEventListener('click', salesOpenCreate);
 
     const renderDebounced = LP.debounce(salesRender);
